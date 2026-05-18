@@ -10,6 +10,7 @@
 
 **The open claim-history layer for public knowledge.**
 **AI agents can use it. [→ `refract mcp`](https://refract-org.github.io/refract-docs/mcp/)**
+**Deterministic ground truth for model evaluation. [→ Tutorial](https://refract-org.github.io/refract-docs/tutorials/model-evaluation/)**
 
 > Refract reveals how claims change across public revision histories — where every
 > claim came from, what supported it, what challenged it, when it stabilized, and
