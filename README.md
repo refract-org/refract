@@ -15,7 +15,7 @@ Refract is an open observation layer for changing knowledge. It ingests versione
 
 Most knowledge systems answer *what does this source say now?* Refract helps answer *what changed, when, where, and what did the record say at a specific point in time?*
 
-Built and maintained by [NextConsensus](https://nextconsensus.com). Domain-neutral infrastructure. Refract observes change. Applications interpret relevance.
+Built and maintained by [NextConsensus](https://nextconsensus.com) and [Kanav Jain](https://kanav.net). For clinical AI safety evaluation and governance advisory, see [Ethotechnics Studio](https://ethotechnics.com). Domain-neutral infrastructure. Refract observes change. Applications interpret relevance.
 
 [Repository boundary](./docs/repository-boundary.md).
 
