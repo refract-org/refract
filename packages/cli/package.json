@@ -1,6 +1,7 @@
 {
   "name": "@refract-org/cli",
   "version": "0.5.7",
+  "mcpName": "io.github.refract-org/refract",
   "type": "module",
   "private": false,
   "description": "CLI for observing claim and evidence changes across public page histories: ingest, diff, timeline, export, visualize, and cache",
