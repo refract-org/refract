@@ -68,14 +68,28 @@ When running `refract mcp`, 5 tools are available to agents:
 
 ## Using Refract in Code
 
-```typescript
-import { MediaWikiClient } from "@refract-org/ingestion";
-import { sectionDiffer, citationTracker } from "@refract-org/analyzers";
-import type { EvidenceEvent } from "@refract-org/evidence-graph";
+Use a **single adapter file** as the import boundary. Re-export only what you
+need; no other file imports from `@refract-org/*` directly.
 
-const client = new MediaWikiClient();
-const revisions = await client.fetchRevisions("Finerenone", { limit: 20 });
+```typescript
+// adapter.ts
+import { MediaWikiClient } from "@refract-org/ingestion";
+import type { EvidenceEvent } from "@refract-org/evidence-graph";
+import {
+  sectionDiffer,
+  citationTracker,
+  computeCertaintyProfile,
+  computeDirectionSignal,
+  extractQuantitativeFindings,
+  extractKeyTerms,
+} from "@refract-org/analyzers";
+
+export type { EvidenceEvent };
+export { MediaWikiClient, sectionDiffer, citationTracker };
+export { computeCertaintyProfile, computeDirectionSignal, extractQuantitativeFindings, extractKeyTerms };
 ```
+
+Consumers import from your adapter, never from `@refract-org/*` directly.
 
 ## Boundary
 

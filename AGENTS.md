@@ -44,6 +44,7 @@ bun run lint       # biome lint packages/
 - **packages/cli**: CLI tool (`refract` command)
 - **packages/persistence**: SQLite storage (bun:sqlite)
 - **packages/eval**: Evaluation harness
+- **packages/observable**: Observable Framework data loader
 
 ## Semantic Enrichment (v0.5.0+)
 
@@ -73,14 +74,28 @@ See `docs/mcp.md` for client configuration (Claude Desktop, Cline, etc.).
 
 ## When Using Refract in Code
 
-```typescript
-import { MediaWikiClient } from "@refract-org/ingestion";
-import { sectionDiffer, citationTracker } from "@refract-org/analyzers";
-import type { EvidenceEvent } from "@refract-org/evidence-graph";
+Use a **single adapter file** as the import boundary between Refract and your
+codebase. Re-export only what you need; no other file imports from
+`@refract-org/*` directly. This isolates version upgrades to one file.
 
-const client = new MediaWikiClient();
-const revisions = await client.fetchRevisions("Finerenone", { limit: 20 });
+```typescript
+// adapter.ts — single import boundary
+import { MediaWikiClient } from "@refract-org/ingestion";
+import type { EvidenceEvent, Revision } from "@refract-org/evidence-graph";
+import {
+  sectionDiffer,
+  citationTracker,
+  computeCertaintyProfile,
+  computeDirectionSignal,
+  extractQuantitativeFindings,
+} from "@refract-org/analyzers";
+
+export type { EvidenceEvent, Revision };
+export { MediaWikiClient, sectionDiffer, citationTracker };
+export { computeCertaintyProfile, computeDirectionSignal, extractQuantitativeFindings };
 ```
+
+Consumers import from your adapter, never from `@refract-org/*` directly.
 
 ## Architectural Doctrine
 
