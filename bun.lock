@@ -13,22 +13,22 @@
     },
     "packages/analyzers": {
       "name": "@refract-org/analyzers",
-      "version": "0.3.2",
+      "version": "0.5.0",
       "dependencies": {
-        "@refract-org/evidence-graph": "^0.4.0",
+        "@refract-org/evidence-graph": "^0.5.0",
       },
     },
     "packages/cli": {
       "name": "@refract-org/cli",
-      "version": "0.5.5",
+      "version": "0.5.7",
       "bin": {
         "refract": "dist/src/cli.js",
         "wikihistory": "dist/src/cli.js",
       },
       "dependencies": {
-        "@refract-org/analyzers": "^0.3.0",
-        "@refract-org/evidence-graph": "^0.4.0",
-        "@refract-org/ingestion": "^0.3.0",
+        "@refract-org/analyzers": "^0.5.0",
+        "@refract-org/evidence-graph": "^0.5.0",
+        "@refract-org/ingestion": "^0.3.1",
         "commander": "^12.0.0",
       },
       "optionalDependencies": {
@@ -40,32 +40,25 @@
       "name": "@refract-org/eval",
       "version": "0.2.1",
       "dependencies": {
-        "@refract-org/evidence-graph": "^0.4.0",
+        "@refract-org/evidence-graph": "^0.5.0",
       },
     },
     "packages/evidence-graph": {
       "name": "@refract-org/evidence-graph",
-      "version": "0.4.3",
+      "version": "0.5.0",
     },
     "packages/ingestion": {
       "name": "@refract-org/ingestion",
       "version": "0.3.1",
       "dependencies": {
-        "@refract-org/evidence-graph": "^0.4.0",
-      },
-    },
-    "packages/observable": {
-      "name": "@refract-org/observable",
-      "version": "0.1.0",
-      "dependencies": {
-        "@refract-org/evidence-graph": "^0.2.2",
+        "@refract-org/evidence-graph": "^0.5.0",
       },
     },
     "packages/persistence": {
       "name": "@refract-org/persistence",
       "version": "0.1.1",
       "dependencies": {
-        "@refract-org/evidence-graph": "^0.2.2",
+        "@refract-org/evidence-graph": "^0.5.0",
       },
     },
   },
@@ -109,8 +102,6 @@
     "@refract-org/evidence-graph": ["@refract-org/evidence-graph@workspace:packages/evidence-graph"],
 
     "@refract-org/ingestion": ["@refract-org/ingestion@workspace:packages/ingestion"],
-
-    "@refract-org/observable": ["@refract-org/observable@workspace:packages/observable"],
 
     "@refract-org/persistence": ["@refract-org/persistence@workspace:packages/persistence"],
 
@@ -269,9 +260,5 @@
     "vitest": ["vitest@4.1.6", "", { "dependencies": { "@vitest/expect": "4.1.6", "@vitest/mocker": "4.1.6", "@vitest/pretty-format": "4.1.6", "@vitest/runner": "4.1.6", "@vitest/snapshot": "4.1.6", "@vitest/spy": "4.1.6", "@vitest/utils": "4.1.6", "es-module-lexer": "^2.0.0", "expect-type": "^1.3.0", "magic-string": "^0.30.21", "obug": "^2.1.1", "pathe": "^2.0.3", "picomatch": "^4.0.3", "std-env": "^4.0.0-rc.1", "tinybench": "^2.9.0", "tinyexec": "^1.0.2", "tinyglobby": "^0.2.15", "tinyrainbow": "^3.1.0", "vite": "^6.0.0 || ^7.0.0 || ^8.0.0", "why-is-node-running": "^2.3.0" }, "peerDependencies": { "@edge-runtime/vm": "*", "@opentelemetry/api": "^1.9.0", "@types/node": "^20.0.0 || ^22.0.0 || >=24.0.0", "@vitest/browser-playwright": "4.1.6", "@vitest/browser-preview": "4.1.6", "@vitest/browser-webdriverio": "4.1.6", "@vitest/coverage-istanbul": "4.1.6", "@vitest/coverage-v8": "4.1.6", "@vitest/ui": "4.1.6", "happy-dom": "*", "jsdom": "*" }, "optionalPeers": ["@edge-runtime/vm", "@opentelemetry/api", "@types/node", "@vitest/browser-playwright", "@vitest/browser-preview", "@vitest/browser-webdriverio", "@vitest/coverage-istanbul", "@vitest/coverage-v8", "@vitest/ui", "happy-dom", "jsdom"], "bin": { "vitest": "vitest.mjs" } }, "sha512-6lvjbS3p9b4CrdCmguzbh2/4uoXhGE2q71R4OX5sqF9R1bo9Xd6fGrMAfvp5wnCzlBnFVdCOp6onuTQVbo8iUQ=="],
 
     "why-is-node-running": ["why-is-node-running@2.3.0", "", { "dependencies": { "siginfo": "^2.0.0", "stackback": "0.0.2" }, "bin": { "why-is-node-running": "cli.js" } }, "sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w=="],
-
-    "@refract-org/observable/@refract-org/evidence-graph": ["@refract-org/evidence-graph@0.2.2", "", {}, "sha512-+4u0zxFyNmCjQhJmcA5rdRQnY8pG2hzQhtXAY+NdDTYqADBvZY8VdVyE/ayIpYALMSKY2x30vzw+sjmlY3kyew=="],
-
-    "@refract-org/persistence/@refract-org/evidence-graph": ["@refract-org/evidence-graph@0.2.2", "", {}, "sha512-+4u0zxFyNmCjQhJmcA5rdRQnY8pG2hzQhtXAY+NdDTYqADBvZY8VdVyE/ayIpYALMSKY2x30vzw+sjmlY3kyew=="],
   }
 }

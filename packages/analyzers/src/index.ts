@@ -71,6 +71,14 @@ export { protectionTracker } from "./protection-tracker.js";
 export { revertDetector } from "./revert-detector.js";
 export type { SectionEvent, SectionLineage } from "./section-differ.js";
 export { buildSectionLineage, sectionDiffer } from "./section-differ.js";
+export {
+  computeCertaintyProfile,
+  computeContentChange,
+  computeDirectionSignal,
+  computeEditMagnitude,
+  extractKeyTerms,
+  extractQuantitativeFindings,
+} from "./semantic-enrichment.js";
 export type { TalkActivityOptions, TalkActivityResult } from "./talk-activity-detector.js";
 export { detectTalkActivitySpikes } from "./talk-activity-detector.js";
 export type { TalkCorrelationOptions } from "./talk-correlator.js";
@@ -90,5 +98,3 @@ export {
   sanitizeWikitext,
   stripWikitext,
 } from "./wikitext-parser.js";
-
-export { computeCertaintyProfile, computeDirectionSignal, computeEditMagnitude, computeContentChange, extractKeyTerms, extractQuantitativeFindings } from "./semantic-enrichment.js";

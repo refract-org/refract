@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { citationTracker, sectionDiffer } from "@refract-org/analyzers";
 import { MediaWikiClient } from "@refract-org/ingestion";
-import { sectionDiffer, citationTracker } from "@refract-org/analyzers";
+import { describe, expect, it } from "vitest";
 
 const API = "https://en.wikipedia.org/w/api.php";
 

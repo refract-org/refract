@@ -6,17 +6,17 @@ import {
   buildPageMoveEvents,
   buildParamChangeEvents,
   citationTracker,
+  computeCertaintyProfile,
+  computeContentChange,
+  computeDirectionSignal,
+  computeEditMagnitude,
   correlateTalkRevisions,
   diffCategories,
   diffObservations,
   diffWikilinks,
-  computeCertaintyProfile,
-  computeDirectionSignal,
-  computeEditMagnitude,
-  computeContentChange,
+  extractCategories,
   extractKeyTerms,
   extractQuantitativeFindings,
-  extractCategories,
   extractWikilinks,
   revertDetector,
   sectionDiffer,
@@ -732,11 +732,14 @@ export async function runAnalyze(
   // Apply deterministic semantic enrichment
   for (const event of events) {
     const text = event.after || event.before || "";
-    event.editMagnitude = computeEditMagnitude((event.before||"").length, (event.after||"").length);
-    event.contentChange = computeContentChange(event.eventType, event.before||"", event.after||"");
+    event.editMagnitude = computeEditMagnitude((event.before || "").length, (event.after || "").length);
+    event.contentChange = computeContentChange(event.eventType, event.before || "", event.after || "");
     event.keyTerms = extractKeyTerms(text);
     event.certaintyProfile = computeCertaintyProfile(text);
-    event.directionSignal = computeDirectionSignal(computeCertaintyProfile(event.before||""), computeCertaintyProfile(event.after||""));
+    event.directionSignal = computeDirectionSignal(
+      computeCertaintyProfile(event.before || ""),
+      computeCertaintyProfile(event.after || ""),
+    );
     event.quantitativeFindings = extractQuantitativeFindings(text);
   }
 

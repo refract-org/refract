@@ -49,8 +49,7 @@ export function validateAgainstGroundTruth(outcomes: OutcomeLabel[], events: Evi
         ? expected.filter((et) => matched.some((m) => m.eventType === et)).length / expected.length
         : 0;
     const recall = matched.length > 0 ? 1.0 : 0.0;
-    const f1 =
-      precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
+    const f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
 
     return {
       outcomeId: outcome.id,

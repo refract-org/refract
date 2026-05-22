@@ -37,13 +37,18 @@ export type {
 export type { AnalyzerConfig } from "./schemas/config.js";
 export { DEFAULT_ANALYZER_CONFIG } from "./schemas/config.js";
 export type {
+  CertaintyProfile,
+  ContentChange,
   DeterministicFact,
+  DirectionSignal,
+  EditMagnitude,
   EventType,
   EvidenceEvent,
   EvidenceLayer,
   FactProvenance,
   ModelInterpretation,
   PolicyDimension,
+  QuantitativeFinding,
 } from "./schemas/evidence.js";
 export { EVENT_SCHEMA_VERSION } from "./schemas/evidence.js";
 export type {
@@ -61,5 +66,3 @@ export type {
 } from "./schemas/report.js";
 export type { DiffLine, DiffResult, Revision, Section, SectionChange } from "./schemas/revision.js";
 export type { SourceAuthority, SourceLineage, SourceRecord, SourceReplacement, SourceType } from "./schemas/source.js";
-
-export type { EditMagnitude, ContentChange, CertaintyProfile, DirectionSignal, QuantitativeFinding } from "./schemas/evidence.js";

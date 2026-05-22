@@ -1,5 +1,5 @@
-import { MediaWikiClient } from "@refract-org/ingestion";
 import { sectionDiffer } from "@refract-org/analyzers";
+import { MediaWikiClient } from "@refract-org/ingestion";
 
 export async function runInit(): Promise<void> {
   console.log();
@@ -9,9 +9,9 @@ export async function runInit(): Promise<void> {
   console.log("  ╚══════════════════════════════════════╝");
   console.log();
   console.log("  Refract observes how Wikipedia pages change over time.");
-  console.log("  It answers \"what changed?\" — deterministically, reproducibly.");
+  console.log('  It answers "what changed?" — deterministically, reproducibly.');
   console.log();
-  console.log("  Running a quick analysis of \"Earth\" to show you what it does...");
+  console.log('  Running a quick analysis of "Earth" to show you what it does...');
   console.log();
 
   try {
@@ -40,16 +40,16 @@ export async function runInit(): Promise<void> {
   console.log("  ── What's next ──");
   console.log();
   console.log("  Analyze any page:");
-  console.log("    refract analyze \"Bitcoin\" --depth detailed");
+  console.log('    refract analyze "Bitcoin" --depth detailed');
   console.log();
   console.log("  View results in a browser:");
-  console.log("    refract explore \"Bitcoin\"");
+  console.log('    refract explore "Bitcoin"');
   console.log();
   console.log("  Track a specific claim:");
-  console.log("    refract claim \"Bitcoin\" --text \"decentralized digital currency\"");
+  console.log('    refract claim "Bitcoin" --text "decentralized digital currency"');
   console.log();
   console.log("  See what a page said on a specific date:");
-  console.log("    refract snapshot \"Bitcoin\" --at 2024-01-15");
+  console.log('    refract snapshot "Bitcoin" --at 2024-01-15');
   console.log();
   console.log("  Monitor for changes:");
   console.log("    refract cron pages.txt --interval 24 --notify-slack");

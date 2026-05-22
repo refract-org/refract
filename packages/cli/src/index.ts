@@ -167,7 +167,11 @@ analyzeCmd.action(async (page, opts) => {
     console.log(dim(`  View in browser  → refract explore "${page}"`));
     console.log(dim(`  Track a claim    → refract claim "${page}" --text "claim text"`));
     console.log(dim(`  Snapshot in time  → refract snapshot "${page}" --at 2024-01-15`));
-    console.log(dim(`  Export data      → refract export "${page}" --format ndjson > ${page.toLowerCase().replace(/\s+/g, "-")}-events.jsonl`));
+    console.log(
+      dim(
+        `  Export data      → refract export "${page}" --format ndjson > ${page.toLowerCase().replace(/\s+/g, "-")}-events.jsonl`,
+      ),
+    );
     console.log(dim(`  Monitor for changes → refract cron pages.txt --interval 24 --notify-slack`));
     console.log(dim(`  Connect an AI    → refract mcp`));
     console.log(dim(`  Full docs        → https://refract-org.github.io/refract-docs`));
@@ -263,10 +267,7 @@ const streamCmd = program
   .option("--wiki <wiki>", "wiki to stream (e.g., enwiki, dewiki)", "enwiki");
 withGlobal(streamCmd);
 streamCmd.action(async (page, opts) => {
-  await runStream(
-    page as string | undefined,
-    opts.wiki as string | undefined,
-  );
+  await runStream(page as string | undefined, opts.wiki as string | undefined);
 });
 
 // ── cron ──

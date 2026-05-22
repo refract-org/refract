@@ -1,7 +1,7 @@
 import { stripWikitext } from "@refract-org/analyzers";
 import type { AuthConfig } from "@refract-org/ingestion";
 import { MediaWikiClient } from "@refract-org/ingestion";
-import { loadCachedRevisions, saveRevisions } from "./cache.js";
+import { saveRevisions } from "./cache.js";
 
 export async function runSnapshot(
   pageTitle: string,
@@ -12,7 +12,7 @@ export async function runSnapshot(
   auth?: AuthConfig,
 ): Promise<void> {
   const target = new Date(atDate);
-  if (isNaN(target.getTime())) {
+  if (Number.isNaN(target.getTime())) {
     console.error(`Invalid date: ${atDate}. Use ISO 8601 format (e.g., 2024-01-15).`);
     process.exit(1);
   }
@@ -32,7 +32,7 @@ export async function runSnapshot(
     }
   }
 
-  const deltaDays = Math.round(closestDelta / (1000 * 60 * 60 * 24) * 10) / 10;
+  const deltaDays = Math.round((closestDelta / (1000 * 60 * 60 * 24)) * 10) / 10;
 
   console.log(`\nSnapshot of "${pageTitle}" at ${atDate}`);
   console.log(`Closest revision: ${closest.revId} (${closest.timestamp})`);

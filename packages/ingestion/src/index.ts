@@ -51,9 +51,9 @@ export interface RevisionOptions {
 }
 
 export { MediaWikiClient } from "./mediawiki-client.js";
-export { WikimediaStreamClient } from "./stream-client.js";
-export type { StreamClientOptions, StreamEvent } from "./stream-client.js";
 export { RateLimiter } from "./rate-limiter.js";
+export type { StreamClientOptions, StreamEvent } from "./stream-client.js";
+export { WikimediaStreamClient } from "./stream-client.js";
 export type { PageToEntityMap, WikidataClaim, WikidataEntity, WikidataValue } from "./wikidata-mapper.js";
 export {
   fetchWikidataEntity,

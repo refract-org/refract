@@ -1,10 +1,6 @@
 import { WikimediaStreamClient } from "@refract-org/ingestion";
-import type { StreamEvent } from "@refract-org/ingestion";
 
-export async function runStream(
-  pageTitle?: string,
-  wiki?: string,
-): Promise<void> {
+export async function runStream(pageTitle?: string, wiki?: string): Promise<void> {
   const filter: { wiki?: string; title?: string } = {};
   if (wiki) filter.wiki = wiki;
   if (pageTitle) filter.title = pageTitle;
