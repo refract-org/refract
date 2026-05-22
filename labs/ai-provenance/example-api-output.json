@@ -1,0 +1,38 @@
+{
+  "page": "https://en.wikipedia.org/wiki/Quantum_computing",
+  "revision": 1234567890,
+  "timestamp": "2026-05-14T12:00:00Z",
+  "signals": {
+    "stability": {
+      "status": "stable",
+      "passage_age_days": 847,
+      "edits_last_90_days": 3,
+      "edit_latency_percentile": 92,
+      "note": "Core content has been stable for over 2 years. Recent edits are minor copyedits."
+    },
+    "contestation": {
+      "status": "contested",
+      "revert_count_90_days": 2,
+      "talk_page_dispute_active": true,
+      "conflicting_editors": 4,
+      "disputed_passage": "Error correction benchmarks section",
+      "note": "Two reverts in the error correction benchmarks section. Talk page shows active debate about methodology."
+    },
+    "recency": {
+      "status": "recently changed",
+      "last_major_edit_days_ago": 2,
+      "introduced_section": "Error correction benchmarks",
+      "editor_experience": "novice",
+      "editor_edit_count": 12,
+      "note": "A novice editor added new benchmark claims 2 days ago. Content has high source churn risk."
+    }
+  },
+  "summary": "Page is generally stable with an active dispute in one section. New benchmark claims were added 2 days ago by a novice editor. Verify before citing.",
+  "metadata": {
+    "page_id": 12345,
+    "wiki": "en.wikipedia.org",
+    "analyzer_version": "0.3.0",
+    "analyzer": "@refract-org/analyzers",
+    "generated_at": "2026-05-14T12:00:00Z"
+  }
+}

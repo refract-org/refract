@@ -44,7 +44,6 @@ bun run lint       # biome lint packages/
 - **packages/cli**: CLI tool (`refract` command)
 - **packages/persistence**: SQLite storage (bun:sqlite)
 - **packages/eval**: Evaluation harness
-- **packages/observable**: Observable Framework data loader
 
 ## Semantic Enrichment (v0.5.0+)
 

@@ -1,0 +1,69 @@
+{
+  "probe": "standards-intelligence",
+  "generated": "2026-05-14T00:00:00Z",
+  "events": [
+    {
+      "event_id": "evt_si_001",
+      "event_type": "requirement_language_shift",
+      "layer": "L1",
+      "source": {
+        "draft": "draft-ietf-example-protocol-03",
+        "draft_next": "draft-ietf-example-protocol-04",
+        "standards_body": "IETF",
+        "section": "4.2 Security Considerations"
+      },
+      "before": "Implementations MUST support TLS 1.3 for all transport connections.",
+      "after": "Implementations SHOULD support TLS 1.3 for all transport connections. TLS 1.2 is acceptable where TLS 1.3 is unavailable.",
+      "diff": {
+        "modality_shift": "MUST → SHOULD",
+        "requirement_relaxed": true,
+        "fallback_added": true
+      },
+      "timestamp": "2026-04-28T10:00:00Z",
+      "datatracker_revision": 7
+    },
+    {
+      "event_id": "evt_si_002",
+      "event_type": "normative_reference_change",
+      "layer": "L1",
+      "source": {
+        "draft": "draft-w3c-example-spec-01",
+        "draft_next": "draft-w3c-example-spec-02",
+        "standards_body": "W3C",
+        "section": "2. Normative References"
+      },
+      "before": [
+        "[RFC8446] TLS 1.3",
+        "[RFC6234] US Secure Hash Algorithms"
+      ],
+      "after": [
+        "[RFC8446] TLS 1.3"
+      ],
+      "diff": {
+        "removed_reference": "[RFC6234] US Secure Hash Algorithms",
+        "added_reference": null,
+        "referenced_sections_affected": ["5.1 Hash Computation"]
+      },
+      "timestamp": "2026-05-02T15:30:00Z"
+    },
+    {
+      "event_id": "evt_si_003",
+      "event_type": "scope_change",
+      "layer": "L1",
+      "source": {
+        "draft": "iso-draft-EXAMPLE-29100",
+        "draft_next": "iso-draft-EXAMPLE-29100-r2",
+        "standards_body": "ISO",
+        "section": "1. Scope"
+      },
+      "before": "This document specifies a framework for privacy management in information systems processing personally identifiable information.",
+      "after": "This document specifies a framework for privacy management in information systems processing personally identifiable information within federated identity architectures.",
+      "diff": {
+        "scope_narrowed": true,
+        "qualifier_added": "within federated identity architectures",
+        "exclusion_implied": "non-federated identity systems"
+      },
+      "timestamp": "2026-05-09T08:00:00Z"
+    }
+  ]
+}

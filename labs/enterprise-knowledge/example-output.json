@@ -1,0 +1,62 @@
+{
+  "probe": "enterprise-knowledge-governance",
+  "generated": "2026-05-14T00:00:00Z",
+  "events": [
+    {
+      "event_id": "evt_ekg_001",
+      "event_type": "policy_wording_drift",
+      "layer": "L1",
+      "source": {
+        "page": "Data Retention Policy",
+        "namespace": "/policies/compliance/",
+        "platform": "confluence"
+      },
+      "before": "Teams MUST retain customer transaction logs for a minimum of 7 years.",
+      "after": "Teams SHOULD retain customer transaction logs where operationally feasible. Recommended retention period: 7 years.",
+      "diff": {
+        "changed_tokens": ["MUST → SHOULD", "minimum → recommended"],
+        "modality_shift": "obligation → recommendation"
+      },
+      "timestamp": "2026-05-12T14:22:00Z",
+      "author": "compliance-team"
+    },
+    {
+      "event_id": "evt_ekg_002",
+      "event_type": "claim_removal",
+      "layer": "L1",
+      "source": {
+        "page": "Incident Response Runbook",
+        "namespace": "/engineering/security/",
+        "platform": "notion"
+      },
+      "before": "On detection of a P1 incident, the on-call engineer must escalate to the VP of Engineering within 15 minutes.",
+      "after": "[section removed — no replacement content]",
+      "diff": {
+        "removed_section": "Escalation protocol for P1 incidents",
+        "replacement": null,
+        "neighboring_sections_preserved": true
+      },
+      "timestamp": "2026-05-08T09:41:00Z",
+      "author": "eng-docs-bot"
+    },
+    {
+      "event_id": "evt_ekg_003",
+      "event_type": "contradiction_flag",
+      "layer": "L2",
+      "source": {
+        "page_a": "/policies/compliance/Vendor Review Policy",
+        "page_b": "/procurement/Vendor Onboarding Checklist",
+        "namespace": "cross-namespace",
+        "platform": "confluence"
+      },
+      "claim_a": "All vendors must complete a security review before contract signing.",
+      "claim_b": "Vendor security reviews are completed post-signature during the onboarding sprint.",
+      "diff": {
+        "contradiction_type": "temporal ordering conflict",
+        "shared_topic": "vendor security review timing",
+        "model_confidence": 0.91
+      },
+      "timestamp": "2026-05-11T16:05:00Z"
+    }
+  ]
+}

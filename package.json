@@ -32,8 +32,7 @@
     "packages/analyzers",
     "packages/cli",
     "packages/persistence",
-    "packages/eval",
-    "packages/observable"
+    "packages/eval"
   ],
   "scripts": {
     "build": "tsc -b",
