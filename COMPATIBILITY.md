@@ -19,22 +19,22 @@ When updating `@refract-org/*` packages, downstream repos must be checked for co
 
 | Package | Version | Downstream Consumers | Breaking Change Risk |
 |---|---|---|---|
-| `@refract-org/evidence-graph` | 0.4.x | All packages + refract-labs | **High** — EventType changes break all consumers |
+| `@refract-org/evidence-graph` | 0.4.x | All packages + `labs/` | **High** — EventType changes break all consumers |
 | `@refract-org/ingestion` | 0.4.x | CLI | **Medium** — API changes break CLI |
-| `@refract-org/analyzers` | 0.4.x | CLI + persistence + eval + refract-labs | **Medium** — analyzer output changes break consumers |
+| `@refract-org/analyzers` | 0.4.x | CLI + persistence + eval + `labs/` | **Medium** — analyzer output changes break consumers |
 | `@refract-org/cli` | 0.5.x | refract-py | **Low** — CLI flag changes break Python SDK |
 | `@refract-org/eval` | 0.4.x | None (internal) | **Low** |
 | `@refract-org/persistence` | 0.4.x | None (internal, not published) | **Low** |
 
 ## External Consumer Versions
 
-| Repo | Depends On | Current Version | Update When |
+| Repo/Dir | Depends On | Current Version | Update When |
 |---|---|---|---|
-| refract-labs | `@refract-org/evidence-graph@^0.2.0`, `@refract-org/analyzers@^0.2.0` | — | evidence-graph or analyzers bump |
+| `labs/` (monorepo) | `@refract-org/evidence-graph@^0.2.0`, `@refract-org/analyzers@^0.2.0` | — | evidence-graph or analyzers bump |
+| `demo-data/` (monorepo) | JSONL format matching evidence-graph types | — | EvidenceEvent schema change |
 | refract-ui | Types mirrored locally from evidence-graph | — | EventType or EvidenceEvent schema change |
 | refract-py | Wraps `@refract-org/cli` via subprocess | — | CLI flag additions/removals |
 | refract-docs | References CLI examples and schema | — | CLI flag changes or schema version bumps |
-| refract-demo-data | JSONL format matching evidence-graph types | — | EvidenceEvent schema change |
 
 ## What Breaks When
 
@@ -42,14 +42,14 @@ When updating `@refract-org/*` packages, downstream repos must be checked for co
 
 **If you add a new event type:**
 - refract-ui: add to local type definitions in `src/types.ts`
-- refract-labs: update any probe that filters by event type
+- `labs/`: update any probe that filters by event type
 - refract-docs: update schema.md and events.md
 - refract-py: no change (dataclasses are generic)
-- refract-demo-data: update JSONL files if they should include the new type
+- `demo-data/`: update JSONL files if they should include the new type
 
 **If you rename an event type:**
 - BREAKING for all consumers. Create a migration guide.
-- refract-labs probes may use old names (e.g., `claim_first_seen` → `sentence_first_seen`)
+- `labs/` probes may use old names (e.g., `claim_first_seen` → `sentence_first_seen`)
 - refract-ui type mirrors must be updated
 - refract-docs schema reference must be updated
 

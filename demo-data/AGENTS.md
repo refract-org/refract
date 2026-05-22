@@ -1,6 +1,7 @@
-# Agent Instructions for refract-demo-data
+# Agent Instructions for demo-data
 
-This repo contains demo datasets for Refract. It is NOT part of the refract monorepo.
+This directory contains demo datasets for Refract. It was consolidated from the
+now-deleted `refract-org/refract-demo-data` repository.
 
 - All content must be from public wikis or obviously fictional (synthetic healthcare).
 - Never add real PII, real medical records, or proprietary data.
