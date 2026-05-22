@@ -232,7 +232,7 @@ function buildReport(pageTitle: string, events: EvidenceEvent[]): Report {
     policySignals: extractPolicySignals(events),
     caveats: hasModel
       ? ["Model-assisted interpretation applied — confidence scores are per-event and may vary between runs."]
-      : ["Deterministic analysis only — no model interpretation applied."],
+      : ["Deterministic analysis only; no bounded labels applied."],
     phase: "Phase 1b",
   };
 }
