@@ -1,0 +1,3 @@
+{
+  "*.{js,ts,tsx,jsx,mjs,cjs}": ["npx biome check --write"]
+}

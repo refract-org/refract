@@ -43,11 +43,14 @@
     "ci": "bun run build && biome ci packages/ && bun run typecheck && bun run check:boundaries && bun run test",
     "check:boundaries": "bun scripts/check-boundaries.ts",
     "clean": "rm -rf packages/*/dist",
-    "postinstall": "mkdir -p node_modules/@refract-org && for pkg in packages/*/; do name=$(basename $pkg); ln -sfn ../../packages/$name node_modules/@refract-org/$name 2>/dev/null; done"
+    "postinstall": "mkdir -p node_modules/@refract-org && for pkg in packages/*/; do name=$(basename $pkg); ln -sfn ../../packages/$name node_modules/@refract-org/$name 2>/dev/null; done",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
     "@types/node": "^22.19.19",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6"
   }
