@@ -44,7 +44,8 @@
     "check:boundaries": "bun scripts/check-boundaries.ts",
     "clean": "rm -rf packages/*/dist",
     "postinstall": "mkdir -p node_modules/@refract-org && for pkg in packages/*/; do name=$(basename $pkg); ln -sfn ../../packages/$name node_modules/@refract-org/$name 2>/dev/null; done",
-    "prepare": "husky"
+    "prepare": "husky",
+    "setup": "mise trust && bun install"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
