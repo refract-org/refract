@@ -12,7 +12,7 @@ Refract separates computation into two architecturally isolated layers. No
 layer's output feeds into another layer's input in a way that would contaminate
 evidence with interpretation.
 
-## Layer 1: Deterministic
+## Deterministic Layer
 
 **What it answers**: What changed, when, where, how — byte-for-byte reproducible.
 
@@ -25,7 +25,7 @@ involved. Every run on the same revision range produces identical output.
 **Why it matters on fandom wikis**: A Star Wars Legends page that had
 `[[Category:Canon characters]]` removed and `[[Category:Legends characters]]`
 added after the 2014 Disney acquisition. These are deterministic signals — no
-interpretation needed, the edit itself is the event. L1 captures these as
+interpretation needed, the edit itself is the event. Refract captures these as
 `category_removed`/`category_added` events, byte-for-byte reproducible from
 the API response.
 
@@ -50,11 +50,11 @@ See `packages/analyzers/src/semantic-enrichment.ts` for the implementation.
 Domain-specific classification (e.g., "is this edit about safety or efficacy?") belongs in
 downstream consumers. Refract provides the deterministic substrate; applications add the interpretation.
 
-## Layer 2: Independent Ground Truth
+## Independent Ground Truth Layer
 
 **What it answers**: Did real-world editorial processes validate the signal?
 
-**Implementation**: Independently sourced ground truth — talk page consensus, page protection events, RFC closures, Arbitration Committee decisions. Never redefined by L1 or L2. Stored separately from pipeline output.
+**Implementation**: Independently sourced ground truth — talk page consensus, page protection events, RFC closures, Arbitration Committee decisions. Never redefined by observed or policy-coded layers. Stored separately from pipeline output.
 
 **Output**: Outcome labels with public observability timestamps and source references.
 
@@ -62,7 +62,7 @@ downstream consumers. Refract provides the deterministic substrate; applications
 get resolved — not by authority, but by editorial consensus with timestamps and
 public permalinks. A 2015 talk page consensus that "Clone Wars TV series is
 canon, novelizations are secondary" might be overturned in 2024 by a new consensus
-citing a different set of source policies. L3 captures both outcomes independently,
+citing a different set of source policies. Refract captures both outcomes independently,
 with temporal validity windows. The pipeline doesn't decide canon — it reports
 that the editorial community reached a specific consensus at a specific time.
 On Wikipedia the ground truth is RFC closures and ArbCom decisions; on fandom
@@ -116,7 +116,7 @@ Every user-facing output carries layer provenance:
 2. Every event is provenance-tagged (revision, section, timestamp)
 3. Output is byte-for-byte reproducible on the same revision range
 
-## Consuming L1 Output
+## Consuming Deterministic Output
 
 Refract's deterministic event stream is consumed by domain-specific interpretation
 layers in downstream systems (e.g., NextConsensus). Those systems must:

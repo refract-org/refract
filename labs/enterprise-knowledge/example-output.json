@@ -5,7 +5,7 @@
     {
       "event_id": "evt_ekg_001",
       "event_type": "policy_wording_drift",
-      "layer": "L1",
+      "layer": "observed",
       "source": {
         "page": "Data Retention Policy",
         "namespace": "/policies/compliance/",
@@ -23,7 +23,7 @@
     {
       "event_id": "evt_ekg_002",
       "event_type": "claim_removal",
-      "layer": "L1",
+      "layer": "observed",
       "source": {
         "page": "Incident Response Runbook",
         "namespace": "/engineering/security/",
@@ -42,7 +42,7 @@
     {
       "event_id": "evt_ekg_003",
       "event_type": "contradiction_flag",
-      "layer": "L2",
+      "layer": "model_interpretation",
       "source": {
         "page_a": "/policies/compliance/Vendor Review Policy",
         "page_b": "/procurement/Vendor Onboarding Checklist",

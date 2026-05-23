@@ -4,15 +4,15 @@
 
 | Signal | Description | Deterministic? |
 |---|---|---|
-| **Negative claim added** | A statement with negative framing introduced to the page | L1 (diff analysis) |
-| **Negative claim removed** | A previously negative statement deleted | L1 |
-| **Controversy section** | Section marked as "Controversy", "Criticism", or equivalent | L1 |
-| **Source quality downgrade** | Citation replaced with lower-quality source (e.g., blog → removed) | L2 (model-assisted) |
-| **Source fragility** | Claim with single source or single editor | L1 |
-| **Revert presence** | Edit immediately reverted by another editor | L1 |
-| **Dispute present** | Active talk page discussion about the subject | L1 |
-| **High source churn** | Section where citations are frequently added/removed | L1 |
-| **Editor network** | Editors who edit related pages about the same subject | L2 (model-assisted) |
+| **Negative claim added** | A statement with negative framing introduced to the page | Yes (observed) |
+| **Negative claim removed** | A previously negative statement deleted | Yes (observed) |
+| **Controversy section** | Section marked as "Controversy", "Criticism", or equivalent | Yes (observed) |
+| **Source quality downgrade** | Citation replaced with lower-quality source (e.g., blog → removed) | No (model_interpretation) |
+| **Source fragility** | Claim with single source or single editor | Yes (observed) |
+| **Revert presence** | Edit immediately reverted by another editor | Yes (observed) |
+| **Dispute present** | Active talk page discussion about the subject | Yes (observed) |
+| **High source churn** | Section where citations are frequently added/removed | Yes (observed) |
+| **Editor network** | Editors who edit related pages about the same subject | No (model_interpretation) |
 
 ## Definitions
 

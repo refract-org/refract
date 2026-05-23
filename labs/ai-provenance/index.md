@@ -14,7 +14,7 @@ Refract exposes three signals directly applicable to RAG provenance:
 - **Contestation.** Is there a current dispute on the article's talk page? Have reverts occurred around this passage? High revert density indicates contested content.
 - **Recency.** Was this passage introduced or substantially rewritten recently? Recent changes carry higher uncertainty.
 
-These signals are deterministic (L1). They require no model — only revision history analysis.
+These signals are deterministic. They require no model — only revision history analysis.
 
 When `REFRACT_INFERENCE_ENDPOINT` (or legacy `OPENAI_API_BASE`) is set, the probe also surfaces nuanced signals: hardening, weakening, contestation, stabilization, ratification — each with a strength score (0-1) and rationale.
 

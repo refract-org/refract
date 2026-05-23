@@ -30,11 +30,11 @@ An IETF RFC draft changes the status of a security requirement from "MUST implem
 
 | Signal | Description | Deterministic? |
 |---|---|---|
-| **Req language change** | MUST/SHALL/SHOULD/MAY shifts | L1 (pattern match) |
-| **Scope change** | Definition or scope paragraph modified | L1 (section diff) |
-| **Reference change** | Normative reference added/removed | L1 |
-| **Substantive edit** | Change beyond whitespace/copyediting | L1 (word-level diff) |
-| **Dissenting note** | Note about disagreement or alternative views | L1 |
+| **Req language change** | MUST/SHALL/SHOULD/MAY shifts | Yes (observed) |
+| **Scope change** | Definition or scope paragraph modified | Yes (observed) |
+| **Reference change** | Normative reference added/removed | Yes (observed) |
+| **Substantive edit** | Change beyond whitespace/copyediting | Yes (observed) |
+| **Dissenting note** | Note about disagreement or alternative views | Yes (observed) |
 
 ## Next Steps
 

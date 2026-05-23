@@ -5,7 +5,7 @@
     {
       "event_id": "evt_si_001",
       "event_type": "requirement_language_shift",
-      "layer": "L1",
+      "layer": "observed",
       "source": {
         "draft": "draft-ietf-example-protocol-03",
         "draft_next": "draft-ietf-example-protocol-04",
@@ -25,7 +25,7 @@
     {
       "event_id": "evt_si_002",
       "event_type": "normative_reference_change",
-      "layer": "L1",
+      "layer": "observed",
       "source": {
         "draft": "draft-w3c-example-spec-01",
         "draft_next": "draft-w3c-example-spec-02",
@@ -49,7 +49,7 @@
     {
       "event_id": "evt_si_003",
       "event_type": "scope_change",
-      "layer": "L1",
+      "layer": "observed",
       "source": {
         "draft": "iso-draft-EXAMPLE-29100",
         "draft_next": "iso-draft-EXAMPLE-29100-r2",
