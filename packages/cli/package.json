@@ -1,6 +1,6 @@
 {
   "name": "@refract-org/cli",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "mcpName": "io.github.refract-org/refract",
   "type": "module",
   "private": false,
