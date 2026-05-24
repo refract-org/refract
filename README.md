@@ -1,62 +1,106 @@
+<div align="center">
+
 # Refract
+
+**Open infrastructure for agent-readable knowledge change. Turns source histories into replayable semantic change events.**
 
 [![CI](https://github.com/refract-org/refract/actions/workflows/ci.yml/badge.svg)](https://github.com/refract-org/refract/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/release/refract-org/refract)](https://github.com/refract-org/refract/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-0f172a.svg)](./LICENSE)
+[![Discussions](https://img.shields.io/badge/discussions-welcome-8b5cf6?style=flat-square)](https://github.com/refract-org/refract/discussions)
 
+</div>
 
-> **v0.5.0+**: Events now carry 6 deterministic enrichment fields ([editMagnitude](#), [directionSignal](#), [certaintyProfile](#), etc.) — byte-reproducible, no model.
+> **v0.5.0+**: Events now carry 6 deterministic enrichment fields (editMagnitude, directionSignal, certaintyProfile, etc.) — byte-reproducible, no model.
 
-**Open infrastructure for agent-readable knowledge change.**
+## What does it do?
 
-> Refract turns source histories into replayable semantic change events about claims, citations, and evidence bindings — so AI systems and human teams can reason over how knowledge became current.
+Given a Wikipedia page, Refract produces a structured event stream showing **what changed, when, and how** — every sentence that appeared, was removed, or was modified; every citation that shifted; every revert and edit cluster.
 
-Refract is an open observation layer for changing knowledge. It ingests versioned and semi-versioned sources, computes structural and semantic change events, tracks claims and citations across time, and emits structured provenance events that downstream systems can query, replay, and audit.
+```bash
+npx @refract-org/cli analyze "Climate change" --brief
+```
 
-Most knowledge systems answer *what does this source say now?* Refract helps answer *what changed, when, where, and what did the record say at a specific point in time?*
+Output:
 
-Built and maintained by [NextConsensus](https://nextconsensus.com) and [Kanav Jain](https://kanav.net) — founding PM, Doximity Dialer (300K clinicians); co-founder & CEO, Andwise; clinical AI safety evaluation via [Ethotechnics Studio](https://ethotechnics.com). Domain-neutral infrastructure. Refract observes change. Applications interpret relevance.
+```
+sentence_first_seen  | 2026-01-15 | "Climate change has led to increased frequency of extreme weather events."
+sentence_modified    | 2026-03-02 | "Climate change has intensified..." (edit magnitude: 0.31)
+citation_added       | 2026-03-02 | [IPCC AR6 Report] → paragraph 4
+sentence_removed     | 2026-04-10 | "Some researchers dispute..." (reverted next edit)
+revert               | 2026-04-11 | Full revert of 2026-04-10 edit (edit cluster: 3 edits in 2h)
+```
 
-[Repository boundary](./docs/repository-boundary.md).
+<p align="center">
+  <img src="assets/refract-demo.gif" alt="Refract CLI analyzing a Wikipedia page" width="700" style="border-radius: 8px;">
+</p>
+
+No model. No API. **Byte-reproducible** — the same source produces the same events every time.
+
+Refract ingests versioned sources (MediaWiki, text files), computes structural and semantic change events, tracks claims and citations across time, and emits structured provenance data that downstream systems can query, replay, and audit.
+
+Most knowledge systems answer *what does this source say now?* Refract helps answer: *what changed, when, where, and what did the record say at a specific point in time?*
+
+Built and maintained by [NextConsensus](https://nextconsensus.com) and [Kanav Jain](https://kanav.net). Domain-neutral — Refract observes change, applications interpret relevance.
+
+[Repository boundary](./docs/repository-boundary.md)
 
 ---
 
-## Core Concepts
+## Quick start
 
-| Concept | Definition |
-|---------|-----------|
-| Source | A document, page, wiki, guideline, policy, or other knowledge artifact. |
-| Version | A captured state of a source at a point in time. |
-| Semantic Change Event | A structured representation of a meaningful change — a claim appearing, a citation shifting, a section moving, a dispute marker appearing. |
-| Claim | A discrete assertion detected or tracked across versions. |
-| Evidence Binding | The relationship between a claim and the sources used to support it at a given time. |
-| Replay | Reconstructing source state or claim state at a past time. |
-| Knowledge-State Memory | The system's ability to answer "what did we know then?" and "what changed since?" |
+### Prerequisites
 
-Refract emits 26 deterministic event types — no model, no API, byte-reproducible on every run. These events are the substrate that provenance-aware systems build on.
+- Node.js 20+ or Bun 1.3+
+- A MediaWiki URL (Wikipedia, Wikibooks, any public wiki)
 
----## Why It Exists
+### One-shot analysis
 
-Machines do not just need more retrieved text. They need provenance, instability,
-disagreement, and temporal change — six things that a current snapshot cannot provide:
+```bash
+# Using npx (no install required)
+npx @refract-org/cli analyze "https://en.wikipedia.org/wiki/Artificial_intelligence" --brief
 
-1. **Where it appeared** — when a claim first entered the public record
-2. **How it changed** — every addition, removal, reintroduction, and in-place modification
-3. **What was tagged** — policy templates, dispute signals, maintenance markers
-4. **What was reverted** — every revert, edit cluster, concentrated contestation
-5. **What moved** — section reorganization, lead promotion, category shifts, page moves
-6. **What was discussed** — correlated talk page activity, thread lifecycle, activity spikes
+# Or install globally
+npm install -g @refract-org/cli
+refract analyze "Quantum computing" --depth forensic --format ndjson
+```
 
-Refract makes that knowledge legible to machines by decomposing every statement
-into its history. That is more durable than search, monitoring, or summarization.
+### Using the Python SDK
 
-## What It Does
+```bash
+pip install refract-py
+```
 
-Given a MediaWiki page, the engine produces a structured event stream with 26
-deterministic event types:
+```python
+from refract import Refract
 
-| Category | What Refract captures |
-|----------|---------------------|
+r = Refract()
+events = r.analyze("Bitcoin", depth="brief")
+for event in events:
+    print(event.eventType, event.timestamp)
+
+# As a DataFrame
+df = r.analyze("Ethereum", depth="forensic", as_frame=True)
+print(df.groupby("event_type").size())
+```
+
+### From source
+
+```bash
+git clone https://github.com/refract-org/refract.git
+cd refract
+npm install
+npx refract analyze "https://en.wikipedia.org/wiki/Machine_learning" --brief
+```
+
+---
+
+## What Refract captures
+
+Refract emits **26 deterministic event types** from versioned sources:
+
+| Category | Events |
+|----------|--------|
 | **Appearance** | `sentence_first_seen`, `sentence_removed`, `sentence_modified`, `sentence_reintroduced` |
 | **Citations** | `citation_added`, `citation_removed`, `citation_replaced` |
 | **Templates** | `template_added`, `template_removed`, `template_parameter_changed` |
@@ -310,6 +354,21 @@ fandom wikis don't.
 
 If the engine handles fandom, it handles anything.
 
+## Why It Exists
+
+Machines do not just need more retrieved text. They need provenance, instability, disagreement, and temporal change — six things that a current snapshot cannot provide:
+
+1. **Where it appeared** — when a claim first entered the public record
+2. **How it changed** — every addition, removal, reintroduction, and in-place modification
+3. **What was tagged** — policy templates, dispute signals, maintenance markers
+4. **What was reverted** — every revert, edit cluster, concentrated contestation
+5. **What moved** — section reorganization, lead promotion, category shifts, page moves
+6. **What was discussed** — correlated talk page activity, thread lifecycle, activity spikes
+
+Refract makes that knowledge legible to machines by decomposing every statement into its history. More durable than search, monitoring, or summarization.
+
+---
+
 ## What It Is Not
 
 | Category | Why |
@@ -352,3 +411,10 @@ These repos extend the core engine:
 | [refract-ui](https://github.com/refract-org/refract-ui) | Standalone visualization — load JSONL, render timelines, diffs, citations |
 | [refract-demo-data](https://github.com/refract-org/refract-demo-data) | Safe, fictional datasets for the eval harness (no real PII or medical data) |
 | [refract-py](https://github.com/refract-org/refract-py) | Python SDK — typed dataclasses and pandas integration for ML workflows |
+
+### Related projects
+
+- [**Stims**](https://github.com/zz-plant/stims) — Browser music visualizer inspired by MilkDrop
+- [**sabnzbd-mcp**](https://github.com/zz-plant/sabnzbd-mcp) — MCP server for SABnzbd (zero deps)
+- [**neckass**](https://github.com/zz-plant/neckass) — Privacy-first headline generator
+- [**ethotechnics.org**](https://github.com/zz-plant/ethotechnics.org) — Essays on ethical technology and human-centered design

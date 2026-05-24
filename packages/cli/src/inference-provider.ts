@@ -1,8 +1,92 @@
+import { classifyHeuristic } from "@refract-org/analyzers";
 import type { InferenceBoundary, InferenceResult } from "@refract-org/evidence-graph";
 import { buildInferencePrompt, parseInferenceResponse } from "@refract-org/evidence-graph";
 
 export interface InferenceProvider {
   infer(boundary: InferenceBoundary, input: Record<string, unknown>): Promise<InferenceResult>;
+}
+
+function asString(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+function asNumber(value: unknown, fallback = 0): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function tokenize(text: string): Set<string> {
+  return new Set(text.toLowerCase().match(/[a-z0-9]+/g) ?? []);
+}
+
+function lexicalSimilarity(before: string, after: string): number {
+  const left = tokenize(before);
+  const right = tokenize(after);
+  if (left.size === 0 && right.size === 0) return 1;
+  if (left.size === 0 || right.size === 0) return 0;
+
+  let intersection = 0;
+  for (const token of left) {
+    if (right.has(token)) intersection += 1;
+  }
+  const union = new Set([...left, ...right]).size;
+  return union === 0 ? 0 : intersection / union;
+}
+
+function defaultInference(boundary: InferenceBoundary, input: Record<string, unknown>): InferenceResult {
+  switch (boundary) {
+    case "revert": {
+      const kind = classifyHeuristic(asString(input.comment), asNumber(input.sizeDelta));
+      return {
+        boundary,
+        output: { isRevert: kind === "revert" },
+        confidence: kind === "revert" ? 0.85 : 0.6,
+        source: "default",
+      };
+    }
+    case "heuristic": {
+      const kind = classifyHeuristic(asString(input.comment), asNumber(input.sizeDelta));
+      return {
+        boundary,
+        output: { kind },
+        confidence: kind === "unknown" ? 0.5 : 0.85,
+        source: "default",
+      };
+    }
+    case "sentence_similarity": {
+      const matchRatio = lexicalSimilarity(asString(input.before), asString(input.after));
+      return {
+        boundary,
+        output: { isSameClaim: matchRatio >= 0.8, matchRatio },
+        confidence: matchRatio >= 0.8 || matchRatio <= 0.2 ? 0.75 : 0.55,
+        source: "default",
+      };
+    }
+    case "template_signal": {
+      const templateName = asString(input.templateName).toLowerCase();
+      const signalType =
+        [
+          ["citation", /\b(cn|citation|cite|source|ref)\b/],
+          ["neutrality", /\b(npov|neutral|pov)\b/],
+          ["blp", /\b(blp|living)\b/],
+          ["dispute", /\b(dispute|controversy|contested)\b/],
+          ["cleanup", /\b(cleanup|copyedit|tone|style)\b/],
+          ["protection", /\b(protect|semi-protected|locked)\b/],
+        ].find(([, pattern]) => (pattern as RegExp).test(templateName))?.[0] ?? "other";
+      return { boundary, output: { signalType }, confidence: signalType === "other" ? 0.5 : 0.8, source: "default" };
+    }
+    case "activity_spike": {
+      const dailyCounts = input.dailyCounts && typeof input.dailyCounts === "object" ? input.dailyCounts : {};
+      const candidateDay = asString(input.candidateDay);
+      const current = asNumber((dailyCounts as Record<string, unknown>)[candidateDay]);
+      const threshold = asNumber(input.threshold);
+      return {
+        boundary,
+        output: { isSpike: current >= threshold && threshold > 0 },
+        confidence: threshold > 0 ? 0.8 : 0.5,
+        source: "default",
+      };
+    }
+  }
 }
 
 /**
@@ -62,6 +146,6 @@ export class OpenAICompatibleProvider implements InferenceProvider {
       return parseInferenceResponse(boundary, text, input);
     }
 
-    return { boundary, output: {}, source: "default" };
+    return defaultInference(boundary, input);
   }
 }
