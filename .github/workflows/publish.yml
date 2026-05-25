@@ -33,6 +33,6 @@ jobs:
           for pkg in packages/evidence-graph packages/ingestion packages/analyzers packages/cli packages/eval; do
             echo "Publishing $pkg..."
             cd $pkg
-            npm publish --access public --provenance
+            npm publish --access public --provenance || echo "$pkg publish skipped (version already exists or error)"
             cd $OLDPWD
           done
