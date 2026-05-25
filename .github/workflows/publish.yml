@@ -26,8 +26,6 @@ jobs:
           for pkg in packages/evidence-graph packages/ingestion packages/analyzers packages/cli packages/eval; do
             echo "Publishing $pkg..."
             cd $pkg
-            bun publish --access public --provenance --no-git-checks
+            npm publish --access public --provenance --no-git-checks
             cd $OLDPWD
           done
-        env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
