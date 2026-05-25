@@ -25,7 +25,8 @@ jobs:
         run: |
           npm --version
           node --version
-          echo "GITHUB_ACTOR: $GITHUB_ACTOR"
+          echo "ID_TOKEN_URL set: ${ACTIONS_ID_TOKEN_REQUEST_URL:+yes}"
+          echo "ID_TOKEN_TOKEN set: ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:+yes}"
           for pkg in packages/evidence-graph packages/ingestion packages/analyzers packages/cli packages/eval; do
             echo "Publishing $pkg..."
             cd $pkg
