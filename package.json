@@ -45,7 +45,9 @@
     "clean": "rm -rf packages/*/dist",
     "postinstall": "mkdir -p node_modules/@refract-org && for pkg in packages/*/; do name=$(basename $pkg); ln -sfn ../../packages/$name node_modules/@refract-org/$name 2>/dev/null; done",
     "prepare": "husky",
-    "setup": "mise trust && bun install"
+    "setup": "mise trust && bun install",
+    "assets:check": "bun run scripts/check-assets.ts",
+    "assets:generate": "bun run scripts/generate-scenes.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",

@@ -9,3 +9,9 @@ coverage/
 .DS_Store
 opencode.json
 /.sisyphus
+
+# Tooling
+.cmux/
+.opencode/
+.codex/
+.agent/
