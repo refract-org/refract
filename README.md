@@ -43,6 +43,8 @@ Refract ingests versioned sources (MediaWiki, text files), computes structural a
 
 Works on any versioned text source: Wikipedia, regulatory documents, clinical guidelines, trial registries, policy archives, and legal texts. Refract replays how a claim changed over time. Downstream systems — like [NextConsensus](https://nextconsensus.com) — decide what that history means.
 
+A vector search tells you what's in the current document. Refract tells you when it got there, what it replaced, and whether it survived.
+
 Most knowledge systems answer *what does this source say now?* Refract helps answer: *what changed, when, where, and what did the record say at a specific point in time?*
 
 Built and maintained by [NextConsensus](https://nextconsensus.com) and [Kanav Jain](https://kanav.net). Domain-neutral — Refract observes change, applications interpret relevance.
