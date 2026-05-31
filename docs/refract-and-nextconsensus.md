@@ -1,6 +1,6 @@
 # How Refract Relates to NextConsensus
 
-Refract is the open observation layer for knowledge-change provenance. NextConsensus checks whether healthcare claims still hold up against the current evidence before someone uses them to make an expensive decision.
+Refract replays how a claim changed over time. NextConsensus judges what that history means for a specific decision.
 
 ## The Split
 
@@ -17,9 +17,9 @@ Refract is the open observation layer for knowledge-change provenance. NextConse
 
 ## The Principle
 
-Refract observes change. NextConsensus evaluates whether a healthcare claim can still bear the weight of the decision being placed on it.
+Refract replays claim history. NextConsensus judges what that history means now.
 
-Refract is domain-neutral. It works on Wikipedia, fan wikis, policy documents, regulatory feeds, and any versioned source. It does not know what a "coverage decision" or a "market-access claim" is. It knows that a sentence appeared, a citation changed, a section moved, a dispute marker was added.
+Refract is domain-neutral. It works on Wikipedia, fan wikis, policy documents, regulatory feeds, and any versioned source. It does not know what a "coverage decision" or a "market-access claim" is. It knows that a sentence appeared, a citation changed, a section moved, a dispute marker was added — across time.
 
 NextConsensus adds healthcare-specific sources, review workflows, and decision-context mapping. It turns "a citation was removed" into "the evidence binding for this coverage claim may need review."
 
