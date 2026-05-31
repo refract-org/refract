@@ -11,7 +11,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build image
         run: docker build -t ghcr.io/refract-org/refract/cli:${{ github.ref_name }} .
       - name: Tag latest
