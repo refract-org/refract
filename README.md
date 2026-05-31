@@ -4,6 +4,8 @@
 
 **Open infrastructure for agent-readable knowledge change. Turns source histories into replayable semantic change events.**
 
+**Turn document histories into claim-state timelines.**
+
 [![CI](https://github.com/refract-org/refract/actions/workflows/ci.yml/badge.svg)](https://github.com/refract-org/refract/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/release/refract-org/refract)](https://github.com/refract-org/refract/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-0f172a.svg)](./LICENSE)
@@ -38,6 +40,8 @@ revert               | 2026-04-11 | Full revert of 2026-04-10 edit (edit cluster
 No model. No API. **Byte-reproducible** — the same source produces the same events every time.
 
 Refract ingests versioned sources (MediaWiki, text files), computes structural and semantic change events, tracks claims and citations across time, and emits structured provenance data that downstream systems can query, replay, and audit.
+
+Works on any versioned text source: Wikipedia, regulatory documents, clinical guidelines, trial registries, policy archives, and legal texts. Refract is the memory engine. [NextConsensus](https://nextconsensus.com) builds the judgment layer for healthcare on top of it.
 
 Most knowledge systems answer *what does this source say now?* Refract helps answer: *what changed, when, where, and what did the record say at a specific point in time?*
 
