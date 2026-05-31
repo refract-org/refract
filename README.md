@@ -134,7 +134,7 @@ Each consumer brings their own interpretation layer on top of Refract's determin
 
 | Consumer | They build | How they use Refract |
 |----------|-----------|---------------------|
-| **Healthcare intelligence** | Sourced briefs answering "does this claim still hold up?" | Feed structured events into a 4-lane measurement pipeline (clinical truth, ratification, economic stake, feasibility). Each event carries `FactProvenance` with the exact thresholds used. |
+| **Healthcare claim review** | Review-ready briefs answering "does this claim still hold up against the current evidence?" | Feed structured events (wording, citations, guidelines, labels, and policies) into claim-review workflows. |
 | **AI training data curation** | Training datasets filtered by claim stability | Score each claim by revert count, citation churn, talk page correlation, and template dispute history from the event stream. Include only claims above a stability threshold. |
 | **Provenance-aware RAG** | Retrieval that weights results by claim stability | Enrich each retrieved chunk with its claim history — stable, recently changed, source-fragile, contested. The RAG system uses the signal to filter or demote low-confidence results. |
 | **Regulatory monitoring** | Early-warning dashboards for policy changes | Run `refract cron` on drug pages, guideline entries, and regulatory topics. When new events fire (citation removal, template dispute, section reorganization), alert the monitoring team with the structured diff. |

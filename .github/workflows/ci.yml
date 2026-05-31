@@ -28,7 +28,6 @@ jobs:
     strategy:
       matrix:
         repo:
-          - refract-org/refract-labs
           - refract-org/refract-ui
     steps:
       - uses: actions/checkout@v4
