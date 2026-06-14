@@ -38,6 +38,14 @@ export interface FactProvenance {
   version: string;
   inputHashes: string[];
   parameters?: Record<string, string | number | boolean>;
+  /** SHA-256 Merkle root of the raw document state and parameter footprint. */
+  merkleRoot: string;
+  /** Analyzer configuration / parameters snapshot used to produce the fact. */
+  parameterFootprint: Record<string, unknown>;
+  /** SHA-256 hash of the raw source snapshot (e.g., before/after state). */
+  sourceSnapshotHash: string;
+  /** ISO 8601 timestamp when the provenance block became effective. */
+  effectiveAt: string;
 }
 
 export type PolicyDimension =

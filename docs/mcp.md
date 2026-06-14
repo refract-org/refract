@@ -82,6 +82,20 @@ Re-observe pages — for scheduled monitoring.
 | `interval` | string | | Lookback window in hours |
 | `api` | string | | MediaWiki API base URL |
 
+### `get_statement_history`
+
+Track the history of a specific statement across revisions. Returns when the statement — or a semantic neighbor — appeared, disappeared, or changed, with revision IDs, timestamps, an overall status, and a short change summary.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `statement` | string | ✅ | Raw text statement to track |
+| `page` | string | ✅ | MediaWiki page title |
+| `context` | string | | Optional use-context slug |
+| `depth` | enum | | `brief`, `detailed` (default), or `forensic` |
+| `api` | string | | MediaWiki API base URL. Defaults to English Wikipedia |
+
+Response fields: `statement`, `page`, `context`, `revisions` (array of `revisionId` + `timestamp`), `status` (`present`, `absent`, `modified`, or `contested`), and `history_summary`.
+
 ## Protocol details
 
 - **Transport:** stdio (stdin for requests, stdout for responses)

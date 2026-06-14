@@ -1,7 +1,17 @@
 // Semantic enrichment — deterministic text analysis for evidence events
 // No model. No API. Byte-reproducible on every run.
 
-import type { CertaintyProfile, DirectionSignal, QuantitativeFinding } from "@refract-org/evidence-graph";
+import {
+  type CertaintyProfile,
+  type ContentChange,
+  type DirectionSignal,
+  type EditMagnitude,
+  EVENT_SCHEMA_VERSION,
+  type EvidenceEvent,
+  type FactProvenance,
+  type QuantitativeFinding,
+} from "@refract-org/evidence-graph";
+import { buildMerkleRoot, hashLeaf } from "./merkle-tree.js";
 
 const CERTAINTY_PATTERNS = {
   high: [/demonstrat\w*/i, /prove\w*/i, /confirm\w*/i, /establish\w*/i, /significantly/i, /robust/i, /definitive/i],
@@ -105,4 +115,134 @@ export function extractKeyTerms(text: string): string[] {
     }
   }
   return [...terms].slice(0, 15); // Limit to top 15
+}
+
+/**
+ * Deterministic JSON serialization for hash inputs.
+ * Sorts object keys recursively so equivalent values always serialize
+ * to the same byte string.
+ */
+function stableStringify(value: unknown): string {
+  if (value === undefined) return "undefined";
+  if (value === null) return "null";
+
+  switch (typeof value) {
+    case "boolean":
+    case "number":
+      return String(value);
+    case "string":
+      return JSON.stringify(value);
+    case "object": {
+      if (Array.isArray(value)) {
+        return `[${value.map(stableStringify).join(",")}]`;
+      }
+      const record = value as Record<string, unknown>;
+      const keys = Object.keys(record).sort();
+      const pairs = keys.map((k) => `${JSON.stringify(k)}:${stableStringify(record[k])}`);
+      return `{${pairs.join(",")}}`;
+    }
+    default:
+      return "null";
+  }
+}
+
+function parameterFootprintToLegacyParameters(
+  footprint: Record<string, unknown>,
+): Record<string, string | number | boolean> | undefined {
+  const out: Record<string, string | number | boolean> = {};
+  let hasAny = false;
+  for (const [key, value] of Object.entries(footprint)) {
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      out[key] = value;
+      hasAny = true;
+    }
+  }
+  return hasAny ? out : undefined;
+}
+
+/** The result of applying semantic enrichment to a single evidence event. */
+export interface SemanticEnrichmentResult {
+  editMagnitude: EditMagnitude;
+  contentChange: ContentChange;
+  keyTerms: string[];
+  certaintyProfile: CertaintyProfile;
+  directionSignal: DirectionSignal;
+  quantitativeFindings: QuantitativeFinding[];
+  /** Strictly typed provenance block carrying the Merkle root of source + parameters. */
+  provenance: FactProvenance;
+}
+
+/** Build a deterministic source snapshot hash from the raw event state. */
+export function computeSourceSnapshotHash(event: EvidenceEvent): string {
+  const snapshot = `${event.fromRevisionId}|${event.toRevisionId}|${event.section}|${event.before}|${event.after}`;
+  return hashLeaf(snapshot);
+}
+
+/** Build a FactProvenance block for semantic enrichment output. */
+export function buildSemanticEnrichmentProvenance(params: {
+  sourceSnapshotHash: string;
+  parameterFootprint: Record<string, unknown>;
+  analyzer?: string;
+  version?: string;
+  inputHashes?: string[];
+  effectiveAt?: string;
+}): FactProvenance {
+  const parameterHash = hashLeaf(stableStringify(params.parameterFootprint));
+  const merkleRoot = buildMerkleRoot([params.sourceSnapshotHash, parameterHash]);
+  return {
+    analyzer: params.analyzer ?? "@refract-org/analyzers/semantic-enrichment",
+    version: params.version ?? EVENT_SCHEMA_VERSION,
+    inputHashes: params.inputHashes ?? [params.sourceSnapshotHash],
+    parameters: parameterFootprintToLegacyParameters(params.parameterFootprint),
+    parameterFootprint: params.parameterFootprint,
+    sourceSnapshotHash: params.sourceSnapshotHash,
+    effectiveAt: params.effectiveAt ?? new Date().toISOString(),
+    merkleRoot,
+  };
+}
+
+/**
+ * Run the full deterministic semantic enrichment pipeline for an evidence event
+ * and emit a strictly typed FactProvenance block alongside the enrichment fields.
+ */
+export function enrichEvidenceEvent(
+  event: EvidenceEvent,
+  options?: {
+    analyzer?: string;
+    version?: string;
+    parameters?: Record<string, unknown>;
+    effectiveAt?: string;
+  },
+): SemanticEnrichmentResult {
+  const before = event.before || "";
+  const after = event.after || "";
+  const text = after || before;
+
+  const editMagnitude = computeEditMagnitude(before.length, after.length);
+  const contentChange = computeContentChange(event.eventType, before, after);
+  const keyTerms = extractKeyTerms(text);
+  const certaintyProfile = computeCertaintyProfile(text);
+  const directionSignal = computeDirectionSignal(computeCertaintyProfile(before), computeCertaintyProfile(after));
+  const quantitativeFindings = extractQuantitativeFindings(text);
+
+  const sourceSnapshotHash = computeSourceSnapshotHash(event);
+  const parameterFootprint = options?.parameters ?? {};
+
+  const provenance = buildSemanticEnrichmentProvenance({
+    sourceSnapshotHash,
+    parameterFootprint,
+    analyzer: options?.analyzer,
+    version: options?.version,
+    effectiveAt: options?.effectiveAt,
+  });
+
+  return {
+    editMagnitude,
+    contentChange,
+    keyTerms,
+    certaintyProfile,
+    directionSignal,
+    quantitativeFindings,
+    provenance,
+  };
 }

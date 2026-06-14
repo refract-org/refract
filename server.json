@@ -39,6 +39,17 @@
       "name": "classify",
       "description": "Model-assisted classification of an inference boundary. Replaces default heuristic with an LLM-based decision for one boundary.",
       "input": { "boundary": "string (classification boundary name)" }
+    },
+    {
+      "name": "get_statement_history",
+      "description": "Track the history of a specific statement across revisions. Returns when the statement (or a semantic neighbor) appeared, disappeared, or changed, with revision IDs, timestamps, an overall status, and a short change summary.",
+      "input": {
+        "statement": "string (raw text statement to track)",
+        "page": "string (MediaWiki page title)",
+        "context": "string optional (use-context slug)",
+        "depth": "brief | detailed | forensic (optional, default detailed)",
+        "api": "string optional (MediaWiki API base URL)"
+      }
     }
   ],
   "capabilities": ["tools"],

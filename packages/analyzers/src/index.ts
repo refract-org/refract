@@ -71,11 +71,15 @@ export { protectionTracker } from "./protection-tracker.js";
 export { revertDetector } from "./revert-detector.js";
 export type { SectionEvent, SectionLineage } from "./section-differ.js";
 export { buildSectionLineage, sectionDiffer } from "./section-differ.js";
+export type { SemanticEnrichmentResult } from "./semantic-enrichment.js";
 export {
+  buildSemanticEnrichmentProvenance,
   computeCertaintyProfile,
   computeContentChange,
   computeDirectionSignal,
   computeEditMagnitude,
+  computeSourceSnapshotHash,
+  enrichEvidenceEvent,
   extractKeyTerms,
   extractQuantitativeFindings,
 } from "./semantic-enrichment.js";

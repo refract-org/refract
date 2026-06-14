@@ -5,6 +5,173 @@ import type { AuthConfig, RevisionOptions } from "@refract-org/ingestion";
 import { MediaWikiClient } from "@refract-org/ingestion";
 import { loadCachedRevisions, loadLatestCachedTimestamp, saveRevisions } from "./cache.js";
 
+export interface ClaimHistoryVariant {
+  revisionId: number;
+  timestamp: string;
+  text: string;
+  section: string;
+}
+
+export interface ClaimHistoryResult {
+  statement: string;
+  page: string;
+  revisions: ClaimHistoryVariant[];
+  status: "present" | "absent" | "modified" | "contested";
+  historySummary: string;
+}
+
+export async function runClaimHistory(
+  pageTitle: string,
+  claimText: string,
+  useCache = false,
+  apiUrl?: string,
+  cacheDir?: string,
+  auth?: AuthConfig,
+): Promise<ClaimHistoryResult> {
+  const client = new MediaWikiClient(apiUrl ? { apiUrl, auth } : auth ? { auth } : undefined);
+
+  let revisions: Revision[] = [];
+
+  if (useCache) {
+    const cached = await loadCachedRevisions(pageTitle, 500, cacheDir);
+    if (cached.length > 0) {
+      revisions = cached;
+
+      const latestTs = await loadLatestCachedTimestamp(pageTitle, cacheDir);
+      if (latestTs) {
+        const deltaOpts: RevisionOptions = { direction: "newer", start: new Date(latestTs) };
+        const newRevisions = await client.fetchRevisions(pageTitle, deltaOpts);
+        const uniqueNew = newRevisions.filter((r) => !revisions.some((cr) => cr.revId === r.revId));
+        if (uniqueNew.length > 0) {
+          revisions = [...revisions, ...uniqueNew];
+          await saveRevisions(uniqueNew, cacheDir);
+        }
+      }
+    }
+  }
+
+  if (revisions.length === 0) {
+    revisions = await client.fetchRevisions(pageTitle, { limit: 50, direction: "newer" });
+
+    if (useCache && revisions.length > 0) {
+      await saveRevisions(revisions, cacheDir);
+    }
+  }
+
+  if (revisions.length === 0) {
+    return {
+      statement: claimText,
+      page: pageTitle,
+      revisions: [],
+      status: "absent",
+      historySummary: `No revisions found for "${pageTitle}".`,
+    };
+  }
+
+  const withTs = [...revisions].map((r) => ({ r, ts: new Date(r.timestamp).getTime() }));
+  withTs.sort((a, b) => a.ts - b.ts);
+  const revs = withTs.map((x) => x.r);
+
+  const variants: ClaimHistoryVariant[] = [];
+  let lastKnownText = "";
+  let currentState: ClaimState = "absent";
+  const transitions: string[] = [];
+  let textChanges = 0;
+  let removals = 0;
+  let reintroductions = 0;
+
+  for (const rev of revs) {
+    const plainText = stripWikitext(rev.content);
+    const foundText = fuzzyFindText(claimText, plainText);
+
+    if (foundText) {
+      if (currentState === "absent" || currentState === "deleted" || currentState === "receding") {
+        if (currentState !== "absent") {
+          reintroductions++;
+          transitions.push(`reintroduced at ${rev.timestamp}`);
+        } else {
+          transitions.push(`first seen at ${rev.timestamp}`);
+        }
+        currentState = "emerging";
+      } else if (foundText !== lastKnownText && lastKnownText !== "") {
+        const oldLen = lastKnownText.length;
+        const newLen = foundText.length;
+        if (Math.abs(newLen - oldLen) > oldLen * 0.2) {
+          currentState = "contested";
+          textChanges++;
+          transitions.push(`text changed at ${rev.timestamp}`);
+        }
+      }
+
+      lastKnownText = foundText;
+      const section = findSectionForText(rev.content, foundText);
+      variants.push({
+        revisionId: rev.revId,
+        timestamp: rev.timestamp,
+        text: foundText,
+        section,
+      });
+    } else {
+      if (currentState !== "absent" && currentState !== "deleted") {
+        currentState = lastKnownText === "" ? "deleted" : "receding";
+        removals++;
+        transitions.push(`removed at ${rev.timestamp}`);
+        lastKnownText = "";
+      }
+    }
+  }
+
+  const isPresentInLatest = variants.length > 0 && variants[variants.length - 1].text !== "";
+
+  if (variants.length === 0) {
+    return {
+      statement: claimText,
+      page: pageTitle,
+      revisions: [],
+      status: "absent",
+      historySummary: `Statement not found in any revision of "${pageTitle}".`,
+    };
+  }
+
+  let status: ClaimHistoryResult["status"];
+  if (!isPresentInLatest) {
+    status = "absent";
+  } else if (removals > 0 || reintroductions > 0 || textChanges > 1) {
+    status = "contested";
+  } else if (textChanges === 1) {
+    status = "modified";
+  } else {
+    status = "present";
+  }
+
+  const first = variants[0];
+  const latest = variants[variants.length - 1];
+  const parts: string[] = [
+    `Tracked "${claimText}" across ${revs.length} revisions.`,
+    `First seen at ${first.timestamp} (rev ${first.revisionId}).`,
+  ];
+  if (status === "absent") {
+    parts.push(`Last present at ${latest.timestamp} (rev ${latest.revisionId}), then removed.`);
+  } else if (status === "modified") {
+    parts.push(`Latest version at ${latest.timestamp} (rev ${latest.revisionId}) has modified wording.`);
+  } else if (status === "contested") {
+    parts.push(`Multiple changes detected; latest version at ${latest.timestamp} (rev ${latest.revisionId}).`);
+  } else {
+    parts.push(`Present continuously from ${first.timestamp} to ${latest.timestamp}.`);
+  }
+  if (transitions.length > 0) {
+    parts.push(transitions.join("; "));
+  }
+
+  return {
+    statement: claimText,
+    page: pageTitle,
+    revisions: variants,
+    status,
+    historySummary: parts.join(" "),
+  };
+}
+
 export async function runClaim(
   pageTitle: string,
   claimText: string,

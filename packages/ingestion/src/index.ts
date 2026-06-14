@@ -51,6 +51,14 @@ export interface RevisionOptions {
 }
 
 export { MediaWikiClient } from "./mediawiki-client.js";
+export type {
+  CoverageDecision,
+  IngestInput,
+  PayerPolicySourceOptions,
+  PolicyDocument,
+  TextExtractor,
+} from "./payer-policy-source.js";
+export { PayerPolicySource } from "./payer-policy-source.js";
 export { RateLimiter } from "./rate-limiter.js";
 export type { StreamClientOptions, StreamEvent } from "./stream-client.js";
 export { WikimediaStreamClient } from "./stream-client.js";

@@ -3,7 +3,7 @@ import { buildInferencePrompt, DEFAULT_ANALYZER_CONFIG } from "@refract-org/evid
 import type { AuthConfig } from "@refract-org/ingestion";
 import { OpenAICompatibleProvider } from "../inference-provider.js";
 import { runAnalyze } from "./analyze.js";
-import { runClaim } from "./claim.js";
+import { runClaim, runClaimHistory } from "./claim.js";
 
 interface JsonRpcRequest {
   jsonrpc: "2.0";
@@ -48,7 +48,7 @@ const PROTOCOL_VERSION = "2025-06-18";
 let _clientCapabilities: Record<string, unknown> | null = null;
 const pendingSampling = new Map<string, { resolve: (value: JsonRpcResponse) => void; reject: (err: Error) => void }>();
 
-const TOOLS: McpTool[] = [
+export const TOOLS: McpTool[] = [
   {
     name: "analyze",
     description:
@@ -149,6 +149,26 @@ const TOOLS: McpTool[] = [
       required: ["boundary", "input"],
     },
   },
+  {
+    name: "get_statement_history",
+    description:
+      "Track the history of a specific statement across revisions. Returns when the statement (or a semantic neighbor) appeared, disappeared, or changed, with revision IDs, timestamps, an overall status, and a short change summary.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        statement: { type: "string", description: "Raw text statement to track" },
+        page: { type: "string", description: "MediaWiki page title to ground against" },
+        context: { type: "string", description: "Optional use-context slug for scoped analysis" },
+        depth: {
+          type: "string",
+          enum: ["brief", "detailed", "forensic"],
+          description: "History depth: brief, detailed, or forensic",
+        },
+        api: { type: "string", description: "MediaWiki API base URL. Defaults to English Wikipedia." },
+      },
+      required: ["statement", "page"],
+    },
+  },
 ];
 
 function send(response: JsonRpcResponse): void {
@@ -234,7 +254,7 @@ async function _requestSampling(messages: SamplingMessage[], systemPrompt: strin
   });
 }
 
-async function handleToolCall(
+export async function handleToolCall(
   name: string,
   args: Record<string, unknown> | undefined,
 ): Promise<{ content: { type: string; text: string }[] }> {
@@ -487,6 +507,33 @@ async function handleToolCall(
       } catch (error) {
         return { content: [{ type: "text", text: `Error: ${String(error)}` }] };
       }
+    }
+
+    case "get_statement_history": {
+      const statement = params.statement as string;
+      const page = params.page as string;
+      const depth = (params.depth as string) ?? "detailed";
+      const context = params.context as string | undefined;
+
+      const history = await runClaimHistory(page, statement, false, apiUrl, undefined, auth);
+
+      // depth influences how many revisions are loaded and how much text is retained
+      const trimmedRevisions =
+        depth === "brief"
+          ? history.revisions.map((r) => ({ revisionId: r.revisionId, timestamp: r.timestamp }))
+          : depth === "forensic"
+            ? history.revisions
+            : history.revisions.map((r) => ({ revisionId: r.revisionId, timestamp: r.timestamp, section: r.section }));
+
+      const response = {
+        statement: history.statement,
+        page: history.page,
+        context,
+        revisions: trimmedRevisions,
+        status: history.status,
+        history_summary: history.historySummary,
+      };
+      return { content: [{ type: "text", text: JSON.stringify(response, null, 2) }] };
     }
 
     default:
