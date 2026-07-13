@@ -20,7 +20,7 @@ Refract observes change across time. Healthcare-specific logic lives in private 
 
 - Healthcare-specific logic: claim supportability thresholds, jurisdiction
   routing, authority-weighting, clinical source ranking, bitemporal gap
-  detection, ClaimUse context mapping, and review workflow triggers.
+  detection, claim-context mapping, and review workflow triggers.
 - Claims that Refract determines truth, predicts external events, or ranks people.
 
 ## Test

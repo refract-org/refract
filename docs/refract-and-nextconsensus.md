@@ -12,7 +12,7 @@ Refract replays how a claim changed over time. NextConsensus judges what that hi
 | **Object** | Citation, wording, section, and template changes | Dated claim assessments pinned to evidence |
 | **Output** | Deterministic event stream | Review-ready briefs and evidence maps |
 | **Question** | "How did this claim or source change over time?" | "Does this claim still hold up — and what would change that?" |
-| **User** | Developer / AI system | Coverage, formulary, market-access, and diligence teams |
+| **User** | Developer / AI system | Coverage, formulary, market-access, and review teams |
 | **Moat** | Open substrate + ecosystem | Claim-to-evidence mapping and review workflows |
 
 ## The Principle
