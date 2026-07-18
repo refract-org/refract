@@ -46,6 +46,8 @@ export interface FactProvenance {
   sourceSnapshotHash: string;
   /** ISO 8601 timestamp when the provenance block became effective. */
   effectiveAt: string;
+  /** Precise reference window, page, paragraph, or character offset range. */
+  sourceSpan?: string;
 }
 
 export type PolicyDimension =
@@ -63,6 +65,8 @@ export interface DeterministicFact {
   fact: string;
   detail?: string;
   provenance?: FactProvenance;
+  /** Document range reference pointer. */
+  sourceSpan?: string;
 }
 
 export interface ModelInterpretation {
@@ -102,6 +106,8 @@ export interface QuantitativeFinding {
   type: string;
   value: string;
   raw: string;
+  /** Document range reference pointer. */
+  sourceSpan?: string;
 }
 
 export interface EvidenceEvent {
