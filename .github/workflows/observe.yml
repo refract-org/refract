@@ -10,6 +10,9 @@ on:
         required: true
         default: "Bitcoin COVID-19"
 
+permissions:
+  contents: write
+
 jobs:
   observe:
     runs-on: ubuntu-latest
@@ -24,12 +27,24 @@ jobs:
         run: bun install --frozen-lockfile && bun run build
 
       - name: Run refract analysis
+        env:
+          # Via env rather than ${{ }} interpolation, so a page title cannot
+          # break out of the string and become shell.
+          PAGES: ${{ github.event.inputs.pages || 'Bitcoin' }}
         run: |
-          PAGES="${{ github.event.inputs.pages || 'Bitcoin' }}"
+          mkdir -p observations
           for PAGE in $PAGES; do
             echo "=== Observing: $PAGE ==="
-            node packages/cli/dist/src/cli.js analyze "$PAGE" --depth detailed --json \
-              > "observations/${PAGE//\//_}.json" 2>&1
+            # Analysis output goes to a temp file first: folding stderr into the
+            # JSON would commit an error message as though it were an
+            # observation, and a partial write on failure is worse than none.
+            if node packages/cli/dist/src/cli.js analyze "$PAGE" --depth detailed --json \
+              > "$RUNNER_TEMP/observation.json"; then
+              mv "$RUNNER_TEMP/observation.json" "observations/${PAGE//\//_}.json"
+            else
+              echo "::error::analysis failed for $PAGE"
+              exit 1
+            fi
           done
 
       - name: Commit observations
@@ -37,7 +52,7 @@ jobs:
           git config user.name "refract-bot"
           git config user.email "bot@refract-org.github.io"
           git add observations/
-          git diff --quiet && echo "No changes" || {
+          git diff --cached --quiet && echo "No changes" || {
             git commit -m "chore: daily observation $(date -u +%Y-%m-%d)"
             git push
           }
