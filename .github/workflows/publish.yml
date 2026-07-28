@@ -24,15 +24,25 @@ jobs:
 
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: bun test || echo "Tests had failures — publishing anyway"
+      - run: bun test
 
       - name: Publish packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          npm --version
-          # npm 10+ auto-exchanges OIDC token when --provenance is used
+          # Resolve npm from the Node toolchain explicitly. setup-bun puts a
+          # bun-backed `npm` earlier in PATH, and bun's implementation does not
+          # support OIDC token exchange — it fails with
+          # "missing authentication (run `bunx npm login`)", which is what killed
+          # every publish from v0.5.8 to v0.5.11.
+          NPM="$(dirname "$(which node)")/npm"
+          "$NPM" --version
+
           for pkg in packages/evidence-graph packages/ingestion packages/analyzers packages/cli packages/eval; do
-            echo "Publishing $pkg..."
-            cd $pkg
-            npm publish --access public --provenance || npm publish --access public || true
-            cd $OLDPWD
+            echo "::group::Publishing $pkg"
+            # No `|| true`. A failed publish must fail the run: v0.5.12 reported
+            # success while every package 404'd on PUT (npm's response to an
+            # unauthorized write), so the tag looked released and was not.
+            ( cd "$pkg" && "$NPM" publish --access public --provenance )
+            echo "::endgroup::"
           done
