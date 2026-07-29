@@ -1,7 +1,7 @@
 // Evidence event — what happened at a revision boundary
 
 /** Current event schema version. Bump when EventType gains or loses members. */
-export const EVENT_SCHEMA_VERSION = "0.4.0";
+export const EVENT_SCHEMA_VERSION = "0.5.0";
 
 export type EvidenceLayer = "observed" | "policy_coded" | "model_interpretation" | "speculative" | "unknown";
 
