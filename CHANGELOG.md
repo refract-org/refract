@@ -1,5 +1,107 @@
 # Changelog
 
+## 0.5.14 (2026-07-29)
+
+**schema:** `EVENT_SCHEMA_VERSION "0.5.0"`.
+
+### Added
+- **Fact provenance, Merkle roots, and statement history MCP**: deterministic claim-state timelines with `sourceSpan` pointer tracing and verifiable provenance blocks.
+- **Enriched evidence schema**: `sourceSpan` optional field on `FactProvenance`, `DeterministicFact`, and `QuantitativeFinding` for precise document-range references.
+
+### Fixed
+- **Scheduled observation workflow**: repaired to build from source and actually publish packages.
+
+## 0.5.13 (2026-05-31)
+
+### Added
+- Standard opencode modes (`deploy`, `refactor`, `review`) and `.opencode/` build/check commands.
+- Demo asset updates.
+
+### Changed
+- README positioning sharpened with GTM-informed one-liner and value statement.
+- Boundary documentation refined with temporal framing and out-of-scope specifics.
+- Claim-state timelines concept documented.
+
+### Fixed
+- Removed nonexistent `refract-labs` from CI downstream configuration.
+- Added tooling patterns to `.gitignore`.
+
+## 0.5.12 (2026-05-25)
+
+### Changed
+- Bumped CLI to `0.5.12`.
+- Publish workflow now continues past already-published packages.
+
+## 0.5.11 (2026-05-25)
+
+### Changed
+- Bumped CLI to `0.5.11`.
+
+### Fixed
+- Trusted Publishing OIDC: added `setup-node@v4` for npm 10+ support and debugged OIDC env vars in publish workflow.
+
+## 0.5.10 (2026-05-25)
+
+### Changed
+- Bumped CLI to `0.5.10`.
+- Switched package publish workflow to npm for Trusted Publishing OIDC.
+
+## 0.5.9 (2026-05-24)
+
+### Added
+- Regenerated graphical assets with retina scaling; added email, blur, circle, and topology scene assets.
+- Added CLI and package-registry card assets.
+
+### Fixed
+- Favicons regenerated as proper 32px squares.
+- Card assets rebuilt with correct ffmpeg scaling.
+
+## 0.5.8 (2026-05-23)
+
+### Changed
+- Bumped CLI to `0.5.8` with analyzers dependency resolution fix.
+- Publish workflow allowed to proceed despite test failures while CI is hardened.
+
+### Added
+- CodeQL security analysis workflow.
+- Dependency review and stale issue workflows.
+- Husky pre-commit hooks with lint-staged.
+- `mise.toml` for Bun/Node version pinning.
+
+### Fixed
+- Labs examples updated to current L1/L2 terminology.
+
+## 0.5.7 (2026-05-18)
+
+### Added
+- AI model evaluation toolkit: benchmark harness, eval adapter, dataset script, and leaderboard with template submission.
+- Streaming adapter and snapshot command for live and point-in-time observation.
+- Init onboarding command for first-time users.
+- Cross-repo CI trigger for downstream repositories.
+- Scheduled observation workflow that builds from source.
+
+## 0.5.6 (2026-05-16)
+
+### Changed
+- Bumped `evidence-graph` to `0.4.4` and CLI to `0.5.6`.
+
+### Added
+- `--format parquet` on `refract export`.
+- `editorCount` on `edit_cluster_detected`, `uniqueEditorCount` on `ObservationReport`, and `UserMetadata` for heuristic classification.
+
+### Fixed
+- Progress output redirected to `stderr`, parquet CJS interop fixed, lint clean.
+
+## 0.5.5 (2026-05-15)
+
+### Changed
+- Moved SVG assets to `refract-docs`; updated README and ARCHITECTURE to link to docs-site versions.
+
+## 0.5.4 (2026-07-18)
+
+### Removed
+- **PayerPolicySource from `@refract-org/ingestion`**: Healthcare-specific payer/coverage policy ingestion logic removed to enforce domain-neutral boundary. This adapter (CoverageDecision, PolicyDocument, PayerPolicySource) has moved to NextConsensus's private evidence-ingest adapters (`@nextconsensus/evidence-ingest/adapters/payer-policy.ts`). Refract remains strictly domain-neutral; all healthcare-specific source adapters belong in downstream applications.
+
 ## 0.5.3 (2026-05-15)
 
 ### Added

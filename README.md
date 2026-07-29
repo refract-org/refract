@@ -192,7 +192,7 @@ Refract pairs naturally with modern tools. The event stream is standard NDJSON �
 | **Data query** | DuckDB, ClickHouse | Query NDJSON output with SQL: `SELECT event_type, count(*) FROM 'events.jsonl' GROUP BY event_type;` |
 | **Monitoring** | Slack, Email, Webhooks, GitHub Actions | `refract cron` + `--notify-slack` for scheduled monitoring with alerts. [Tutorial](https://refract-org.github.io/refract-docs/tutorials/scheduled-monitoring/) |
 | **Streaming** | Kafka, Redpanda, Cloudflare Queues | Each `EvidenceEvent` is a message keyed by claimId for real-time monitoring. |
-| **Visualization** | Observable Framework, Mermaid, D3 | `refract visualize --format mermaid` produces Mermaid diagrams. Observable has a `@refract-org/observable` data loader. |
+| **Visualization** | Observable Framework, Mermaid, D3 | `refract visualize --format mermaid` produces Mermaid diagrams. |
 | **Model serving** | OpenAI API, DeepSeek, Ollama, vLLM, Workers AI | Any OpenAI-compatible endpoint plugs into `refract classify`. Workers AI runs at the edge. |
 | **Local inference** | WebGPU, MLX, llama.cpp | Run detection models on-device — no API key needed. Refract defaults are mechanical; any boundary can use a local model via Ollama or MCP sampling. |
 | **Notebooks** | Jupyter, Marimo, Observable | Load events into a DataFrame: `pd.read_json("events.jsonl", lines=True)`. Marimo's reactive runtime is ideal for live event stream analysis. |
@@ -255,7 +255,6 @@ import { sectionDiffer, citationTracker } from "@refract-org/analyzers";
 | `@refract-org/cli` | [![npm](https://img.shields.io/npm/v/@refract-org/cli)](https://www.npmjs.com/package/@refract-org/cli) | CLI tool — `refract` / `wikihistory` commands, `classify` inference |
 | `@refract-org/persistence` | — | Local SQLite persistence (bun:sqlite, not published) |
 | `@refract-org/eval` | [![npm](https://img.shields.io/npm/v/@refract-org/eval)](https://www.npmjs.com/package/@refract-org/eval) | Evaluation harness — ground truth validation and benchmarks |
-| `@refract-org/observable` | — | Observable Framework data loader (not published) |
 
 ## How It Compares
 
