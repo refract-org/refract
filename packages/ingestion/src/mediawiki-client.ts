@@ -159,7 +159,7 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
 
       if (data.continue?.rvcontinue) {
         rvcontinue = data.continue.rvcontinue;
-        if (revisions.length >= (options?.limit ?? MAX_REVISIONS_PER_REQUEST)) break;
+        if (options?.limit !== undefined && revisions.length >= options.limit) break;
       } else {
         break;
       }

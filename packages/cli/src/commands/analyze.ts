@@ -257,7 +257,7 @@ export async function runAnalyze(
     if (toRevId) {
       options.endRevId = toRevId;
     }
-    if (!fromTimestamp && !fromRevId && !toRevId) {
+    if (depth === "brief" && !fromTimestamp && !fromRevId && !toRevId) {
       options.limit = 20;
     }
     revisions = await client.fetchRevisions(pageTitle, options);
