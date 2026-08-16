@@ -35,7 +35,7 @@ bun add @refract-org/analyzers
 import { sectionDiffer, citationTracker, revertDetector } from "@refract-org/analyzers";
 ```
 
-[Refract](https://github.com/refract-org/sequent) · [Docs](https://github.com/refract-org/sequent-docs) · [npm](https://www.npmjs.com/package/@refract-org/analyzers)
+[Refract](https://github.com/refract-org/refract) · [Docs](https://github.com/refract-org/refract-docs) · [npm](https://www.npmjs.com/package/@refract-org/analyzers)
 
 ### semantic-enrichment (v0.5.0+)
 

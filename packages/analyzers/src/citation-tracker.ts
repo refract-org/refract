@@ -53,6 +53,7 @@ export const citationTracker: CitationTracker = {
     return refs;
   },
 
+  /** Diff two citation lists, returning added/removed/replaced/unchanged changes. */
   diffCitations(before: CitationRef[], after: CitationRef[]): CitationChange[] {
     const changes: CitationChange[] = [];
     const beforeMap = indexByKey(before);

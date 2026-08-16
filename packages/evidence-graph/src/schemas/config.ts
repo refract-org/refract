@@ -8,6 +8,10 @@ export interface AnalyzerConfig {
   talkCorrelation?: TalkCorrelationConfig;
   talkParser?: TalkParserConfig;
   section?: SectionConfig;
+  /** Max revisions to fetch in brief mode (default: 20). */
+  briefRevisionLimit?: number;
+  /** Max pages to analyze concurrently in batch mode (default: 4). */
+  batchConcurrency?: number;
 }
 
 export interface HeuristicConfig {

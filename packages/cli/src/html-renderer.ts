@@ -29,32 +29,6 @@ function countBy<T>(items: T[], key: (item: T) => string): Record<string, number
   return counts;
 }
 
-function renderEventRows(events: EvidenceEvent[]): string {
-  if (events.length === 0) return '<div class="empty">No events detected</div>';
-  return events
-    .map((e) => {
-      const color = EVENT_COLORS[e.eventType] ?? "#999";
-      const facts =
-        e.deterministicFacts
-          ?.map((f) => `<span class="fact-chip">${escapeHtml(f.fact + (f.detail ? `: ${f.detail}` : ""))}</span>`)
-          .join("") ?? "";
-      const conf = e.modelInterpretation?.confidence;
-      const text = e.after || e.before || "";
-      const typeClass = e.eventType.replace(/_/g, " ");
-
-      return `<div class="event-row" data-type="${escapeHtml(e.eventType)}" data-section="${escapeHtml(e.section)}">
-        <span class="event-type" style="background:${color}22;color:${color}">${typeClass}</span>
-        <span class="event-section">${escapeHtml(e.section || "—")}</span>
-        <span class="event-text" title="${escapeHtml(text)}">${escapeHtml(text.slice(0, 120))}</span>
-        <span class="event-revs">r${e.fromRevisionId}→r${e.toRevisionId}</span>
-        <button class="event-diff" onclick="showDiff(${e.fromRevisionId},${e.toRevisionId},'${escapeHtml(e.eventType)}')">diff</button>
-        ${conf != null ? `<span class="event-confidence">${Math.round(conf * 100)}%</span>` : ""}
-        <span class="fact-chip-container">${facts}</span>
-      </div>`;
-    })
-    .join("\n");
-}
-
 function renderTimeline(revisions: Revision[], events: EvidenceEvent[]): string {
   if (revisions.length === 0) return '<div class="empty">No revisions</div>';
   const firstTs = new Date(revisions[0].timestamp).getTime();
@@ -207,6 +181,13 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 .export-link { color: var(--accent); text-decoration: none; font-size: 13px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; display: inline-block; cursor: pointer; }
 .export-link:hover { background: var(--code); }
 .empty { text-align: center; padding: 48px; color: var(--dim); }
+.pagination { display: flex; align-items: center; gap: 12px; padding: 12px 0; font-size: 13px; }
+.pagination button { background: var(--code); border: 1px solid var(--border); color: var(--fg); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.pagination button:hover:not(:disabled) { background: var(--border); }
+.pagination button:disabled { opacity: 0.4; cursor: default; }
+.page-info { color: var(--dim); }
+.page-size-label { color: var(--dim); font-size: 12px; margin-left: 8px; }
+.pagination select { background: var(--code); border: 1px solid var(--border); color: var(--fg); padding: 5px 8px; border-radius: 6px; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -240,7 +221,24 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
           .join("")}
       </select>
     </div>
-    <div id="eventList">${renderEventRows(events)}</div>
+    <div class="pagination" id="pagination-top">
+      <button onclick="prevPage()" id="prevBtn" disabled>&larr; Prev</button>
+      <span id="pageInfo" class="page-info">Page 1 of 1</span>
+      <button onclick="nextPage()" id="nextBtn">Next &rarr;</button>
+      <span class="page-size-label">Per page:</span>
+      <select id="pageSize" onchange="setPageSize(this.value)">
+        <option value="25">25</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+        <option value="0">All</option>
+      </select>
+    </div>
+    <div id="eventList"></div>
+    <div class="pagination" id="pagination-bottom">
+      <button onclick="prevPage()" id="prevBtnBot" disabled>&larr; Prev</button>
+      <span id="pageInfoBot" class="page-info">Page 1 of 1</span>
+      <button onclick="nextPage()" id="nextBtnBot">Next &rarr;</button>
+    </div>
   </div>
   <div id="tab-timeline" class="tab">${renderTimeline(sortedRevs, events)}</div>
   <div id="tab-revisions" class="tab">${renderRevisionTable(sortedRevs, events)}</div>
@@ -269,6 +267,91 @@ const allEvents = ${JSON.stringify(
     })),
   )};
 
+let currentPage = 1;
+let pageSize = 50;
+let filteredEvents = [];
+
+function getFilteredEvents() {
+  const typeFilter = document.getElementById('eventFilter').value;
+  const sectionFilter = document.getElementById('sectionFilter').value;
+  if (!typeFilter && !sectionFilter) return allEvents;
+  return allEvents.filter(function(e) {
+    return (!typeFilter || e.eventType === typeFilter) &&
+           (!sectionFilter || e.section === sectionFilter);
+  });
+}
+
+function renderEventHTML(ev) {
+  const color = eventColors[ev.eventType] || '#999';
+  const facts = (ev.deterministicFacts || [])
+    .map(function(f) { return '<span class="fact-chip">' + esc(f) + '</span>'; })
+    .join('');
+  const text = ev.after || ev.before || '';
+  const typeClass = ev.eventType.replace(/_/g, ' ');
+  const conf = ev.confidence != null
+    ? '<span class="event-confidence">' + Math.round(ev.confidence * 100) + '%</span>'
+    : '';
+  return '<div class="event-row" data-type="' + esc(ev.eventType) + '" data-section="' + esc(ev.section || '') + '">' +
+    '<span class="event-type" style="background:' + color + '22;color:' + color + '">' + typeClass + '</span>' +
+    '<span class="event-section">' + esc(ev.section || '\u2014') + '</span>' +
+    '<span class="event-text" title="' + esc(text) + '">' + esc(text.slice(0, 120)) + '</span>' +
+    '<span class="event-revs">r' + ev.fromRevisionId + '\u2192r' + ev.toRevisionId + '</span>' +
+    '<button class="event-diff" onclick="showDiff(' + ev.fromRevisionId + ',' + ev.toRevisionId + ',' + "'" + esc(ev.eventType) + "'" + ')">diff</button>' +
+    conf +
+    '<span class="fact-chip-container">' + facts + '</span>' +
+    '</div>';
+}
+
+function renderPage() {
+  filteredEvents = getFilteredEvents();
+  const total = filteredEvents.length;
+  const effectiveSize = pageSize === 0 ? total : pageSize;
+  const totalPages = Math.max(1, Math.ceil(total / effectiveSize));
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+  const start = pageSize === 0 ? 0 : (currentPage - 1) * pageSize;
+  const end = pageSize === 0 ? total : start + pageSize;
+  const pageEvents = filteredEvents.slice(start, end);
+  const list = document.getElementById('eventList');
+  if (pageEvents.length === 0) {
+    list.innerHTML = '<div class="empty">No events match the current filters</div>';
+  } else {
+    list.innerHTML = pageEvents.map(renderEventHTML).join('\n');
+  }
+  const displayPage = pageSize === 0 ? 1 : currentPage;
+  const displayTotal = pageSize === 0 ? 1 : totalPages;
+  const info = 'Page ' + displayPage + ' of ' + displayTotal + ' (' + total + ' events)';
+  document.getElementById('pageInfo').textContent = info;
+  document.getElementById('pageInfoBot').textContent = info;
+  const atStart = currentPage <= 1 || pageSize === 0;
+  const atEnd = currentPage >= totalPages || pageSize === 0;
+  document.getElementById('prevBtn').disabled = atStart;
+  document.getElementById('prevBtnBot').disabled = atStart;
+  document.getElementById('nextBtn').disabled = atEnd;
+  document.getElementById('nextBtnBot').disabled = atEnd;
+}
+
+function filterEvents() {
+  currentPage = 1;
+  renderPage();
+}
+
+function nextPage() {
+  currentPage++;
+  renderPage();
+}
+
+function prevPage() {
+  currentPage--;
+  renderPage();
+}
+
+function setPageSize(val) {
+  pageSize = parseInt(val);
+  currentPage = 1;
+  renderPage();
+}
+
 function showTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -278,23 +361,10 @@ function showTab(name) {
   if (nav) nav.classList.add('active');
 }
 
-function filterEvents() {
-  const typeFilter = document.getElementById('eventFilter').value;
-  const sectionFilter = document.getElementById('sectionFilter').value;
-  const rows = document.querySelectorAll('.event-row');
-  rows.forEach(row => {
-    const type = row.dataset.type;
-    const section = row.dataset.section;
-    const matchType = !typeFilter || type === typeFilter;
-    const matchSection = !sectionFilter || section === sectionFilter;
-    row.style.display = matchType && matchSection ? '' : 'none';
-  });
-}
-
 function showDiff(from, to, eventType) {
   const ev = allEvents.find(e => e.fromRevisionId === from && e.toRevisionId === to && e.eventType === eventType);
   if (!ev) return;
-  document.getElementById('diff-title').textContent = eventType.replace(/_/g, ' ') + ' (rev ' + from + ' → ' + to + ')';
+  document.getElementById('diff-title').textContent = eventType.replace(/_/g, ' ') + ' (rev ' + from + ' \u2192 ' + to + ')';
   document.getElementById('diff-content').innerHTML =
     '<div><div class="diff-label">Before (rev ' + from + ')</div><pre>' + esc(ev.before || '(empty)') + '</pre></div>' +
     '<div><div class="diff-label">After (rev ' + to + ')</div><pre>' + esc(ev.after || '(empty)') + '</pre></div>';
@@ -305,6 +375,7 @@ function closeModal() { document.getElementById('diff-modal').classList.remove('
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 ${inlineDownloadScript}
+renderPage();
 </script>
 </body>
 </html>`;

@@ -76,6 +76,7 @@ export const sectionDiffer: SectionDiffer = {
     return sections;
   },
 
+  /** Diff two section arrays, returning added/removed/modified/unchanged changes. */
   diffSections(
     before: Section[],
     after: Section[],

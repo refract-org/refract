@@ -21,4 +21,4 @@ import { Persistence } from "@refract-org/persistence";
 import type { PersistenceAdapter, PersistenceConfig } from "@refract-org/persistence";
 ```
 
-[Refract](https://github.com/refract-org/sequent) · [Docs](https://github.com/refract-org/sequent-docs)
+[Refract](https://github.com/refract-org/refract) · [Docs](https://github.com/refract-org/refract-docs)

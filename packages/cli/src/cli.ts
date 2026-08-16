@@ -5,8 +5,6 @@ cli(process.argv.slice(2)).catch((err) => {
   const msg = err instanceof Error ? err.message : String(err);
   if (msg.includes("API key") || msg.includes("api_key") || msg.includes("Authorization")) {
     console.error("refract: authentication error — check your API credentials");
-  } else if (msg.includes("@refract-org/persistence")) {
-    console.error("refract:", msg);
   } else {
     console.error("refract:", msg);
   }

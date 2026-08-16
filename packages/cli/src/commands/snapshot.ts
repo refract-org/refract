@@ -10,6 +10,7 @@ export async function runSnapshot(
   apiUrl?: string,
   cacheDir?: string,
   auth?: AuthConfig,
+  revisionLimit = 500,
 ): Promise<void> {
   const target = new Date(atDate);
   if (Number.isNaN(target.getTime())) {
@@ -18,7 +19,7 @@ export async function runSnapshot(
   }
 
   const client = new MediaWikiClient(apiUrl ? { apiUrl, auth } : auth ? { auth } : undefined);
-  const revisions = await client.fetchRevisions(pageTitle, { limit: 500, direction: "newer" });
+  const revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "newer" });
 
   let closest = revisions[0];
   let closestDelta = Infinity;

@@ -5,6 +5,6 @@ export default defineConfig({
     globals: true,
     testTimeout: 30000,
     hookTimeout: 30000,
-    exclude: ["labs/**", "node_modules/**", ".opencode/**", "dist/**"],
+    exclude: ["node_modules/**", ".opencode/**", "dist/**"],
   },
 });

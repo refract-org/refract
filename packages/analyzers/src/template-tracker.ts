@@ -34,6 +34,7 @@ const TEMPLATE_TYPE_MAP: Record<string, TemplateType> = {
 };
 
 export const templateTracker: TemplateTracker = {
+  /** Extract all unique templates from wikitext, classifying each by type. */
   extractTemplates(wikitext: string): Template[] {
     const templates: Template[] = [];
     const seen = new Set<string>();

@@ -11,6 +11,7 @@ const DEFAULT_REVERT_PATTERNS = [
 ];
 
 export const revertDetector: RevertDetector = {
+  /** Check if an edit comment matches known revert patterns. */
   isRevert(comment: string, options?: { patterns?: RegExp[] }): boolean {
     const patterns = options?.patterns ?? DEFAULT_REVERT_PATTERNS;
     return patterns.some((pattern) => pattern.test(comment));

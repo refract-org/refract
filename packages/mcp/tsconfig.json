@@ -18,9 +18,6 @@
   "references": [
     { "path": "../evidence-graph" },
     { "path": "../ingestion" },
-    { "path": "../analyzers" },
-    { "path": "../persistence" },
-    { "path": "../eval" },
-    { "path": "../mcp" }
+    { "path": "../analyzers" }
   ]
 }

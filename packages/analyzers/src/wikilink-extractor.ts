@@ -23,6 +23,7 @@ const EXCLUDED_PREFIXES = [
   "b:",
 ];
 
+/** Extract all unique internal wikilinks from wikitext, excluding file/category namespaces. */
 export function extractWikilinks(wikitext: string): string[] {
   const links: string[] = [];
   const seen = new Set<string>();
@@ -44,6 +45,7 @@ export function extractWikilinks(wikitext: string): string[] {
   return links;
 }
 
+/** Diff two wikilink lists, returning added and removed links. */
 export function diffWikilinks(before: string[], after: string[]): { added: string[]; removed: string[] } {
   const beforeSet = new Set(before);
   const afterSet = new Set(after);
@@ -54,6 +56,7 @@ export function diffWikilinks(before: string[], after: string[]): { added: strin
   };
 }
 
+/** Build evidence events for wikilink additions and removals between revisions. */
 export function buildWikilinkEvents(
   beforeWikitext: string,
   afterWikitext: string,

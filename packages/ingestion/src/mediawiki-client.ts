@@ -2,12 +2,15 @@ import type { DiffLine, DiffResult, Revision } from "@refract-org/evidence-graph
 import type {
   AuthConfig,
   DiffFetcher,
+  KnowledgeSource,
   MoveFetcher,
   PageMove,
   ProtectionLogEvent,
   RevisionFetcher,
   RevisionOptions,
   RevisionSource,
+  SourceEntity,
+  SourceQuery,
 } from "./index.js";
 import { RateLimiter } from "./rate-limiter.js";
 
@@ -77,7 +80,9 @@ interface CompareResponse {
   };
 }
 
-export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFetcher, MoveFetcher {
+export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFetcher, MoveFetcher, KnowledgeSource {
+  readonly sourceId = "mediawiki";
+  readonly sourceName = "MediaWiki";
   private rateLimiter: RateLimiter;
   private userAgent: string;
   private apiUrl: string;
@@ -273,6 +278,27 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
     return events;
   }
 
+  async fetchEntities(query: SourceQuery): Promise<SourceEntity[]> {
+    const params = new URLSearchParams({
+      action: "query",
+      list: "search",
+      srsearch: query.query,
+      srlimit: String(query.limit ?? 10),
+      format: "json",
+      formatversion: "2",
+    });
+    const response = await this.fetch(`${this.apiUrl}?${params.toString()}`);
+    const data = (await response.json()) as {
+      query?: { search?: Array<{ title: string; pageid: number }> };
+    };
+    return (data.query?.search ?? []).map((r) => ({
+      entityId: String(r.pageid),
+      title: r.title,
+      type: "page",
+      metadata: { api: this.apiUrl },
+    }));
+  }
+
   async fetchDiff(fromRevId: number, toRevId: number): Promise<DiffResult> {
     const params = new URLSearchParams({
       action: "compare",
@@ -334,13 +360,20 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
         const retryAfter = response.headers.get("Retry-After");
         const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : 1000;
         if (attempt < retries - 1) {
+          console.error(
+            `refract: retrying request (attempt ${attempt + 2}/${retries}, status 429, wait ${waitMs}ms)...`,
+          );
           await this.sleep(waitMs);
           continue;
         }
       }
 
       if (response.status >= 500 && attempt < retries - 1) {
-        await this.sleep(2 ** attempt * 1000);
+        const waitMs = 2 ** attempt * 1000;
+        console.error(
+          `refract: retrying request (attempt ${attempt + 2}/${retries}, status ${response.status}, wait ${waitMs}ms)...`,
+        );
+        await this.sleep(waitMs);
         continue;
       }
 

@@ -43,8 +43,6 @@ export function detectEditClusters(revisions: Revision[], options?: AnalyzerConf
     if (cluster.length >= minSize) {
       const hasSingleEditor = singleEditorCluster(sorted, cluster);
       const editorCount = uniqueEditorCount(sorted, cluster);
-      const _revIds = cluster.map((idx) => sorted[idx].revId);
-
       for (const idx of cluster) clustered.add(idx);
 
       events.push({

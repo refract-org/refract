@@ -23,6 +23,7 @@ export {
   buildMerkleTree,
   createReplayManifest,
   getMerkleProof,
+  hashLeaf,
   singleEventProof,
   verifyMerkleProof,
 } from "./replay-manifest.js";

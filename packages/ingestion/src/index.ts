@@ -1,4 +1,60 @@
-import type { DiffResult, Revision } from "@refract-org/evidence-graph";
+import type { DiffResult, EvidenceEvent, Revision } from "@refract-org/evidence-graph";
+
+/**
+ * Source-agnostic interface for knowledge repositories.
+ * Implement this to add support for non-MediaWiki sources
+ * (ClinicalTrials.gov, PubMed, GitHub, Fandom, etc.).
+ */
+export interface KnowledgeSource {
+  /** Unique identifier for this source (e.g., "mediawiki", "clinicaltrials", "pubmed") */
+  readonly sourceId: string;
+
+  /** Human-readable name */
+  readonly sourceName: string;
+
+  /** Fetch entity histories from this source */
+  fetchEntities(query: SourceQuery): Promise<SourceEntity[]>;
+
+  /** Fetch revision history for a specific entity */
+  fetchRevisions(entityId: string, options?: RevisionOptions): Promise<Revision[]>;
+
+  /** Fetch diff between two revisions (if supported) */
+  fetchDiff?(fromRevId: number, toRevId: number): Promise<DiffResult>;
+}
+
+export interface SourceQuery {
+  /** Search term or entity identifier */
+  query: string;
+  /** Maximum results to return */
+  limit?: number;
+  /** Filter by entity type */
+  type?: string;
+  /** Time range filter */
+  start?: Date;
+  end?: Date;
+}
+
+export interface SourceEntity {
+  /** Source-specific entity ID */
+  entityId: string;
+  /** Human-readable title/name */
+  title: string;
+  /** Source type (e.g., "page", "trial", "paper", "commit") */
+  type: string;
+  /** When this entity was last modified */
+  lastModified?: Date;
+  /** Source-specific metadata */
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Adapter that normalizes a third-party source into Refract's event model.
+ * Implement this to make a new source emit EvidenceEvents.
+ */
+export interface SourceAdapter extends KnowledgeSource {
+  /** Normalize fetched data into EvidenceEvents */
+  toEvents(entities: SourceEntity[], revisions: Revision[]): Promise<EvidenceEvent[]>;
+}
 
 export interface AuthConfig {
   apiKey?: string;

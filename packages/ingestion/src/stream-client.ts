@@ -36,7 +36,7 @@ export class WikimediaStreamClient {
     const response = await fetch(this.streamUrl, {
       headers: {
         Accept: "text/event-stream",
-        "User-Agent": "Refract/0.5.0 (https://github.com/refract-org/refract)",
+        "User-Agent": "Refract/0.5.14 (https://github.com/refract-org/refract)",
       },
     });
 
@@ -92,8 +92,8 @@ export class WikimediaStreamClient {
                 minor: event.minor ?? false,
                 type: (event.type === "new" ? "new" : "edit") as "edit" | "new",
               };
-            } catch {
-              // Skip unparseable events
+            } catch (err) {
+              console.error("refract: stream-client: failed to parse event", err);
             }
           }
         }

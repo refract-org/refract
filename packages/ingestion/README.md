@@ -24,4 +24,4 @@ import { MediaWikiClient, RateLimiter } from "@refract-org/ingestion";
 import type { RevisionFetcher, RevisionOptions } from "@refract-org/ingestion";
 ```
 
-[Refract](https://github.com/refract-org/sequent) · [Docs](https://github.com/refract-org/sequent-docs) · [npm](https://www.npmjs.com/package/@refract-org/ingestion)
+[Refract](https://github.com/refract-org/refract) · [Docs](https://github.com/refract-org/refract-docs) · [npm](https://www.npmjs.com/package/@refract-org/ingestion)

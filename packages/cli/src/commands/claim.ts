@@ -27,6 +27,7 @@ export async function runClaimHistory(
   apiUrl?: string,
   cacheDir?: string,
   auth?: AuthConfig,
+  revisionLimit = 50,
 ): Promise<ClaimHistoryResult> {
   const client = new MediaWikiClient(apiUrl ? { apiUrl, auth } : auth ? { auth } : undefined);
 
@@ -51,7 +52,7 @@ export async function runClaimHistory(
   }
 
   if (revisions.length === 0) {
-    revisions = await client.fetchRevisions(pageTitle, { limit: 50, direction: "newer" });
+    revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "newer" });
 
     if (useCache && revisions.length > 0) {
       await saveRevisions(revisions, cacheDir);
@@ -179,6 +180,7 @@ export async function runClaim(
   apiUrl?: string,
   cacheDir?: string,
   auth?: AuthConfig,
+  revisionLimit = 50,
 ): Promise<void> {
   const client = new MediaWikiClient(apiUrl ? { apiUrl, auth } : auth ? { auth } : undefined);
   console.log(`Tracking claim in "${pageTitle}"...`);
@@ -209,7 +211,7 @@ export async function runClaim(
   }
 
   if (revisions.length === 0) {
-    revisions = await client.fetchRevisions(pageTitle, { limit: 50, direction: "newer" });
+    revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "newer" });
     console.log(`Fetched ${revisions.length} revisions.\n`);
 
     if (useCache && revisions.length > 0) {

@@ -21,6 +21,10 @@ export interface ReplayManifest {
   manifestHash: string;
 }
 
+export function hashLeaf(input: string): string {
+  return createHash("sha256").update(input, "utf8").digest("hex");
+}
+
 function hashPair(a: string, b: string): string {
   return createHash("sha256")
     .update(a < b ? a + b : b + a)

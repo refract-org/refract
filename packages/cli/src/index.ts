@@ -74,6 +74,8 @@ const analyzeCmd = program
   .option("--since <timestamp>", "re-observe from ISO timestamp")
   .option("-c, --cache", "cache revisions in SQLite (~/.wikihistory/refract.db)")
   .option("--pages-file <path>", "batch file of page titles (one per line)")
+  .option("--brief-limit <n>", "max revisions in brief mode (default: 20)", parseInt)
+  .option("--batch-concurrency <n>", "max pages to analyze in parallel (default: 4)", parseInt)
   .option("-r, --report", "output ObservationReport JSON instead of raw events")
   .option("-j, --json", "force JSON output to stdout (disable interactive web UI)");
 withGlobal(analyzeCmd);
@@ -190,6 +192,7 @@ const claimCmd = program
   .command("claim <page>")
   .description("track a specific claim across revisions")
   .option("-t, --text <text>", "claim text to track (required)")
+  .option("--limit <n>", "max revisions to fetch (default: 50)", parseInt)
   .option("-c, --cache", "cache revisions in SQLite");
 withGlobal(claimCmd);
 claimCmd.action(async (page, opts) => {
@@ -205,6 +208,7 @@ claimCmd.action(async (page, opts) => {
     opts.api as string | undefined,
     opts.cacheDir as string | undefined,
     extractAuth(opts),
+    opts.limit as number | undefined,
   );
 });
 
@@ -213,6 +217,7 @@ const snapshotCmd = program
   .command("snapshot <page>")
   .description("reconstruct page state at a point in time")
   .option("--at <date>", "target date (ISO 8601, e.g. 2024-01-15)", new Date().toISOString().slice(0, 10))
+  .option("--revision-limit <n>", "max revisions to fetch (default: 500)", parseInt)
   .option("-c, --cache", "cache revisions in SQLite");
 withGlobal(snapshotCmd);
 snapshotCmd.action(async (page, opts) => {
@@ -223,6 +228,7 @@ snapshotCmd.action(async (page, opts) => {
     opts.api as string | undefined,
     opts.cacheDir as string | undefined,
     extractAuth(opts),
+    opts.revisionLimit as number | undefined,
   );
 });
 

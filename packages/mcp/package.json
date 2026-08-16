@@ -1,0 +1,26 @@
+{
+  "name": "@refract-org/mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "private": false,
+  "description": "MCP server for Refract — exposes deterministic knowledge-change observation as AI agent tools",
+  "license": "AGPL-3.0",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/refract-org/refract.git",
+    "directory": "packages/mcp"
+  },
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@refract-org/evidence-graph": "^0.5.0",
+    "@refract-org/ingestion": "^0.3.1",
+    "@refract-org/analyzers": "^0.5.1"
+  },
+  "devDependencies": {}
+}

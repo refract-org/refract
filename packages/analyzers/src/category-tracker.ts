@@ -2,6 +2,7 @@ import type { DeterministicFact, EvidenceEvent } from "@refract-org/evidence-gra
 
 const CATEGORY_REGEX = /\[\[Category:([^\]|]+)(?:\|[^\]]*)?\]\]/gi;
 
+/** Extract all unique category names from wikitext. */
 export function extractCategories(wikitext: string): string[] {
   const categories: string[] = [];
   const seen = new Set<string>();
@@ -20,6 +21,7 @@ export function extractCategories(wikitext: string): string[] {
   return categories;
 }
 
+/** Diff two category lists, returning added and removed categories. */
 export function diffCategories(before: string[], after: string[]): { added: string[]; removed: string[] } {
   const beforeSet = new Set(before);
   const afterSet = new Set(after);
@@ -30,6 +32,7 @@ export function diffCategories(before: string[], after: string[]): { added: stri
   };
 }
 
+/** Build evidence events for category additions and removals between revisions. */
 export function buildCategoryEvents(
   beforeWikitext: string,
   afterWikitext: string,

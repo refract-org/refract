@@ -123,8 +123,8 @@ export async function runCron(
     try {
       const raw = readFileSync(obsFile, "utf-8");
       priorEvents = JSON.parse(raw) as EvidenceEvent[];
-    } catch {
-      /* no prior observation file yet */
+    } catch (err) {
+      console.error("refract: cron: failed to read prior observation file", err);
     }
 
     const isFirstObservation = priorEvents.length === 0;
@@ -153,8 +153,8 @@ export async function runCron(
     try {
       const raw = readFileSync(observationReportFile, "utf-8");
       priorObservationReport = JSON.parse(raw) as ObservationReport;
-    } catch {
-      /* no prior observation report yet */
+    } catch (err) {
+      console.error("refract: cron: failed to read prior observation report", err);
     }
 
     const mergedReport = mergeObservationReports(priorObservationReport, currentReport);

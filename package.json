@@ -31,6 +31,7 @@
     "packages/ingestion",
     "packages/analyzers",
     "packages/cli",
+    "packages/mcp",
     "packages/persistence",
     "packages/eval"
   ],

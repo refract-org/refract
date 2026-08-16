@@ -38,15 +38,15 @@ export interface FactProvenance {
   version: string;
   inputHashes: string[];
   parameters?: Record<string, string | number | boolean>;
-  /** SHA-256 Merkle root of the raw document state and parameter footprint. */
-  merkleRoot: string;
-  /** Analyzer configuration / parameters snapshot used to produce the fact. */
-  parameterFootprint: Record<string, unknown>;
-  /** SHA-256 hash of the raw source snapshot (e.g., before/after state). */
-  sourceSnapshotHash: string;
-  /** ISO 8601 timestamp when the provenance block became effective. */
-  effectiveAt: string;
-  /** Precise reference window, page, paragraph, or character offset range. */
+  /** Reserved for future use. */
+  merkleRoot?: string;
+  /** Reserved for future use. */
+  parameterFootprint?: Record<string, unknown>;
+  /** Reserved for future use. */
+  sourceSnapshotHash?: string;
+  /** Reserved for future use. */
+  effectiveAt?: string;
+  /** Reserved for future use. */
   sourceSpan?: string;
 }
 
@@ -131,4 +131,54 @@ export interface EvidenceEvent {
   quantitativeFindings?: QuantitativeFinding[];
   layer: EvidenceLayer; // provenance layer
   timestamp: string; // ISO 8601
+}
+
+/**
+ * Represents the state of a document at a specific point in time,
+ * reconstructed from its event history.
+ */
+export interface DocumentSnapshot {
+  /** The page/document identifier */
+  entityId: string;
+  /** The timestamp this snapshot represents */
+  asOf: string;
+  /** The revision ID this snapshot is based on */
+  revisionId: number;
+  /** Sections present at this point in time */
+  sections: Array<{
+    heading: string;
+    level: number;
+    content?: string;
+  }>;
+  /** Citations present at this point in time */
+  citations: Array<{
+    url?: string;
+    title?: string;
+    raw: string;
+  }>;
+  /** Templates present at this point in time */
+  templates: Array<{
+    name: string;
+    type: string;
+  }>;
+  /** Categories at this point in time */
+  categories: string[];
+  /** Wikilinks at this point in time */
+  wikilinks: string[];
+  /** Total byte size at this point in time */
+  byteSize?: number;
+}
+
+/**
+ * A temporal query for reconstructing document state.
+ */
+export interface TemporalQuery {
+  /** Document to query */
+  entityId: string;
+  /** Reconstruct state at this timestamp */
+  asOf: string;
+  /** Or at this specific revision ID */
+  revisionId?: number;
+  /** What to include in the snapshot */
+  include?: Array<"sections" | "citations" | "templates" | "categories" | "wikilinks" | "size">;
 }

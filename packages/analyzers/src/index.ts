@@ -57,6 +57,8 @@ export interface TemplateChange {
   template: Template;
 }
 
+export type { RegisteredAnalyzer } from "./analyzer-registry.js";
+export { AnalyzerRegistry, registry } from "./analyzer-registry.js";
 export { buildCategoryEvents, diffCategories, extractCategories } from "./category-tracker.js";
 export { buildSourceId, buildSourceLineage, citationTracker } from "./citation-tracker.js";
 export type { EditClusterOptions } from "./edit-cluster-detector.js";
