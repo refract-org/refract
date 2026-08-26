@@ -28,9 +28,10 @@
         "wikihistory": "dist/src/cli.js",
       },
       "dependencies": {
-        "@refract-org/analyzers": "^0.5.0",
+        "@refract-org/analyzers": "^0.5.1",
         "@refract-org/evidence-graph": "^0.5.0",
         "@refract-org/ingestion": "^0.3.1",
+        "@refract-org/mcp": "^0.1.0",
         "commander": "^12.0.0",
       },
       "optionalDependencies": {
@@ -54,6 +55,15 @@
       "version": "0.3.1",
       "dependencies": {
         "@refract-org/evidence-graph": "^0.5.0",
+      },
+    },
+    "packages/mcp": {
+      "name": "@refract-org/mcp",
+      "version": "0.1.0",
+      "dependencies": {
+        "@refract-org/analyzers": "^0.5.1",
+        "@refract-org/evidence-graph": "^0.5.0",
+        "@refract-org/ingestion": "^0.3.1",
       },
     },
     "packages/persistence": {
@@ -104,6 +114,8 @@
     "@refract-org/evidence-graph": ["@refract-org/evidence-graph@workspace:packages/evidence-graph"],
 
     "@refract-org/ingestion": ["@refract-org/ingestion@workspace:packages/ingestion"],
+
+    "@refract-org/mcp": ["@refract-org/mcp@workspace:packages/mcp"],
 
     "@refract-org/persistence": ["@refract-org/persistence@workspace:packages/persistence"],
 
