@@ -1,11 +1,22 @@
 cff-version: 1.2.0
 message: "If you use Refract in research, please cite it."
-title: "Refract: A deterministic claim-provenance engine for Wikipedia page histories"
-version: 0.5.1
-date-released: 2026-05-13
+title: "Refract: a deterministic claim-provenance engine for Wikipedia page histories"
+abstract: >-
+  Refract reconstructs when a claim entered, changed, or left a source, and reports
+  which downstream claims and citations built on a version that no longer says what
+  was cited.
+version: 0.5.14
+date-released: 2026-07-29
 authors:
-  - name: NextConsensus
-    website: https://nextconsensus.com
-repository-code: https://github.com/refract-org/refract
+  - given-names: Kanav
+    family-names: Jain
+    orcid: "https://orcid.org/0009-0009-5202-0920"
+    affiliation: NextConsensus
+repository-code: "https://github.com/refract-org/refract"
 license: AGPL-3.0
 type: software
+keywords:
+  - provenance
+  - claim tracking
+  - citation integrity
+  - Wikipedia
