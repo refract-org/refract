@@ -7,6 +7,7 @@ import {
   sectionDiffer,
   stripWikitext,
   templateTracker,
+  windowPageMoves,
 } from "@refract-org/analyzers";
 import type {
   AnalyzerConfig,
@@ -250,7 +251,13 @@ export async function runAnalyze(
     client.fetchProtectionLogs(pageTitle),
     client.fetchTalkRevisions(pageTitle, { direction: "newer", limit: 10 }),
   ]);
-  events.push(...buildPageMoveEvents(pageMoves));
+  // Bound moves to the analyzed span: the move log covers the page's whole
+  // lifetime, and a --since window must not open with moves from 2005.
+  events.push(
+    ...buildPageMoveEvents(
+      windowPageMoves(pageMoves, sortedRevs[0].timestamp, sortedRevs[sortedRevs.length - 1].timestamp),
+    ),
+  );
 
   const protectionLogsWithTs = protectionLogs.map((l) => ({
     l,

@@ -67,7 +67,7 @@ export type { HeuristicKind, HeuristicOptions, UserMetadata } from "./heuristic-
 export { classifyHeuristic } from "./heuristic-classifier.js";
 export type { ObservationDiff } from "./observation-differ.js";
 export { diffObservations } from "./observation-differ.js";
-export { buildPageMoveEvents } from "./page-move-detector.js";
+export { buildPageMoveEvents, windowPageMoves } from "./page-move-detector.js";
 export type { ProtectionChange, ProtectionTracker } from "./protection-tracker.js";
 export { protectionTracker } from "./protection-tracker.js";
 export { revertDetector } from "./revert-detector.js";

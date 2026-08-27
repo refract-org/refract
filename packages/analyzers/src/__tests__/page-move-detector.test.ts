@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPageMoveEvents } from "../page-move-detector.js";
+import { buildPageMoveEvents, windowPageMoves } from "../page-move-detector.js";
 
 interface MoveRecord {
   oldTitle: string;
@@ -60,5 +60,34 @@ describe("buildPageMoveEvents", () => {
 
     const events = buildPageMoveEvents(moves);
     expect(events).toHaveLength(2);
+  });
+});
+
+describe("windowPageMoves", () => {
+  const mk = (timestamp: string) => ({
+    oldTitle: "A",
+    newTitle: "B",
+    timestamp,
+    revId: 1,
+    comment: "",
+  });
+
+  it("drops moves outside the analyzed revision span", () => {
+    const moves = [mk("2005-08-28T00:00:00Z"), mk("2026-08-20T12:00:00Z"), mk("2026-09-01T00:00:00Z")];
+    const out = windowPageMoves(moves, "2026-08-13T00:00:00Z", "2026-08-27T00:00:00Z");
+    expect(out).toHaveLength(1);
+    expect(out[0].timestamp).toBe("2026-08-20T12:00:00Z");
+  });
+
+  it("keeps boundary moves — bounds are inclusive", () => {
+    const moves = [mk("2026-08-13T00:00:00Z"), mk("2026-08-27T00:00:00Z")];
+    const out = windowPageMoves(moves, "2026-08-13T00:00:00Z", "2026-08-27T00:00:00Z");
+    expect(out).toHaveLength(2);
+  });
+
+  it("is the identity on a full-history window", () => {
+    const moves = [mk("2005-08-28T00:00:00Z"), mk("2026-08-20T12:00:00Z")];
+    const out = windowPageMoves(moves, "2001-01-15T00:00:00Z", "2026-08-27T00:00:00Z");
+    expect(out).toHaveLength(2);
   });
 });
