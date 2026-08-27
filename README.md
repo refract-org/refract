@@ -37,7 +37,7 @@ revert               | 2026-04-11 | Full revert of 2026-04-10 edit (edit cluster
   <img src="assets/refract-demo.gif" alt="Refract CLI analyzing a Wikipedia page" width="700" style="border-radius: 8px;">
 </p>
 
-No model. No API. **Byte-reproducible** — the same source produces the same events every time.
+No model. No API. **Byte-reproducible** — the same source produces the same events every time. The claim is published, not just asserted: a [hash-pinned ground-truth corpus](BENCHMARK.md#ground-truth-corpus) of 16,146 events across ten benchmark pages ships as a [release asset](https://github.com/refract-org/refract/releases/tag/benchmark-corpus-2026-08-27), reproducible byte-for-byte from the manifest bounds.
 
 Refract ingests versioned sources (MediaWiki, text files), computes structural and semantic change events, tracks claims and citations across time, and emits structured provenance data that downstream systems can query, replay, and audit.
 
@@ -73,8 +73,10 @@ refract analyze "Quantum computing" --depth forensic --format ndjson
 
 ### Using the Python SDK
 
+The Python SDK lives at [refract-org/refract-py](https://github.com/refract-org/refract-py) and installs from source (it is not on PyPI yet):
+
 ```bash
-pip install refract-py
+pip install git+https://github.com/refract-org/refract-py.git
 ```
 
 ```python
