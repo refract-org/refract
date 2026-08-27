@@ -1,0 +1,19 @@
+{
+  "refractVersion": "0.5.14",
+  "windowStart": "2026-05-29T00:00:00Z",
+  "windowEnd": "pinned by lastRevisionId per page in the manifest",
+  "generatedAt": "2026-08-27T02:58:43Z",
+  "depth": "detailed",
+  "pages": [
+    {"page": "COVID-19", "file": "COVID-19.jsonl", "events": 202, "lastRevisionId": 1371468951, "sha256": "ab9242ac57db33d870b8147c24a293fec27be01abfe55dc5b19ad468f924d63b"},
+    {"page": "Bitcoin", "file": "Bitcoin.jsonl", "events": 354, "lastRevisionId": 1371413925, "sha256": "f3f392e50165e2fdd107f94c1476c1bdf8c4f7a883ba2da158f574533f1bc904"},
+    {"page": "GPT-4", "file": "GPT-4.jsonl", "events": 22, "lastRevisionId": 1368364186, "sha256": "a443933c88d94480ef9968704558c27b6fa23ddda4a9e20278b7e597f6cc0f91"},
+    {"page": "Climate change", "file": "Climate_change.jsonl", "events": 409, "lastRevisionId": 1371527404, "sha256": "e1c6157c2c347bbd797662b34e977b58e1df5a9fc68b6936f371a52b4c105290"},
+    {"page": "Donald Trump", "file": "Donald_Trump.jsonl", "events": 8317, "lastRevisionId": 1371509132, "sha256": "88d6f98173e01b0c86d6758cb4a0a4fe78e583dc6a287c8813024c279caa54c9"},
+    {"page": "CRISPR", "file": "CRISPR.jsonl", "events": 447, "lastRevisionId": 1369215477, "sha256": "7c9cf2248adadb9e1467ad689da7d4f1b42c9519ff5bb2807f3d78f94987ff81"},
+    {"page": "COVID-19 pandemic", "file": "COVID-19_pandemic.jsonl", "events": 3828, "lastRevisionId": 1371379558, "sha256": "5815875bc22e6e60b78c06d8d15a9cfd9ca2e44fd78c9004094516529da86123"},
+    {"page": "Russia", "file": "Russia.jsonl", "events": 1395, "lastRevisionId": 1371525676, "sha256": "48dd57b2fec2cf43c8ff082b0688c93c21b85fbaff66cced4cfd4abc1c40ab6e"},
+    {"page": "Tesla, Inc.", "file": "Tesla_Inc..jsonl", "events": 353, "lastRevisionId": 1371162982, "sha256": "db4db269118be7b44f22e504f00ec69ef500ddf943776fe07222f4b09fc2761c"},
+    {"page": "Earth", "file": "Earth.jsonl", "events": 599, "lastRevisionId": 1370989416, "sha256": "7e4ffcebab95d9ca705cb4ad6ceeb58b4fac0fae89adff8353b3dec73f16e517"}
+  ]
+}

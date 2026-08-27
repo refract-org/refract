@@ -2,6 +2,12 @@
 
 Refract can serve as deterministic ground truth for AI model evaluation. This document defines the standard benchmark pages, submission format, and scoring methodology for temporal leakage, retrieval quality, and provenance hallucination benchmarks.
 
+## Ground-truth corpus
+
+The published corpus is attached to the [`benchmark-corpus-2026-08-27` release](https://github.com/refract-org/refract/releases/tag/benchmark-corpus-2026-08-27): one event-stream JSONL per benchmark page over a fixed window — 16,146 events, 82 MB uncompressed — with [`manifest.json`](benchmark/ground-truth/manifest.json) tracked here in the repo recording the Refract version, the window bounds, each page's last analyzed revision ID, event count, and SHA-256. The manifest hashes bind the release artifact to this commit.
+
+The window is fixed (start pinned in the manifest, end pinned per page by `lastRevisionId`) rather than full-history, for two reasons: a corpus that changes when the pages change isn't a benchmark, and full-history analysis of the largest pages exceeds any fixed heap. To verify the corpus, run the manifest's window against each page with `--since <windowStart> --to <lastRevisionId>` and compare hashes — analysis is deterministic, so a match is byte-for-byte.
+
 ## Standard benchmark pages
 
 These 10 pages are selected for high editorial activity, diverse event types, and known revision history patterns that stress-test model evaluation:
