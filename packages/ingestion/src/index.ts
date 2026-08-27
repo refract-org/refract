@@ -3,10 +3,10 @@ import type { DiffResult, EvidenceEvent, Revision } from "@refract-org/evidence-
 /**
  * Source-agnostic interface for knowledge repositories.
  * Implement this to add support for non-MediaWiki sources
- * (ClinicalTrials.gov, PubMed, GitHub, Fandom, etc.).
+ * (GitHub, Fandom, etc.).
  */
 export interface KnowledgeSource {
-  /** Unique identifier for this source (e.g., "mediawiki", "clinicaltrials", "pubmed") */
+  /** Unique identifier for this source (e.g., "mediawiki", "github") */
   readonly sourceId: string;
 
   /** Human-readable name */
