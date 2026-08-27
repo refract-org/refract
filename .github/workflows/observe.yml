@@ -31,18 +31,24 @@ jobs:
           # Via env rather than ${{ }} interpolation, so a page title cannot
           # break out of the string and become shell.
           PAGES: ${{ github.event.inputs.pages || 'Bitcoin' }}
-          # Bitcoin's full revision history at detailed depth outgrew Node's
-          # default heap (~2 GB) in August 2026 — the run OOM'd after ~16
-          # minutes daily. The runner has plenty of RAM; let Node use it.
+          # Headroom, not the fix — see --since below. At the default ~2 GB
+          # the run died in 16 minutes; at 6 GB it died after two hours.
           NODE_OPTIONS: --max-old-space-size=6144
         run: |
           mkdir -p observations
+          # A daily observer has no business replaying a page's full history
+          # every morning: Bitcoin's grew past what any fixed heap holds, and
+          # every heap bump would re-break as the history grows. Observe a
+          # 30-day window instead — bounded memory by construction, and the
+          # committed observations still accumulate the long record day by day.
+          SINCE=$(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ)
           for PAGE in $PAGES; do
-            echo "=== Observing: $PAGE ==="
+            echo "=== Observing: $PAGE (since $SINCE) ==="
             # Analysis output goes to a temp file first: folding stderr into the
             # JSON would commit an error message as though it were an
             # observation, and a partial write on failure is worse than none.
             if node packages/cli/dist/src/cli.js analyze "$PAGE" --depth detailed --json \
+              --since "$SINCE" \
               > "$RUNNER_TEMP/observation.json"; then
               mv "$RUNNER_TEMP/observation.json" "observations/${PAGE//\//_}.json"
             else
