@@ -5,8 +5,8 @@ abstract: >-
   Refract reconstructs when a claim entered, changed, or left a source, and reports
   which downstream claims and citations built on a version that no longer says what
   was cited.
-version: 0.5.14
-date-released: 2026-07-29
+version: 0.5.15
+date-released: 2026-08-27
 authors:
   - given-names: Kanav
     family-names: Jain

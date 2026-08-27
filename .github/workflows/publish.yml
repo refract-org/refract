@@ -8,6 +8,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # v0.5.13 and v0.5.14 died at GitHub's 6-hour default: `bun test` (Bun's
+    # own runner, not the project suite) hung in CI. Fail a hang in minutes.
+    timeout-minutes: 30
     permissions:
       contents: read
       id-token: write
@@ -24,7 +27,11 @@ jobs:
 
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: bun test
+      # The project suite is vitest (`bun run test`), not `bun test` — the raw
+      # Bun runner picks up every *.test.ts with a different runtime and hung
+      # in CI, which is what actually killed v0.5.13/v0.5.14 (timeout, shown
+      # as "cancelled").
+      - run: bun run test
 
       - name: Publish packages
         env:
@@ -40,9 +47,18 @@ jobs:
 
           for pkg in packages/evidence-graph packages/ingestion packages/analyzers packages/cli packages/eval; do
             echo "::group::Publishing $pkg"
-            # No `|| true`. A failed publish must fail the run: v0.5.12 reported
-            # success while every package 404'd on PUT (npm's response to an
-            # unauthorized write), so the tag looked released and was not.
-            ( cd "$pkg" && "$NPM" publish --access public --provenance )
+            NAME=$(node -p "require('./$pkg/package.json').name")
+            VERSION=$(node -p "require('./$pkg/package.json').version")
+            # Skip versions already on the registry: packages version
+            # independently, so most tags republish only some of them, and npm
+            # rejects a duplicate PUT — which failed the whole run.
+            if "$NPM" view "$NAME@$VERSION" version >/dev/null 2>&1; then
+              echo "$NAME@$VERSION already published — skipping"
+            else
+              # No `|| true`. A failed publish must fail the run: v0.5.12 reported
+              # success while every package 404'd on PUT (npm's response to an
+              # unauthorized write), so the tag looked released and was not.
+              ( cd "$pkg" && "$NPM" publish --access public --provenance )
+            fi
             echo "::endgroup::"
           done

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.15 (2026-08-27)
+
+### Added
+- **Benchmark ground-truth corpus**: 16,146 hash-pinned events across the ten benchmark pages, published as a release asset with an in-repo manifest (`BENCHMARK.md#ground-truth-corpus`).
+
+### Fixed
+- **Windowed analyses leaked the full page-move log**: a `--since` window opened with `page_moved` events from the page's earliest history. Moves are now bounded to the analyzed revision span (`windowPageMoves`).
+- **Scheduled observation**: observes a trailing 30-day window instead of replaying full history daily, which had outgrown any fixed heap.
+- **Publish pipeline**: the gate ran `bun test` (not the vitest suite) and hung in CI until GitHub's 6-hour timeout — every publish since v0.5.7 died this way or on duplicate-version PUTs. The workflow now runs the real suite, times out in 30 minutes, and skips already-published versions.
+
 ## 0.5.14 (2026-07-29)
 
 **schema:** `EVENT_SCHEMA_VERSION "0.5.0"`.
