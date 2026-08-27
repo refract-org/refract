@@ -31,6 +31,10 @@ jobs:
           # Via env rather than ${{ }} interpolation, so a page title cannot
           # break out of the string and become shell.
           PAGES: ${{ github.event.inputs.pages || 'Bitcoin' }}
+          # Bitcoin's full revision history at detailed depth outgrew Node's
+          # default heap (~2 GB) in August 2026 — the run OOM'd after ~16
+          # minutes daily. The runner has plenty of RAM; let Node use it.
+          NODE_OPTIONS: --max-old-space-size=6144
         run: |
           mkdir -p observations
           for PAGE in $PAGES; do
