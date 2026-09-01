@@ -26,11 +26,33 @@ npx @refract-org/cli analyze "Climate change" --depth brief
 Output:
 
 ```
-sentence_first_seen  | 2026-01-15 | "Climate change has led to increased frequency of extreme weather events."
-sentence_modified    | 2026-03-02 | "Climate change has intensified..." (edit magnitude: 0.31)
-citation_added       | 2026-03-02 | [IPCC AR6 Report] → paragraph 4
-sentence_removed     | 2026-04-10 | "Some researchers dispute..." (reverted next edit)
-revert               | 2026-04-11 | Full revert of 2026-04-10 edit (edit cluster: 3 edits in 2h)
+Analyzing "Climate change" at depth: brief...
+Fetching revisions from Wikipedia...
+Fetched 20 revisions.
+
+────────────────────
+  Analysis Results
+────────────────────
+  Page:    Climate change
+  Events:  76
+
+  ◇ wikilink added (rev 333257774→333257775) [body]
+    target=urban heat island effect
+  ◇ wikilink removed (rev 333257774→333257775) [body]
+    target=urban island effect
+  ○ section changed (rev 333257774→333257775) [(lead)]
+    change=modified
+  ● sentence modified (rev 333257774→333257775) [(lead)]
+    sentence_length=148
+  ○ section changed (rev 333257775→333257776) [(lead)]
+    change=modified
+  ● sentence introduced (rev 333257775→333257776) [(lead)]
+    sentence_length=209
+  ● sentence modified (rev 333257775→333257776) [(lead)]
+    sentence_length=196
+  ◇ wikilink added (rev 333257776→333257777) [body]
+    target=heidelberg appeal
+  … 68 more events
 ```
 
 <p align="center">
