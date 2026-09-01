@@ -20,7 +20,7 @@
 Given a Wikipedia page, Refract produces a structured event stream showing **what changed, when, and how** — every sentence that appeared, was removed, or was modified; every citation that shifted; every revert and edit cluster.
 
 ```bash
-npx @refract-org/cli analyze "Climate change" --brief
+npx @refract-org/cli analyze "Climate change" --depth brief
 ```
 
 Output:
@@ -64,11 +64,11 @@ Built and maintained by [NextConsensus](https://nextconsensus.com) and [Kanav Ja
 
 ```bash
 # Using npx (no install required)
-npx @refract-org/cli analyze "https://en.wikipedia.org/wiki/Artificial_intelligence" --brief
+npx @refract-org/cli analyze "https://en.wikipedia.org/wiki/Artificial_intelligence" --depth brief
 
 # Or install globally
 npm install -g @refract-org/cli
-refract analyze "Quantum computing" --depth forensic --format ndjson
+refract analyze "Quantum computing" --depth forensic
 ```
 
 ### Using the Python SDK
@@ -97,8 +97,9 @@ print(df.groupby("event_type").size())
 ```bash
 git clone https://github.com/refract-org/refract.git
 cd refract
-npm install
-npx refract analyze "https://en.wikipedia.org/wiki/Machine_learning" --brief
+bun install
+bun run build
+node packages/cli/dist/src/cli.js analyze "https://en.wikipedia.org/wiki/Machine_learning" --depth brief
 ```
 
 ---
