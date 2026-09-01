@@ -20,39 +20,40 @@
 Given a Wikipedia page, Refract produces a structured event stream showing **what changed, when, and how** — every sentence that appeared, was removed, or was modified; every citation that shifted; every revert and edit cluster.
 
 ```bash
-npx @refract-org/cli analyze "Climate change" --depth brief
+npx @refract-org/cli analyze "Semaglutide" --depth brief
 ```
 
 Output:
 
 ```
-Analyzing "Climate change" at depth: brief...
+Analyzing "Semaglutide" at depth: brief...
 Fetching revisions from Wikipedia...
 Fetched 20 revisions.
+Correlated 4 talk page discussions.
 
 ────────────────────
   Analysis Results
 ────────────────────
-  Page:    Climate change
-  Events:  76
+  Page:    Semaglutide
+  Events:  203
 
-  ◇ wikilink added (rev 333257774→333257775) [body]
-    target=urban heat island effect
-  ◇ wikilink removed (rev 333257774→333257775) [body]
-    target=urban island effect
-  ○ section changed (rev 333257774→333257775) [(lead)]
+  ○ section changed (rev 714793761→714794084) [(lead)]
     change=modified
-  ● sentence modified (rev 333257774→333257775) [(lead)]
-    sentence_length=148
-  ○ section changed (rev 333257775→333257776) [(lead)]
+  ◇ template added (rev 714793761→714794084) [body]
+    name=R with possibilities type=added
+  ◇ wikilink added (rev 714794084→740186843) [body]
+    target=glucagon-like peptide-1 receptor agonist
+  ◇ wikilink removed (rev 714794084→740186843) [body]
+    target=glucagon-like peptide-1 agonist
+  ○ section changed (rev 714794084→740186843) [(lead)]
     change=modified
-  ● sentence introduced (rev 333257775→333257776) [(lead)]
-    sentence_length=209
-  ● sentence modified (rev 333257775→333257776) [(lead)]
-    sentence_length=196
-  ◇ wikilink added (rev 333257776→333257777) [body]
-    target=heidelberg appeal
-  … 68 more events
+  ● sentence introduced (rev 714794084→740186843) [(lead)]
+    sentence_length=50
+  ● sentence removed (rev 714794084→740186843) [(lead)]
+    sentence_length=40
+  ◆ citation added (rev 740186843→781025475) [body]
+    type=added
+  … 195 more events
 ```
 
 <p align="center">
