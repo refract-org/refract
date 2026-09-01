@@ -17,7 +17,7 @@
 
 ## What does it do?
 
-Given a Wikipedia page, Refract produces a structured event stream showing **what changed, when, and how** — every sentence that appeared, was removed, or was modified; every citation that shifted; every revert and edit cluster.
+Given a Wikipedia page, Refract produces a structured event stream showing **what changed, when, and how** — every sentence that appeared, was removed, or was modified; every citation that shifted.
 
 ```bash
 npx @refract-org/cli analyze "Semaglutide" --depth brief
