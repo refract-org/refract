@@ -52,7 +52,9 @@ export async function runClaimHistory(
   }
 
   if (revisions.length === 0) {
-    revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "newer" });
+    // Newest first, then sorted below. "newer" with a limit and no start returns
+    // the page's first revisions, so a claim in the current text read as absent.
+    revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "older" });
 
     if (useCache && revisions.length > 0) {
       await saveRevisions(revisions, cacheDir);
@@ -211,7 +213,9 @@ export async function runClaim(
   }
 
   if (revisions.length === 0) {
-    revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "newer" });
+    // Newest first, then sorted below. "newer" with a limit and no start returns
+    // the page's first revisions, so a claim in the current text read as absent.
+    revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "older" });
     console.log(`Fetched ${revisions.length} revisions.\n`);
 
     if (useCache && revisions.length > 0) {

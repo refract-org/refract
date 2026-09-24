@@ -119,6 +119,10 @@ export async function fetchRevisionsWithCache(
       options.endRevId = toRevId;
     }
     if (depth === "brief" && !fromTimestamp && !fromRevId && !toRevId) {
+      // The latest N, newest first (sorted oldest-first below). With "newer"
+      // this read the page's first N edits, so a brief look at a live page
+      // reported its history from the year it was created.
+      options.direction = "older";
       options.limit = briefRevisionLimit ?? 20;
     }
     revisions = await client.fetchRevisions(pageTitle, options);

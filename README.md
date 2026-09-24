@@ -81,13 +81,15 @@ Built and maintained by [NextConsensus](https://nextconsensus.com) and [Kanav Ja
 ### Prerequisites
 
 - Node.js 20+ or Bun 1.3+
-- A MediaWiki URL (Wikipedia, Wikibooks, any public wiki)
+- A page title. English Wikipedia is the default; for any other MediaWiki (Wikibooks, a Fandom wiki, a private wiki) pass its `api.php` URL with `--api`. A page URL is not parsed — it is looked up as a title and finds nothing.
+
+> **npm status, 2026-09-24:** `@refract-org/cli@0.5.7`, the newest CLI on npm, does not start. It was published against analyzer and ingestion code that never reached npm (its `^0.3.0` range on analyzers means 0.3.x only). Until the next release is published, run the CLI [from source](#from-source). The library packages on npm — `evidence-graph`, `ingestion`, `analyzers` — install and import normally. `bun run check:release` now fails a release that would repeat this; see [CHANGELOG](./CHANGELOG.md).
 
 ### One-shot analysis
 
 ```bash
 # Using npx (no install required)
-npx @refract-org/cli analyze "https://en.wikipedia.org/wiki/Artificial_intelligence" --depth brief
+npx @refract-org/cli analyze "Artificial intelligence" --depth brief
 
 # Or install globally
 npm install -g @refract-org/cli
@@ -122,7 +124,7 @@ git clone https://github.com/refract-org/refract.git
 cd refract
 bun install
 bun run build
-node packages/cli/dist/src/cli.js analyze "https://en.wikipedia.org/wiki/Machine_learning" --depth brief
+node packages/cli/dist/src/cli.js analyze "Machine learning" --depth brief
 ```
 
 ---
@@ -222,7 +224,7 @@ Refract pairs naturally with modern tools. The event stream is standard NDJSON �
 | **Model serving** | OpenAI API, DeepSeek, Ollama, vLLM, Workers AI | Any OpenAI-compatible endpoint plugs into `refract classify`. Workers AI runs at the edge. |
 | **Local inference** | WebGPU, MLX, llama.cpp | Run detection models on-device — no API key needed. Refract defaults are mechanical; any boundary can use a local model via Ollama or MCP sampling. |
 | **Notebooks** | Jupyter, Marimo, Observable | Load events into a DataFrame: `pd.read_json("events.jsonl", lines=True)`. Marimo's reactive runtime is ideal for live event stream analysis. |
-| **Serverless** | Cloudflare Workers, D1, R2 | Run `refract` via `npx` in a Worker. Store events in D1, export to R2, queue re-observations. Entirely edge-deployable. |
+| **Serverless** | Cloudflare Workers, D1, R2 | Import the library packages in a Worker (`nodejs_compat`; `evidence-graph` uses `node:crypto`). The CLI needs Node or Bun, so a Worker cannot run it — schedule it on a runner and load its NDJSON into D1 or R2. |
 
 ## Quick Start
 
@@ -238,8 +240,8 @@ npx @refract-org/cli analyze "Bitcoin" --depth brief
 # 3. Open the local web explorer (starts a server at localhost:8899)
 npx @refract-org/cli explore "Bitcoin"
 
-# 4. Export as JSON for your own tools
-npx @refract-org/cli analyze "Bitcoin" --json | jq .events[0]
+# 4. Print events as JSON lines for your own tools (one event per line)
+npx @refract-org/cli analyze "Bitcoin" --depth brief --json | head -1 | jq .
 
 # 5. Export as structured data
 npx @refract-org/cli export "Bitcoin" --format ndjson > bitcoin-events.ndjson
@@ -278,6 +280,7 @@ import { sectionDiffer, citationTracker } from "@refract-org/analyzers";
 | `@refract-org/evidence-graph` | [![npm](https://img.shields.io/npm/v/@refract-org/evidence-graph)](https://www.npmjs.com/package/@refract-org/evidence-graph) | Core types, schemas, BYO-inference boundaries |
 | `@refract-org/ingestion` | [![npm](https://img.shields.io/npm/v/@refract-org/ingestion)](https://www.npmjs.com/package/@refract-org/ingestion) | Wikimedia API adapters — fetching, diffing, rate limits |
 | `@refract-org/analyzers` | [![npm](https://img.shields.io/npm/v/@refract-org/analyzers)](https://www.npmjs.com/package/@refract-org/analyzers) | Deterministic analyzers — sections, citations, reverts, templates |
+| `@refract-org/mcp` | — (first published with the next release) | MCP tool definitions and server; the executable is `refract mcp` from `@refract-org/cli` |
 | `@refract-org/cli` | [![npm](https://img.shields.io/npm/v/@refract-org/cli)](https://www.npmjs.com/package/@refract-org/cli) | CLI tool — `refract` / `wikihistory` commands, `classify` inference |
 | `@refract-org/persistence` | — | Local SQLite persistence (bun:sqlite, not published) |
 | `@refract-org/eval` | [![npm](https://img.shields.io/npm/v/@refract-org/eval)](https://www.npmjs.com/package/@refract-org/eval) | Evaluation harness — ground truth validation and benchmarks |
@@ -337,7 +340,7 @@ knowledge bases, private fan wikis. Use the `--api` flag with the wiki's
 |--------|-----------|-------------|
 | Bearer token | `--api-key <token>` | Sends `Authorization: Bearer <token>` with every request |
 | Basic auth | `--api-user <user> --api-password <pass>` | Sends HTTP basic auth credentials |
-| OAuth2 | `OAUTH_CLIENT_ID` + `OAUTH_CLIENT_SECRET` env vars | Sends `X-OAuth-Client-Id` and `X-OAuth-Client-Secret` headers |
+| Client credentials | `REFRACT_OAUTH_CLIENT_ID` + `REFRACT_OAUTH_CLIENT_SECRET` env vars | Sends `X-OAuth-Client-Id` and `X-OAuth-Client-Secret` headers (custom headers for wikis behind a gateway that expects them; not an OAuth 2.0 flow) |
 
 All three methods work with every command:
 
@@ -348,8 +351,8 @@ refract analyze "Page" --api https://corp-wiki.example.com/w/api.php --api-key "
 # Basic auth
 refract analyze "Page" --api https://corp-wiki.example.com/w/api.php --api-user "admin" --api-password "..."
 
-# OAuth2 (via env vars)
-OAUTH_CLIENT_ID="..." OAUTH_CLIENT_SECRET="..." \
+# Client-credential headers (via env vars)
+REFRACT_OAUTH_CLIENT_ID="..." REFRACT_OAUTH_CLIENT_SECRET="..." \
   refract analyze "Page" --api https://corp-wiki.example.com/w/api.php
 ```
 

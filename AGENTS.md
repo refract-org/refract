@@ -68,7 +68,8 @@ See `docs/repository-boundary.md` and `docs/refract-and-nextconsensus.md`.
 
 ## MCP Server
 
-Refract exposes 5 MCP tools: `analyze`, `claim`, `export`, `cron`, `classify`.
+Refract exposes 6 MCP tools: `analyze`, `claim`, `export`, `cron`, `classify`,
+`get_statement_history`.
 Start with `refract mcp`. Agents connect via stdio.
 See `docs/mcp.md` for client configuration (Claude Desktop, Cline, etc.).
 

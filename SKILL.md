@@ -56,15 +56,19 @@ deterministic enrichment fields (`editMagnitude`, `contentChange`,
 
 ## MCP Tools
 
-When running `refract mcp`, 5 tools are available to agents:
+When running `refract mcp`, 6 tools are available to agents:
 
 | Tool | Purpose |
 |------|---------|
 | `analyze` | Full page edit history with structured events |
 | `claim` | Track a specific sentence's provenance across revisions |
-| `export` | Export analysis as JSON, NDJSON, CSV, Parquet, or HTML |
+| `export` | Export analysis as JSON |
 | `cron` | One-shot re-observation for scheduled monitoring |
 | `classify` | Model-assisted classification of one inference boundary |
+| `get_statement_history` | When a statement (or a close variant) appeared, changed or disappeared, with revision IDs |
+
+Configure the client with `@refract-org/cli` (`npx -y @refract-org/cli mcp`), never the unscoped
+`refract` package, which is an unrelated project.
 
 ## Using Refract in Code
 
