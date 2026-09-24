@@ -34,10 +34,22 @@ export interface HeadingPosition {
 }
 
 export function extractHeadingMap(wikitext: string): HeadingPosition[] {
-  return Array.from(wikitext.matchAll(/^==+\s*(.*?)\s*==+\s*$/gm)).map((match) => ({
-    position: match.index ?? 0,
-    heading: match[1]?.trim() ?? "",
-  }));
+  // A heading is one line that opens with "==" and, after trailing whitespace,
+  // closes with "=="; its title is what lies between the runs of "=", trimmed.
+  // The runs are stripped by hand rather than by /^==+\s*(.*?)\s*==+\s*$/gm,
+  // whose three whitespace-matching quantifiers took time cubic in the length of
+  // a line of "==" and spaces, and whose \s could join a heading across lines.
+  const headings: HeadingPosition[] = [];
+  for (const match of wikitext.matchAll(/^==.*$/gm)) {
+    const line = match[0].trimEnd();
+    if (line.length < 4 || !line.endsWith("==")) continue;
+    let start = 0;
+    while (line[start] === "=") start++;
+    let end = line.length;
+    while (end > start && line[end - 1] === "=") end--;
+    headings.push({ position: match.index ?? 0, heading: line.slice(start, end).trim() });
+  }
+  return headings;
 }
 
 export function deriveSectionHeading(wikitext: string, position: number): string | null {
@@ -119,8 +131,9 @@ export function findSectionForText(
   }
 
   // No g flag: exec on a global regex resumes at lastIndex, so a heading on
-  // the line right after another heading was skipped.
-  const headerRegex = /^(=+)\s*([^=]+?)\s*\1$/;
+  // the line right after another heading was skipped. See buildSectionCharMap
+  // for why the title is matched whole and trimmed.
+  const headerRegex = /^(=+)([^=]+)\1$/;
   const lines = wikitext.split("\n");
   let currentSection = "(lead)";
   let charCount = 0;
@@ -140,7 +153,11 @@ export function findSectionForText(
 /** Each heading's character offset in the wikitext, starting with "(lead)" at 0. */
 export function buildSectionCharMap(wikitext: string): Array<{ charOffset: number; section: string }> {
   const lines = wikitext.split("\n");
-  const headerRegex = /^(=+)\s*([^=]+?)\s*\1$/;
+  // The title is matched whole and trimmed after. As \s*([^=]+?)\s*, the
+  // spaces on a line of "=" and spaces could be split between three
+  // quantifiers, which took time cubic in the line's length: minutes for one
+  // line of a few thousand characters.
+  const headerRegex = /^(=+)([^=]+)\1$/;
   const map: Array<{ charOffset: number; section: string }> = [{ charOffset: 0, section: "(lead)" }];
   let charCount = 0;
   for (const line of lines) {
