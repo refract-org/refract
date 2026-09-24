@@ -5,6 +5,7 @@ import {
   deriveSectionHeading,
   extractAnchorSnippet,
   extractHeadingMap,
+  findSectionForText,
   sanitizeWikitext,
 } from "../wikitext-parser.js";
 
@@ -138,5 +139,30 @@ describe("extractAnchorSnippet", () => {
     const snippet = extractAnchorSnippet(text, ["TARGET"], 10);
     expect(snippet).toBeTruthy();
     expect(snippet?.length).toBeLessThan(50);
+  });
+});
+
+describe("findSectionForText", () => {
+  const wikitext = `Lead text about the topic.
+
+== History ==
+Historical content about the subject.
+
+== References ==
+{{reflist}}`;
+
+  it("finds section for text in lead", () => {
+    const section = findSectionForText(wikitext, "Lead text about the topic.");
+    expect(section).toBe("(lead)");
+  });
+
+  it("finds section for text in a named section", () => {
+    const section = findSectionForText(wikitext, "Historical content about the subject.");
+    expect(section).toBe("History");
+  });
+
+  it("returns lead for text that doesn't appear", () => {
+    const section = findSectionForText(wikitext, "Text that does not appear anywhere.");
+    expect(section).toBe("(lead)");
   });
 });

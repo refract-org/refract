@@ -19,6 +19,7 @@ bun add @refract-org/analyzers
 ### Utilities
 
 - `sanitizeWikitext`, `extractHeadingMap`, `deriveSectionHeading`, `countCitations`, `countKeywordMentions`, `extractAnchorSnippet` — wikitext parsing helpers
+- `findSectionForText`, `buildSectionCharMap` — which section a sentence sits in
 
 ### Builders
 
@@ -30,6 +31,7 @@ bun add @refract-org/analyzers
 - `SectionDiffer`, `CitationTracker`, `RevertDetector`, `TemplateTracker` — analyzer interfaces
 - `CitationRef`, `CitationChange`, `RevertChain`, `Template`, `TemplateChange`, `TemplateType` — domain types
 - `HeuristicKind`, `SectionEvent`, `SectionLineage`, `HeadingPosition` — supporting types
+- `ParsedContent`, `RevisionEventOptions`, `RevisionEventDepth`, `ProtectionLogRecord` — event pipeline types
 
 ```ts
 import { sectionDiffer, citationTracker, revertDetector } from "@refract-org/analyzers";
@@ -49,3 +51,21 @@ Deterministic text analysis for evidence events. No model, no API.
 - `extractQuantitativeFindings(text)` — p-values, HR, n-values, CIs
 
 Exported from `@refract-org/analyzers`.
+
+### Event pipeline (0.5.1+)
+
+The events `refract analyze` derives from a page history, as library functions. The CLI calls these, so a consumer that imports them gets the same events the CLI emits, and no copy to keep in step. They read no network and no filesystem, so they run in a Worker (with `nodejs_compat`) as well as Node or Bun.
+
+- `buildRevisionEvents(revisions, options?)` — structural diffs, editorial signals and sentence diffs for each consecutive pair of revisions, ordered by timestamp. Options: `depth` (`"brief"` blanks the changed text, `"forensic"` adds both revisions' wikitext as facts, default `"detailed"`), `similarityThreshold` (default 0.8), `protectionLogs`.
+- `annotateEvents(events)` — adds `schemaVersion` and the semantic fields (`editMagnitude`, `contentChange`, `keyTerms`, `certaintyProfile`, `directionSignal`, `quantitativeFindings`) in place.
+- `parseContent`, `computeStructuralDiffs`, `detectEditorialSignals` — the per-pair steps, for a caller that runs them itself.
+
+```ts
+import { annotateEvents, buildRevisionEvents } from "@refract-org/analyzers";
+import { createEventIdentity } from "@refract-org/evidence-graph";
+
+const events = annotateEvents(buildRevisionEvents(revisions, { protectionLogs }));
+const ids = events.map((e) => createEventIdentity(e));
+```
+
+For everything `refract analyze` prints, add `buildPageMoveEvents(windowPageMoves(...))` before and `correlateTalkRevisions(revisions, talkRevisions)` after `buildRevisionEvents`, then annotate all of them together.

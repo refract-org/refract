@@ -1,14 +1,6 @@
 import { readFileSync } from "node:fs";
-import {
-  buildPageMoveEvents,
-  citationTracker,
-  extractCategories,
-  extractWikilinks,
-  sectionDiffer,
-  stripWikitext,
-  templateTracker,
-  windowPageMoves,
-} from "@refract-org/analyzers";
+import type { RevisionEventDepth } from "@refract-org/analyzers";
+import { buildPageMoveEvents, buildRevisionEvents, windowPageMoves } from "@refract-org/analyzers";
 import type {
   AnalyzerConfig,
   ClaimLedger,
@@ -27,16 +19,7 @@ import {
 import type { AuthConfig } from "@refract-org/ingestion";
 
 import { REFRACT_VERSION } from "../version.js";
-import type { ParsedContent } from "./analyze-helpers.js";
-import {
-  computeStructuralDiffs,
-  correlateTalkPages,
-  detectEditorialSignals,
-  diffSentences,
-  fetchRevisionsWithCache,
-  finalizeEvents,
-} from "./analyze-helpers.js";
-import { buildSectionCharMap } from "./claim.js";
+import { correlateTalkPages, fetchRevisionsWithCache, finalizeEvents } from "./analyze-helpers.js";
 
 interface BatchPageResult {
   pageTitle: string;
@@ -208,42 +191,6 @@ export async function runAnalyze(
 
   const events: EvidenceEvent[] = [];
 
-  const allSeenSentences = new Set<string>();
-  const strippedCache = new Map<number, string>();
-  const sectionCharMapCache = new Map<number, Array<{ charOffset: number; section: string }>>();
-
-  const getStripped = (rev: Revision): string => {
-    const cached = strippedCache.get(rev.revId);
-    if (cached !== undefined) return cached;
-    const result = stripWikitext(rev.content);
-    strippedCache.set(rev.revId, result);
-    return result;
-  };
-
-  const getSectionCharMap = (rev: Revision): Array<{ charOffset: number; section: string }> => {
-    const cached = sectionCharMapCache.get(rev.revId);
-    if (cached) return cached;
-    const map = buildSectionCharMap(rev.content);
-    sectionCharMapCache.set(rev.revId, map);
-    return map;
-  };
-
-  const parsedCache = new Map<number, ParsedContent>();
-
-  const getParsed = (rev: Revision): ParsedContent => {
-    const cached = parsedCache.get(rev.revId);
-    if (cached) return cached;
-    const result: ParsedContent = {
-      sections: sectionDiffer.extractSections(rev.content),
-      citations: citationTracker.extractCitations(rev.content),
-      wikilinks: extractWikilinks(rev.content),
-      categories: extractCategories(rev.content),
-      templates: templateTracker.extractTemplates(rev.content),
-    };
-    parsedCache.set(rev.revId, result);
-    return result;
-  };
-
   const [pageMoves, protectionLogs, talkRevs] = await Promise.all([
     client.fetchPageMoves(pageTitle),
     client.fetchProtectionLogs(pageTitle),
@@ -265,52 +212,15 @@ export async function runAnalyze(
     ),
   );
 
-  const protectionLogsWithTs = protectionLogs.map((l) => ({
-    l,
-    ts: new Date(l.timestamp).getTime(),
-  }));
-
-  const isBrief = depth === "brief";
-  const isForensic = depth === "forensic";
-  const similarityThreshold = config?.section?.similarityThreshold ?? 0.8;
-
-  for (let i = 1; i < sortedRevs.length; i++) {
-    const before = sortedRevs[i - 1];
-    const after = sortedRevs[i];
-
-    const pairExtraFacts = isForensic
-      ? [
-          { fact: "full_wikitext_before", detail: before.content },
-          { fact: "full_wikitext_after", detail: after.content },
-        ]
-      : [];
-
-    const beforeParsed = getParsed(before);
-    const afterParsed = getParsed(after);
-
-    events.push(
-      ...computeStructuralDiffs(before, after, beforeParsed, afterParsed, isBrief, pairExtraFacts),
-      ...detectEditorialSignals(
-        before,
-        after,
-        beforeParsed,
-        afterParsed,
-        isBrief,
-        pairExtraFacts,
-        protectionLogsWithTs,
-      ),
-      ...diffSentences(
-        before,
-        after,
-        getStripped,
-        getSectionCharMap,
-        allSeenSentences,
-        similarityThreshold,
-        isBrief,
-        pairExtraFacts,
-      ),
-    );
-  }
+  // Any other --depth value has always run as detailed.
+  const eventDepth: RevisionEventDepth = depth === "brief" || depth === "forensic" ? depth : "detailed";
+  events.push(
+    ...buildRevisionEvents(sortedRevs, {
+      depth: eventDepth,
+      similarityThreshold: config?.section?.similarityThreshold ?? 0.8,
+      protectionLogs,
+    }),
+  );
 
   events.push(...correlateTalkPages(sortedRevs, talkRevs));
   finalizeEvents(pageTitle, events, sortedRevs, fromTimestamp, cacheDir);
