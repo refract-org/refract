@@ -118,7 +118,9 @@ export function findSectionForText(
     return "(lead)";
   }
 
-  const headerRegex = /^(=+)\s*([^=]+?)\s*\1$/gm;
+  // No g flag: exec on a global regex resumes at lastIndex, so a heading on
+  // the line right after another heading was skipped.
+  const headerRegex = /^(=+)\s*([^=]+?)\s*\1$/;
   const lines = wikitext.split("\n");
   let currentSection = "(lead)";
   let charCount = 0;

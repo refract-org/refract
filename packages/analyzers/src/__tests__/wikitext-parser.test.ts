@@ -165,4 +165,9 @@ Historical content about the subject.
     const section = findSectionForText(wikitext, "Text that does not appear anywhere.");
     expect(section).toBe("(lead)");
   });
+
+  it("finds text under a heading that directly follows another", () => {
+    const nested = "Lead text.\n\n== Parent ==\n=== Child ===\nText that sits in the child section.";
+    expect(findSectionForText(nested, "Text that sits in the child section.")).toBe("Child");
+  });
 });
