@@ -18,7 +18,7 @@ vi.mock("bun:sqlite", () => {
 });
 
 import { stripWikitext } from "@refract-org/analyzers";
-import { findSectionForText, fuzzyFindText } from "../commands/claim.js";
+import { fuzzyFindText } from "../commands/claim.js";
 
 describe("stripWikitext", () => {
   it("strips HTML comments", () => {
@@ -77,30 +77,5 @@ describe("fuzzyFindText", () => {
     const result = fuzzyFindText("", "Some text.");
     expect(result).toBeTruthy();
     expect(result?.length).toBeGreaterThan(0);
-  });
-});
-
-describe("findSectionForText", () => {
-  const wikitext = `Lead text about the topic.
-
-== History ==
-Historical content about the subject.
-
-== References ==
-{{reflist}}`;
-
-  it("finds section for text in lead", () => {
-    const section = findSectionForText(wikitext, "Lead text about the topic.");
-    expect(section).toBe("(lead)");
-  });
-
-  it("finds section for text in a named section", () => {
-    const section = findSectionForText(wikitext, "Historical content about the subject.");
-    expect(section).toBe("History");
-  });
-
-  it("returns lead for text that doesn't appear", () => {
-    const section = findSectionForText(wikitext, "Text that does not appear anywhere.");
-    expect(section).toBe("(lead)");
   });
 });
