@@ -38,12 +38,16 @@ function withAnalyzerConfig(cmd: Command): Command {
     .option("--section-rename <mode>", "Section rename detection: exact | similarity | none");
 }
 
-function extractAuth(opts: Record<string, unknown>): AuthConfig | undefined {
+export function extractAuth(opts: Record<string, unknown>): AuthConfig | undefined {
   const apiKey = opts.apiKey as string | undefined;
   const apiUser = opts.apiUser as string | undefined;
   const apiPassword = opts.apiPassword as string | undefined;
-  const oauthClientId = process.env.OAUTH_CLIENT_ID;
-  const oauthClientSecret = process.env.OAUTH_CLIENT_SECRET;
+  // Namespaced so an unrelated OAUTH_CLIENT_ID/OAUTH_CLIENT_SECRET in the
+  // environment — common on CI runners — is not read as Refract's. Under the
+  // generic names they were sent as headers to whatever wiki was queried,
+  // including Wikipedia when --api was not given.
+  const oauthClientId = process.env.REFRACT_OAUTH_CLIENT_ID;
+  const oauthClientSecret = process.env.REFRACT_OAUTH_CLIENT_SECRET;
 
   if (!apiKey && !apiUser && !apiPassword && !oauthClientId && !oauthClientSecret) return undefined;
 

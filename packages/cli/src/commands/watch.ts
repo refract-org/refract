@@ -24,7 +24,9 @@ export async function runWatch(
     if (running) return;
     running = true;
     try {
-      const revisions = await client.fetchRevisions(pageTitle, { limit: 5, direction: "newer" });
+      // The latest five. "newer" with a limit returned the page's first five,
+      // so a watch never saw a revision made after it started.
+      const revisions = await client.fetchRevisions(pageTitle, { limit: 5, direction: "older" });
       if (revisions.length === 0) return;
 
       const sortedRevs = [...revisions].sort(
@@ -145,9 +147,12 @@ export async function runWatch(
       console.error(`[${new Date().toISOString()}] Watch error:`, (err as Error).message);
     } finally {
       running = false;
-    }
-    if (!stopped) {
-      timer = setTimeout(poll, pollInterval);
+      // Rescheduled here rather than after the try: its early returns — the
+      // first poll always takes one — skipped the reschedule, so the process
+      // exited after one poll.
+      if (!stopped) {
+        timer = setTimeout(poll, pollInterval);
+      }
     }
   };
 

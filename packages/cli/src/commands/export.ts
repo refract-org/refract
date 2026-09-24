@@ -89,7 +89,9 @@ export async function runExport(
   }
 
   if (events.length === 0) {
-    console.log("No events to export.");
+    // stderr, not stdout: stdout is the export. Printed there, this line became
+    // a malformed first record of every empty NDJSON file redirected to disk.
+    console.error("No events to export.");
     return;
   }
 

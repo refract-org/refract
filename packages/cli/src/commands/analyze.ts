@@ -247,7 +247,15 @@ export async function runAnalyze(
   const [pageMoves, protectionLogs, talkRevs] = await Promise.all([
     client.fetchPageMoves(pageTitle),
     client.fetchProtectionLogs(pageTitle),
-    client.fetchTalkRevisions(pageTitle, { direction: "newer", limit: 10 }),
+    // The talk edits leading up to the last analyzed revision. "newer" with a
+    // limit read the talk page's first ten edits, years before most windows.
+    client
+      .fetchTalkRevisions(pageTitle, {
+        direction: "older",
+        start: new Date(sortedRevs[sortedRevs.length - 1].timestamp),
+        limit: 10,
+      })
+      .then((revs) => [...revs].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())),
   ]);
   // Bound moves to the analyzed span: the move log covers the page's whole
   // lifetime, and a --since window must not open with moves from 2005.

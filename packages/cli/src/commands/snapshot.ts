@@ -19,7 +19,14 @@ export async function runSnapshot(
   }
 
   const client = new MediaWikiClient(apiUrl ? { apiUrl, auth } : auth ? { auth } : undefined);
-  const revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "newer" });
+  // Revisions at or before the target, newest first. "newer" with a limit read
+  // the page's first revisions, so any date past them snapped to the latest of
+  // those instead of to the revision live on that date.
+  const revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "older", start: target });
+  if (revisions.length === 0) {
+    console.error(`No revision of "${pageTitle}" exists at or before ${atDate}.`);
+    process.exit(1);
+  }
 
   let closest = revisions[0];
   let closestDelta = Infinity;

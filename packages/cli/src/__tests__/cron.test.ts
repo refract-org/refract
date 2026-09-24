@@ -151,4 +151,114 @@ describe("cron command", () => {
 
     rmSync(tmpDir, { recursive: true, force: true });
   });
+
+  it("finds a new event even when analysis rewrites the observation file first", async () => {
+    // runAnalyze's --since path writes the events it just produced to the same
+    // observations/<page>.json cron reads. Cron used to read it afterwards and
+    // diff the run against itself, so it never reported a new event.
+    const tmpDir = mkdtempSync(join(tmpdir(), "cron-test-"));
+    const pagesFile = join(tmpDir, "pages.txt");
+    writeFileSync(pagesFile, "Earth\n", "utf-8");
+    const obsFile = join(tmpDir, "observations", "Earth.json");
+    mkdirSync(join(tmpDir, "observations"), { recursive: true });
+
+    const priorEvent = makeEvent({ timestamp: "2023-12-01T00:00:00Z" });
+    writeFileSync(obsFile, JSON.stringify([priorEvent], null, 2));
+    const newEvent = makeEvent({
+      eventType: "citation_added",
+      fromRevisionId: 3,
+      toRevisionId: 4,
+      timestamp: "2024-01-15T00:00:00Z",
+    });
+
+    vi.mocked(runAnalyze).mockImplementation(async () => {
+      writeFileSync(obsFile, JSON.stringify([priorEvent, newEvent], null, 2));
+      return { events: [priorEvent, newEvent], revisions: [] };
+    });
+
+    const result = await runCron(pagesFile, undefined, undefined, tmpDir);
+
+    expect(result.totalNewEvents).toBe(1);
+    expect(result.reports[0].eventsNew).toBe(1);
+
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("keeps its own observation, so the second run has something to compare", async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), "cron-test-"));
+    const pagesFile = join(tmpDir, "pages.txt");
+    writeFileSync(pagesFile, "Earth\n", "utf-8");
+
+    const first = makeEvent({ timestamp: "2024-01-01T00:00:00Z" });
+    vi.mocked(runAnalyze).mockResolvedValueOnce({ events: [first], revisions: [] });
+    const baseline = await runCron(pagesFile, undefined, undefined, tmpDir);
+    expect(baseline.reports[0].deltaSummary).toBe("baseline established");
+    expect(existsSync(join(tmpDir, "observations", "Earth.json"))).toBe(true);
+
+    const second = makeEvent({
+      eventType: "revert_detected",
+      fromRevisionId: 5,
+      toRevisionId: 6,
+      timestamp: "2024-01-02T00:00:00Z",
+    });
+    vi.mocked(runAnalyze).mockResolvedValueOnce({ events: [first, second], revisions: [] });
+    const next = await runCron(pagesFile, undefined, undefined, tmpDir);
+
+    expect(next.totalNewEvents).toBe(1);
+    expect(next.reports[0].deltaSummary).toBe("1 new, 0 resolved");
+
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("does not count prior events outside the lookback window as resolved", async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), "cron-test-"));
+    const pagesFile = join(tmpDir, "pages.txt");
+    writeFileSync(pagesFile, "Earth\n", "utf-8");
+    mkdirSync(join(tmpDir, "observations"), { recursive: true });
+
+    const longAgo = makeEvent({ timestamp: "2020-01-01T00:00:00Z" });
+    writeFileSync(join(tmpDir, "observations", "Earth.json"), JSON.stringify([longAgo], null, 2));
+    const recent = makeEvent({ eventType: "citation_added", timestamp: new Date().toISOString() });
+    vi.mocked(runAnalyze).mockResolvedValue({ events: [recent], revisions: [] });
+
+    const result = await runCron(pagesFile, 24, undefined, tmpDir);
+
+    expect(result.reports[0].eventsResolved).toBe(0);
+    expect(result.reports[0].eventsNew).toBe(1);
+
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("keeps the last observation through a quiet run, so the next run still has its anchor", async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), "cron-test-"));
+    const pagesFile = join(tmpDir, "pages.txt");
+    writeFileSync(pagesFile, "Earth\n", "utf-8");
+    const obsFile = join(tmpDir, "observations", "Earth.json");
+
+    const seen = makeEvent({ timestamp: "2024-01-01T00:00:00Z" });
+    vi.mocked(runAnalyze).mockResolvedValueOnce({ events: [seen], revisions: [] });
+    await runCron(pagesFile, undefined, undefined, tmpDir);
+
+    // A day with no edits. Analysis may still write an empty observation file.
+    vi.mocked(runAnalyze).mockImplementationOnce(async () => {
+      writeFileSync(obsFile, "[]");
+      return { events: [], revisions: [] };
+    });
+    const quiet = await runCron(pagesFile, undefined, undefined, tmpDir);
+    expect(quiet.reports[0].deltaSummary).toBe("no changes");
+
+    const fresh = makeEvent({
+      eventType: "citation_removed",
+      fromRevisionId: 7,
+      toRevisionId: 8,
+      timestamp: "2024-01-03T00:00:00Z",
+    });
+    vi.mocked(runAnalyze).mockResolvedValueOnce({ events: [seen, fresh], revisions: [] });
+    const next = await runCron(pagesFile, undefined, undefined, tmpDir);
+
+    expect(next.reports[0].priorObservationAt).toBe("2024-01-01T00:00:00Z");
+    expect(next.totalNewEvents).toBe(1);
+
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 });
