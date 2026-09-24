@@ -106,7 +106,7 @@ export interface RevisionOptions {
   endRevId?: number;
 }
 
-export { MediaWikiClient } from "./mediawiki-client.js";
+export { DEFAULT_USER_AGENT, MediaWikiApiError, MediaWikiClient, retryAfterMs } from "./mediawiki-client.js";
 export { RateLimiter } from "./rate-limiter.js";
 export type { StreamClientOptions, StreamEvent } from "./stream-client.js";
 export { WikimediaStreamClient } from "./stream-client.js";
