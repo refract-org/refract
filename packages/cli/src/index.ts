@@ -16,6 +16,7 @@ import { runStream } from "./commands/stream.js";
 import { runVisualize } from "./commands/visualize.js";
 import { runWatch } from "./commands/watch.js";
 import { bold, cyan, dim, formatEvent, gray, green, heading, red, success } from "./render.js";
+import { REFRACT_VERSION } from "./version.js";
 
 function withGlobal(cmd: Command): Command {
   return cmd
@@ -54,7 +55,7 @@ const program = new Command();
 program
   .name("refract")
   .description("Wikipedia edit history analysis — deterministic L1 observation engine")
-  .version("0.5.14")
+  .version(REFRACT_VERSION)
   .addHelpCommand("help [command]", "show help for a specific command");
 
 // ── init ──

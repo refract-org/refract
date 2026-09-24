@@ -26,6 +26,7 @@ import {
 } from "@refract-org/evidence-graph";
 import type { AuthConfig } from "@refract-org/ingestion";
 
+import { REFRACT_VERSION } from "../version.js";
 import type { ParsedContent } from "./analyze-helpers.js";
 import {
   computeStructuralDiffs,
@@ -101,9 +102,6 @@ function compilePatterns(config: AnalyzerConfig): void {
     );
   }
 }
-
-/** Current Refract CLI version — single source of truth for output metadata. */
-const REFRACT_VERSION = "0.5.14";
 
 export function buildConfig(options: Record<string, unknown>): AnalyzerConfig {
   const config: AnalyzerConfig = structuredClone(DEFAULT_ANALYZER_CONFIG);

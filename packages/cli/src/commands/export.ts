@@ -3,6 +3,7 @@ import type { AnalyzerConfig, EvidenceEvent, PolicySignal, Report, Revision } fr
 import { createEventIdentity, createReplayManifest, EVENT_SCHEMA_VERSION } from "@refract-org/evidence-graph";
 import type { AuthConfig } from "@refract-org/ingestion";
 import { renderHtmlReport } from "../html-renderer.js";
+import { REFRACT_VERSION } from "../version.js";
 import { runAnalyze } from "./analyze.js";
 
 interface EvidenceBundle {
@@ -60,7 +61,7 @@ export async function runExport(
     );
     const manifestData = createReplayManifest({
       pageTitle,
-      analyzerVersions: { refract: "0.5.14" },
+      analyzerVersions: { refract: REFRACT_VERSION },
       revisions,
       events,
     });

@@ -21,6 +21,11 @@ jobs:
       - run: bun run typecheck
       - run: bun run check:boundaries
       - run: bun run test
+      # What a release of this tree would put on npm: internal ranges that name
+      # the versions built here, nothing depending on an unpublished package,
+      # and the packed tarballs installing together and starting the CLI. The
+      # registry comparison runs in publish.yml, where npm's state is the point.
+      - run: bun run check:release -- --pack
 
 # There was a `downstream` job here that checked out refract-org/refract-ui and
 # ran its test suite on every pull request and push. It could not detect a

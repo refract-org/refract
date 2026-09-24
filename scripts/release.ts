@@ -5,6 +5,14 @@
  * Reads the current version from the root package.json, bumps it according to the
  * specified level, writes the changelog entry, commits, and tags.
  *
+ * The CLI ships as the project version, so the bump is written to every place that
+ * carries it: the root package.json, packages/cli/package.json, the constant the CLI
+ * stamps into its output (packages/cli/src/version.ts), server.json and the MCP
+ * server card. The
+ * other packages version on their own and are bumped by hand when their source
+ * changes; scripts/check-release.ts, run here before anything is committed, fails
+ * the release if one was changed without a bump or a dependent range was not moved.
+ *
  * The actual npm publish and GitHub release creation are handled by the existing
  * publish.yml and release.yml workflows, which trigger on tag push.
  */
@@ -66,9 +74,13 @@ const entry = [
 ].join("\n");
 
 const changelog = readFileSync("CHANGELOG.md", "utf-8");
+// A hand-written "## Unreleased" section is the entry: it is renamed to the
+// version rather than buried under a list generated from commit subjects.
+const unreleased = /^## Unreleased[^\n]*$/m;
 const insertionPoint = changelog.indexOf("## ");
-const newChangelog =
-  insertionPoint >= 0
+const newChangelog = unreleased.test(changelog)
+  ? changelog.replace(unreleased, `## ${next} (${date})`)
+  : insertionPoint >= 0
     ? changelog.slice(0, insertionPoint) + entry + "\n" + changelog.slice(insertionPoint)
     : changelog + "\n" + entry;
 
@@ -77,8 +89,25 @@ writeFileSync("CHANGELOG.md", newChangelog);
 pkg.version = next;
 writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
 
+// The CLI's own manifest, the version it stamps into --version and every
+// manifest, and the MCP registry entry all follow the project version.
+function setVersion(path: string, pattern: RegExp) {
+  const text = readFileSync(path, "utf-8");
+  if (!pattern.test(text)) throw new Error(`${path}: no match for ${pattern}`);
+  writeFileSync(path, text.replace(pattern, (_match, before: string, after: string) => `${before}${next}${after}`));
+}
+setVersion("packages/cli/package.json", /("version":\s*")[^"]+(")/);
+setVersion("packages/cli/src/version.ts", /(REFRACT_VERSION = ")[^"]+(")/);
+setVersion("server.json", /("version":\s*")[^"]+(",\s*"website")/);
+setVersion("server.json", /("identifier":\s*"@refract-org\/cli",\s*"version":\s*")[^"]+(")/);
+setVersion(".well-known/mcp/server-card.json", /("version":\s*")[^"]+(")/);
+
+// Offline checks only: the registry comparison runs in publish.yml, at the point
+// where npm's state is what matters.
+await $`bun scripts/check-release.ts`;
+
 const tag = `v${next}`;
-await $`git add package.json CHANGELOG.md`;
+await $`git add package.json CHANGELOG.md packages/cli/package.json packages/cli/src/version.ts server.json .well-known/mcp/server-card.json`;
 await $`git commit -m "chore: release ${tag}"`;
 await $`git tag ${tag}`;
 
