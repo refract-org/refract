@@ -5,7 +5,10 @@ export const sectionDiffer: SectionDiffer = {
   extractSections(wikitext: string): Section[] {
     const sections: Section[] = [];
     const lines = wikitext.split("\n");
-    const headerRegex = /^(=+)\s*([^=]+?)\s*\1$/;
+    // Same pattern and fix as buildSectionCharMap in wikitext-parser.ts: the
+    // title is matched whole and trimmed below, so no whitespace is split
+    // between quantifiers.
+    const headerRegex = /^(=+)([^=]+)\1$/;
 
     // Pre-compute byte offsets of each line from a single TextEncoder pass
     const bytes = new TextEncoder().encode(wikitext);

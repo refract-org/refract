@@ -118,3 +118,14 @@ describe("diffSections", () => {
     expect(changes.every((c) => c.changeType === "unchanged")).toBe(true);
   });
 });
+
+describe("sectionDiffer.extractSections on a hostile line", () => {
+  it("stays linear on a line of '=' and whitespace", () => {
+    // The heading pattern took time cubic or worse in such a line until 2026-09-24.
+    const wikitext = `Lead.\n=\t${"\t\t".repeat(2000)}\u0000\n== History ==\nText.`;
+    const start = performance.now();
+    const sections = sectionDiffer.extractSections(wikitext);
+    expect(performance.now() - start).toBeLessThan(1000);
+    expect(sections.map((s) => s.title)).toContain("History");
+  });
+});
