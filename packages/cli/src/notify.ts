@@ -44,7 +44,7 @@ function formatSlackMessage(deltas: DeltaNotification[]): string {
   const blocks: Record<string, unknown>[] = [
     {
       type: "header",
-      text: { type: "plain_text", text: "🔭 Refract Observation Report" },
+      text: { type: "plain_text", text: "Refract observation report" },
     },
     {
       type: "section",
@@ -63,7 +63,7 @@ function formatSlackMessage(deltas: DeltaNotification[]): string {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*${d.pageTitle}*\n${summary}\n${d.eventsNew > 0 ? "⚠️ Changes detected" : "✅ Resolved"}`,
+        text: `*${d.pageTitle}*\n${summary}\n${d.eventsNew > 0 ? "Changes detected" : "Resolved"}`,
       },
     });
   }

@@ -16,8 +16,7 @@ export async function runStream(pageTitle?: string, wiki?: string): Promise<void
   for await (const event of client.connect()) {
     count++;
     const ts = new Date(event.timestamp * 1000).toISOString();
-    const icon = event.type === "new" ? "📄" : "✏️";
-    console.log(`[${ts}] ${icon} ${event.title}`);
+    console.log(`[${ts}] ${event.type.padEnd(4)} ${event.title}`);
     console.log(`  rev ${event.revId} by ${event.user}: ${event.comment.slice(0, 120)}`);
     console.log(`  ${event.wiki} · ${count} events received`);
     console.log();

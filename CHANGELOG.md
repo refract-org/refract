@@ -4,6 +4,9 @@
 
 Nothing has reached npm since 0.5.7, and 0.5.7's CLI does not start: it declares `@refract-org/analyzers@^0.3.0` — 0.3.x only, under npm's rule for 0.x — and imports code that exists only in analyzers 0.5.0; forcing 0.5.0 fails on an ingestion export no published ingestion has. This release is the first that can be installed from npm and run.
 
+### Changed
+- **CLI output carries no emoji.** The Slack notification header is "Refract observation report" (was "🔭 Refract Observation Report") and its per-page status lines drop their emoji; `refract stream` prints `new` or `edit` where it printed an emoji; `refract init` drops its boxed banner and no longer calls a failed fetch "offline mode".
+
 ### Fixed
 - **Release pipeline would have shipped another CLI that cannot install or start.** evidence-graph 0.5.0, ingestion 0.3.1 and eval 0.2.1 carried source changes under versions already on npm, which `publish.yml` skips, while the CLI built against that source would have been published; and the CLI depends on `@refract-org/mcp`, which `publish.yml` never published. `scripts/check-release.ts` (`bun run check:release`) now fails on an internal range that is not `^` + the sibling's version, a published package depending on a private one, a version already on npm whose `src/` differs from this tree (`--registry`), a CLI that stamps a different version than it ships as, and a pack-install-run of every package that does not start `refract --version` (`--pack`). CI runs `--pack`; `publish.yml` runs `--registry --pack` and publishes in the order the script prints, `@refract-org/mcp` included. evidence-graph → 0.5.1, ingestion → 0.3.2, eval → 0.2.2, internal ranges moved to match.
 - **Publishing authentication.** v0.5.15 failed `ENEEDAUTH`: npm 10, bundled with Node 22, has no OIDC login, and no `NPM_TOKEN` was set. `publish.yml` installs npm ≥ 11.5.1 first, so trusted publishing works once it is configured for each package on npmjs.com; a token still works.
