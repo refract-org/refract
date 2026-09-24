@@ -283,7 +283,7 @@ async function fetchPackument(name: string): Promise<{
   "dist-tags"?: Record<string, string>;
   versions?: Record<string, { dist?: { tarball?: string } }>;
 } | null> {
-  const url = `${REGISTRY}/${name.replace("/", "%2f")}`;
+  const url = `${REGISTRY}/${name.replaceAll("/", "%2f")}`;
   const res = await fetch(url, { headers: { Accept: "application/json" } });
   if (res.status === 404) return null; // never published: nothing to compare
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
