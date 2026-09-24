@@ -68,9 +68,17 @@ export { classifyHeuristic } from "./heuristic-classifier.js";
 export type { ObservationDiff } from "./observation-differ.js";
 export { diffObservations } from "./observation-differ.js";
 export { buildPageMoveEvents, windowPageMoves } from "./page-move-detector.js";
-export type { ProtectionChange, ProtectionTracker } from "./protection-tracker.js";
+export type { ProtectionChange, ProtectionLogRecord, ProtectionTracker } from "./protection-tracker.js";
 export { protectionTracker } from "./protection-tracker.js";
 export { revertDetector } from "./revert-detector.js";
+export type { ParsedContent, RevisionEventDepth, RevisionEventOptions } from "./revision-events.js";
+export {
+  annotateEvents,
+  buildRevisionEvents,
+  computeStructuralDiffs,
+  detectEditorialSignals,
+  parseContent,
+} from "./revision-events.js";
 export type { SectionEvent, SectionLineage } from "./section-differ.js";
 export { buildSectionLineage, sectionDiffer } from "./section-differ.js";
 export type { SemanticEnrichmentResult } from "./semantic-enrichment.js";
@@ -96,11 +104,13 @@ export { buildParamChangeEvents, diffTemplateParams, templateTracker } from "./t
 export { buildWikilinkEvents, diffWikilinks, extractWikilinks } from "./wikilink-extractor.js";
 export type { HeadingPosition } from "./wikitext-parser.js";
 export {
+  buildSectionCharMap,
   countCitations,
   countKeywordMentions,
   deriveSectionHeading,
   extractAnchorSnippet,
   extractHeadingMap,
+  findSectionForText,
   sanitizeWikitext,
   stripWikitext,
 } from "./wikitext-parser.js";
