@@ -49,12 +49,10 @@ export async function runSnapshot(
   }
   console.log();
 
-  const sections = [...closest.content.matchAll(/^=+\s*(.+?)\s*=+$/gm)];
+  const sections = headingLines(closest.content);
   console.log(`Sections (${sections.length}):`);
-  for (const m of sections) {
-    const level = m[0].match(/^=+/)?.[0].length ?? 2;
-    const indent = "  ".repeat(level - 1);
-    console.log(`${indent}${m[1]}`);
+  for (const { level, name } of sections) {
+    console.log(`${"  ".repeat(level - 1)}${name}`);
   }
   console.log();
 
@@ -80,4 +78,25 @@ export async function runSnapshot(
   if (useCache && revisions.length > 0) {
     await saveRevisions(revisions, cacheDir);
   }
+}
+
+/**
+ * Lines that open and close with "=", with the name between the runs of "=".
+ * /^=+\s*(.+?)\s*=+$/gm split each line's whitespace between three quantifiers,
+ * which took time cubic in its length; a line that is only "=" and spaces,
+ * which that pattern printed as a section named "=", is skipped.
+ */
+export function headingLines(wikitext: string): Array<{ level: number; name: string }> {
+  const headings: Array<{ level: number; name: string }> = [];
+  for (const match of wikitext.matchAll(/^=.*$/gm)) {
+    const line = match[0];
+    if (!line.endsWith("=")) continue;
+    let start = 0;
+    while (line[start] === "=") start++;
+    let end = line.length;
+    while (end > start && line[end - 1] === "=") end--;
+    const name = line.slice(start, end).trim();
+    if (name) headings.push({ level: start, name });
+  }
+  return headings;
 }

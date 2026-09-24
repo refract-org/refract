@@ -183,3 +183,44 @@ describe("buildSourceLineage", () => {
     expect(src.authority).toBe("unrated");
   });
 });
+
+describe("citationTracker.extractCitations on hostile and edge-case markup", () => {
+  // Until 2026-09-24 these took time quadratic or cubic in the input: every
+  // unclosed "<ref" re-read the rest of the text, and the title pattern split
+  // whitespace between three quantifiers.
+  const timed = (text: string) => {
+    const start = performance.now();
+    const refs = citationTracker.extractCitations(text);
+    return { refs, ms: performance.now() - start };
+  };
+
+  it("stays linear on many unclosed openers", () => {
+    const { refs, ms } = timed(`e${"<ref/r".repeat(20000)}`);
+    expect(refs).toEqual([]);
+    expect(ms).toBeLessThan(1000);
+  });
+
+  it("stays linear on many openers sharing one closing bracket", () => {
+    const { refs, ms } = timed(`${"<ref".repeat(20000)}>`);
+    expect(refs).toEqual([]);
+    expect(ms).toBeLessThan(1000);
+  });
+
+  it("stays linear on a long run of whitespace after title=", () => {
+    // Followed by text, so the trim before the title search leaves the run in.
+    const { refs, ms } = timed(`<ref>TITLE=${"\t".repeat(3000)}x</ref>`);
+    expect(refs).toHaveLength(1);
+    expect(refs[0].title).toBeUndefined();
+    expect(ms).toBeLessThan(1000);
+  });
+
+  it("keeps the regex semantics it replaced", () => {
+    // A title with nothing before its delimiter is skipped for the next one.
+    expect(citationTracker.extractCitations("<ref>title=| Title = Found |</ref>")[0].title).toBe("Found");
+    // A closing tag may carry whitespace; <refx> is not a ref.
+    const refs = citationTracker.extractCitations('<refx>no</refx><ref name="a">x</ref \n>');
+    expect(refs.map((r) => [r.refName, r.raw])).toEqual([["a", '<ref name="a">x</ref \n>']]);
+    // A self-closing tag counts when "/" is its last non-space character.
+    expect(citationTracker.extractCitations("<ref name=b / >").map((r) => r.refName)).toEqual(["b"]);
+  });
+});

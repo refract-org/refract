@@ -2,24 +2,137 @@ import { createHash } from "node:crypto";
 import type { SourceAuthority, SourceLineage, SourceRecord, SourceType } from "@refract-org/evidence-graph";
 import type { CitationChange, CitationRef, CitationTracker } from "./index.js";
 
+// The three scans below replace regexes that took super-linear time on
+// unclosed or repeated markup: /<ref\b([^>]*?)>(.*?)<\/ref\s*>/gs and
+// /<ref\b([^>]*?)\/\s*>/g re-read the rest of the text from every "<ref" whose
+// tag did not close (quadratic in the number of openers), and
+// /title\s*=\s*([^|}\]]+?)(?:\s*[|}\]])/i split whitespace between three
+// quantifiers (cubic). Each returns exactly what its regex matched; the
+// positions of the next ">" and the next delimiter are carried forward rather
+// than searched for again.
+
+const WORD_CHAR = /[A-Za-z0-9_]/;
+const WHITESPACE = /\s/;
+
+/** Whether "<ref" at `open` ends at a word boundary, as `<ref\b` requires. */
+function refTagBoundary(text: string, open: number): boolean {
+  const next = open + 4;
+  return next >= text.length || !WORD_CHAR.test(text[next]);
+}
+
+/** The first `</ref\s*>` starting at or after `from`. */
+function findClosingRef(text: string, from: number): { start: number; end: number } | null {
+  let at = from;
+  for (;;) {
+    const start = text.indexOf("</ref", at);
+    if (start < 0) return null;
+    let i = start + 5;
+    while (i < text.length && WHITESPACE.test(text[i])) i++;
+    if (text[i] === ">") return { start, end: i + 1 };
+    at = start + 1;
+  }
+}
+
+/** Each match of /<ref\b([^>]*?)>(.*?)<\/ref\s*>/gs, in order. */
+function matchRefTags(text: string): Array<{ attrs: string; content: string; raw: string }> {
+  const tags: Array<{ attrs: string; content: string; raw: string }> = [];
+  let from = 0;
+  let gt = -1;
+  for (;;) {
+    const open = text.indexOf("<ref", from);
+    if (open < 0) break;
+    if (!refTagBoundary(text, open)) {
+      from = open + 1;
+      continue;
+    }
+    const attrsStart = open + 4;
+    if (gt < attrsStart) gt = text.indexOf(">", attrsStart);
+    // With no ">" or no closing tag after this opener, none follows a later one.
+    if (gt < 0) break;
+    const close = findClosingRef(text, gt + 1);
+    if (!close) break;
+    tags.push({
+      attrs: text.slice(attrsStart, gt),
+      content: text.slice(gt + 1, close.start),
+      raw: text.slice(open, close.end),
+    });
+    from = close.end;
+  }
+  return tags;
+}
+
+/** Each match of /<ref\b([^>]*?)\/\s*>/g, in order. */
+function matchSelfClosingRefs(text: string): Array<{ attrs: string; raw: string }> {
+  const tags: Array<{ attrs: string; raw: string }> = [];
+  let from = 0;
+  let gt = -1;
+  let slash = -1;
+  for (;;) {
+    const open = text.indexOf("<ref", from);
+    if (open < 0) break;
+    if (!refTagBoundary(text, open)) {
+      from = open + 1;
+      continue;
+    }
+    const attrsStart = open + 4;
+    if (gt < attrsStart) {
+      gt = text.indexOf(">", attrsStart);
+      if (gt < 0) break;
+      // The tag closes itself when the last non-space character before ">" is "/".
+      let k = gt - 1;
+      while (k >= 0 && WHITESPACE.test(text[k])) k--;
+      slash = text[k] === "/" ? k : -1;
+    }
+    if (slash >= attrsStart) {
+      tags.push({ attrs: text.slice(attrsStart, slash), raw: text.slice(open, gt + 1) });
+      from = gt + 1;
+    } else {
+      from = open + 1;
+    }
+  }
+  return tags;
+}
+
+/**
+ * /title\s*=\s*([^|}\]]+?)(?:\s*[|}\]])/i, trimmed: the value after the first
+ * "title" (in any ASCII case) followed by "=" and at least one character before
+ * the next "|", "}" or "]".
+ */
+function extractCitationTitle(content: string): string | undefined {
+  const lower = content.replace(/[A-Z]/g, (c) => c.toLowerCase());
+  let from = 0;
+  let delimiter = -1;
+  for (;;) {
+    const at = lower.indexOf("title", from);
+    if (at < 0) return undefined;
+    let i = at + 5;
+    while (i < content.length && WHITESPACE.test(content[i])) i++;
+    if (content[i] === "=") {
+      const valueStart = i + 1;
+      if (delimiter < valueStart) {
+        delimiter = valueStart;
+        while (delimiter < content.length && !"|}]".includes(content[delimiter])) delimiter++;
+        if (delimiter === content.length) return undefined;
+      }
+      if (delimiter > valueStart) return content.slice(valueStart, delimiter).trim();
+    }
+    from = at + 1;
+  }
+}
+
 export const citationTracker: CitationTracker = {
   extractCitations(wikitext: string): CitationRef[] {
     const refs: CitationRef[] = [];
     const seen = new Set<string>();
 
-    const refRegex = /<ref\b([^>]*?)>(.*?)<\/ref\s*>/gs;
-    let match: RegExpExecArray | null;
-
-    // biome-ignore lint/suspicious/noAssignInExpressions: Standard regex loop pattern
-    while ((match = refRegex.exec(wikitext)) !== null) {
-      const attrs = match[1];
-      const content = match[2].trim();
+    for (const tag of matchRefTags(wikitext)) {
+      const attrs = tag.attrs;
+      const content = tag.content.trim();
 
       const nameMatch = attrs.match(/name\s*=\s*["']?([^"'\s>]+)/i);
       const urlMatch = content.match(/url\s*=\s*([^\s|}\]]+)/i);
-      const titleMatch = content.match(/title\s*=\s*([^|}\]]+?)(?:\s*[|}\]])/i);
 
-      const raw = match[0];
+      const raw = tag.raw;
       const key = nameMatch ? nameMatch[1] : raw;
 
       if (seen.has(key)) continue;
@@ -28,16 +141,13 @@ export const citationTracker: CitationTracker = {
       refs.push({
         refName: nameMatch?.[1],
         url: urlMatch ? urlMatch[1].trim() : undefined,
-        title: titleMatch ? titleMatch[1].trim() : undefined,
+        title: extractCitationTitle(content),
         raw,
       });
     }
 
-    const selfClosingRegex = /<ref\b([^>]*?)\/\s*>/g;
-    // biome-ignore lint/suspicious/noAssignInExpressions: Standard regex loop pattern
-    while ((match = selfClosingRegex.exec(wikitext)) !== null) {
-      const attrs = match[1];
-      const nameMatch = attrs.match(/name\s*=\s*["']?([^"'\s>]+)/i);
+    for (const tag of matchSelfClosingRefs(wikitext)) {
+      const nameMatch = tag.attrs.match(/name\s*=\s*["']?([^"'\s>]+)/i);
       if (!nameMatch) continue;
 
       const key = nameMatch[1];
@@ -46,7 +156,7 @@ export const citationTracker: CitationTracker = {
 
       refs.push({
         refName: key,
-        raw: match[0],
+        raw: tag.raw,
       });
     }
 
