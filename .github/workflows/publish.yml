@@ -66,6 +66,7 @@ jobs:
           # Dependency order, from the same script that checked it. The list was
           # hand-written and left out @refract-org/mcp, which the CLI imports at
           # startup, so the next CLI would not have installed at all.
+          FAILED=""
           for pkg in $(bun scripts/check-release.ts --order); do
             echo "::group::Publishing $pkg"
             NAME=$(node -p "require('./$pkg/package.json').name")
@@ -78,10 +79,24 @@ jobs:
             if "$NPM" view "$NAME@$VERSION" version >/dev/null 2>&1; then
               echo "$NAME@$VERSION already published — skipping"
             else
-              # No `|| true`. A failed publish must fail the run: v0.5.12 reported
-              # success while every package 404'd on PUT (npm's response to an
+              # A failed publish still fails the run — v0.5.12 reported success
+              # while every package 404'd on PUT (npm's response to an
               # unauthorized write), so the tag looked released and was not.
-              ( cd "$pkg" && "$NPM" publish --access public --provenance )
+              # But it must not stop the packages after it: v0.5.16 died at
+              # @refract-org/mcp (a new package, which cannot use trusted
+              # publishing until it exists on npm) and left eval and cli
+              # unpublished behind it. Attempt every package, then fail once.
+              if ( cd "$pkg" && "$NPM" publish --access public --provenance ); then
+                echo "$NAME@$VERSION published"
+              else
+                echo "::error::Publish failed for $NAME@$VERSION"
+                FAILED="$FAILED $NAME@$VERSION"
+              fi
             fi
             echo "::endgroup::"
           done
+
+          if [ -n "$FAILED" ]; then
+            echo "Publish failed for:$FAILED"
+            exit 1
+          fi
