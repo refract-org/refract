@@ -21,9 +21,18 @@ bun add @refract-org/evidence-graph
 - `createClaimIdentity(pageTitle, claimText)` — deterministic hash for claim dedup
 - `createEventIdentity(pageTitle, eventType, revisionRange)` — deterministic event fingerprint
 
+### Verification bundles (0.5.1+)
+
+Merkle-tree proofs that an analysis output came from a given set of inputs, verifiable offline later.
+
+- `createVerificationBundle(...)` — package a replay manifest, its events, and Merkle proofs
+- `verifyVerificationBundle(bundle)` — re-check leaf hashes, manifest hash and proof chains against the Merkle root
+- `hashLeaf`, `getMerkleProof`, `verifyMerkleProof` — the proof primitives
+- Types: `ReplayManifest`, `MerkleProof`, `VerificationBundle`
+
 ```ts
 import type { EvidenceEvent, Revision } from "@refract-org/evidence-graph";
-import { createClaimIdentity } from "@refract-org/evidence-graph";
+import { createClaimIdentity, createVerificationBundle } from "@refract-org/evidence-graph";
 ```
 
 [Refract](https://github.com/refract-org/refract) · [Docs](https://github.com/refract-org/refract-docs) · [npm](https://www.npmjs.com/package/@refract-org/evidence-graph)

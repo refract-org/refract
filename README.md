@@ -75,7 +75,7 @@ Built and maintained by [NextConsensus](https://nextconsensus.com) and [Kanav Ja
 - Node.js 20+ or Bun 1.3+
 - A page title. English Wikipedia is the default; for any other MediaWiki (Wikibooks, a Fandom wiki, a private wiki) pass its `api.php` URL with `--api`. A page URL is not parsed — it is looked up as a title and finds nothing.
 
-> **npm status, 2026-09-24:** `@refract-org/cli@0.5.7`, the newest CLI on npm, does not start. It was published against analyzer and ingestion code that never reached npm (its `^0.3.0` range on analyzers means 0.3.x only). Until the next release is published, run the CLI [from source](#from-source). The library packages on npm — `evidence-graph`, `ingestion`, `analyzers` — install and import normally. `bun run check:release` now fails a release that would repeat this; see [CHANGELOG](./CHANGELOG.md).
+> **npm status, 2026-09-25:** The library packages were republished with matching source and verified to install and export their documented API — `@refract-org/evidence-graph@0.5.1`, `@refract-org/ingestion@0.3.2`, `@refract-org/analyzers@0.5.1`. The CLI is still `0.5.7` on npm and does not start, and the `0.5.16` publish is pending on bootstrapping `@refract-org/mcp` (a new package — trusted publishing cannot authenticate it until it exists on npm). Until that lands, run the CLI [from source](#from-source). `bun run check:release` now fails a release that would repeat this; see [CHANGELOG](./CHANGELOG.md).
 
 ### One-shot analysis
 
