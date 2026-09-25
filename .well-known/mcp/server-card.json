@@ -1,6 +1,6 @@
 {
   "name": "refract",
-  "version": "0.5.15",
+  "version": "0.5.16",
   "description": "Deterministic observation engine for knowledge change. Analyzes Wikipedia and MediaWiki revision histories, tracks claims and citations across time, and emits structured provenance events with semantic enrichment.",
   "website": "https://github.com/refract-org/refract",
   "documentation": "https://github.com/refract-org/refract#readme",
