@@ -59,8 +59,8 @@ refract analyze "Internal Policy" --api https://corp.example.com/w/api.php --api
 # Basic auth
 refract analyze "Internal Policy" --api https://corp.example.com/w/api.php --api-user "user" --api-password "pass"
 
-# OAuth2
-OAUTH_CLIENT_ID="..." OAUTH_CLIENT_SECRET="..." \
+# Client-credential headers (sent to whatever --api names, so set them only for that wiki)
+REFRACT_OAUTH_CLIENT_ID="..." REFRACT_OAUTH_CLIENT_SECRET="..." \
   refract analyze "Internal Policy" --api https://corp.example.com/w/api.php
 ```
 

@@ -85,3 +85,38 @@ describe("createReplayManifest", () => {
     expect(a.manifestHash).toBe(b.manifestHash);
   });
 });
+
+describe("VerificationBundle", () => {
+  it("creates a bundle and verifies successfully", async () => {
+    const { createVerificationBundle, verifyVerificationBundle } = await import("../replay-manifest.js");
+    const bundle = createVerificationBundle({
+      pageTitle: "Test",
+      analyzerVersions: { "revert-detector": "0.1.0" },
+      revisions: [rev],
+      events: [event],
+    });
+
+    expect(bundle.format).toBe("refract-verification-bundle/v1");
+    expect(bundle.proofs).toHaveLength(1);
+
+    const verification = verifyVerificationBundle(bundle);
+    expect(verification.valid).toBe(true);
+    expect(verification.errors).toHaveLength(0);
+  });
+
+  it("detects tampered event in bundle", async () => {
+    const { createVerificationBundle, verifyVerificationBundle } = await import("../replay-manifest.js");
+    const bundle = createVerificationBundle({
+      pageTitle: "Test",
+      analyzerVersions: { "revert-detector": "0.1.0" },
+      revisions: [rev],
+      events: [event],
+    });
+
+    // Tamper with the manifest root
+    bundle.manifest.merkleRoot = "0".repeat(64);
+    const verification = verifyVerificationBundle(bundle);
+    expect(verification.valid).toBe(false);
+    expect(verification.errors.length).toBeGreaterThan(0);
+  });
+});

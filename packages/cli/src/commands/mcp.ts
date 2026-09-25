@@ -3,6 +3,7 @@ import { buildInferencePrompt, DEFAULT_ANALYZER_CONFIG } from "@refract-org/evid
 import type { AuthConfig } from "@refract-org/ingestion";
 import { createMcpServer, type McpServerOptions } from "@refract-org/mcp";
 import { OpenAICompatibleProvider } from "../inference-provider.js";
+import { REFRACT_VERSION } from "../version.js";
 import { runAnalyze } from "./analyze.js";
 import { runClaim, runClaimHistory } from "./claim.js";
 
@@ -31,7 +32,7 @@ function sendRequest(request: {
 }
 
 const CLIENT_NAME = "refract-mcp";
-const CLIENT_VERSION = "0.5.14";
+const CLIENT_VERSION = REFRACT_VERSION;
 const PROTOCOL_VERSION = "2025-06-18";
 
 let _clientCapabilities: Record<string, unknown> | null = null;

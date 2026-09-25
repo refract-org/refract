@@ -1,6 +1,6 @@
 {
   "name": "@refract-org/cli",
-  "version": "0.5.15",
+  "version": "0.5.16",
   "mcpName": "io.github.refract-org/refract",
   "type": "module",
   "private": false,
@@ -31,13 +31,13 @@
   },
   "dependencies": {
     "@refract-org/mcp": "^0.1.0",
-    "@refract-org/ingestion": "^0.3.1",
+    "@refract-org/ingestion": "^0.3.2",
     "@refract-org/analyzers": "^0.5.1",
-    "@refract-org/evidence-graph": "^0.5.0",
+    "@refract-org/evidence-graph": "^0.5.1",
     "commander": "^12.0.0"
   },
   "optionalDependencies": {
-    "@refract-org/eval": "^0.2.0",
+    "@refract-org/eval": "^0.2.2",
     "parquetjs-lite": "^0.8.7"
   },
   "devDependencies": {},

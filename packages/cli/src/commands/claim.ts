@@ -1,4 +1,4 @@
-import { stripWikitext } from "@refract-org/analyzers";
+import { findSectionForText, stripWikitext } from "@refract-org/analyzers";
 import type { ClaimState, Revision } from "@refract-org/evidence-graph";
 import { createClaimIdentity } from "@refract-org/evidence-graph";
 import type { AuthConfig, RevisionOptions } from "@refract-org/ingestion";
@@ -52,7 +52,9 @@ export async function runClaimHistory(
   }
 
   if (revisions.length === 0) {
-    revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "newer" });
+    // Newest first, then sorted below. "newer" with a limit and no start returns
+    // the page's first revisions, so a claim in the current text read as absent.
+    revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "older" });
 
     if (useCache && revisions.length > 0) {
       await saveRevisions(revisions, cacheDir);
@@ -211,7 +213,9 @@ export async function runClaim(
   }
 
   if (revisions.length === 0) {
-    revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "newer" });
+    // Newest first, then sorted below. "newer" with a limit and no start returns
+    // the page's first revisions, so a claim in the current text read as absent.
+    revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "older" });
     console.log(`Fetched ${revisions.length} revisions.\n`);
 
     if (useCache && revisions.length > 0) {
@@ -322,57 +326,4 @@ export function fuzzyFindText(claimText: string, plainText: string, preNormalize
   }
 
   return "";
-}
-
-export function findSectionForText(
-  wikitext: string,
-  plainText: string,
-  preStripped?: string,
-  sectionCharMap?: Array<{ charOffset: number; section: string }>,
-): string {
-  const strippedBase = preStripped ?? stripWikitext(wikitext);
-  const stripped = strippedBase.toLowerCase().replace(/\s+/g, " ");
-  const targetIdx = stripped.indexOf(plainText.toLowerCase().replace(/\s+/g, " ").trim());
-
-  if (targetIdx < 0) return "(lead)";
-
-  if (sectionCharMap) {
-    for (let i = sectionCharMap.length - 1; i >= 0; i--) {
-      if (sectionCharMap[i].charOffset <= targetIdx) {
-        return sectionCharMap[i].section;
-      }
-    }
-    return "(lead)";
-  }
-
-  const headerRegex = /^(=+)\s*([^=]+?)\s*\1$/gm;
-  const lines = wikitext.split("\n");
-  let currentSection = "(lead)";
-  let charCount = 0;
-
-  for (const line of lines) {
-    const match = headerRegex.exec(line);
-    if (match) {
-      if (charCount > targetIdx) return currentSection;
-      currentSection = match[2].trim();
-    }
-    charCount += line.length + 1;
-  }
-
-  return currentSection;
-}
-
-export function buildSectionCharMap(wikitext: string): Array<{ charOffset: number; section: string }> {
-  const lines = wikitext.split("\n");
-  const headerRegex = /^(=+)\s*([^=]+?)\s*\1$/;
-  const map: Array<{ charOffset: number; section: string }> = [{ charOffset: 0, section: "(lead)" }];
-  let charCount = 0;
-  for (const line of lines) {
-    const match = headerRegex.exec(line);
-    if (match) {
-      map.push({ charOffset: charCount, section: match[2].trim() });
-    }
-    charCount += line.length + 1;
-  }
-  return map;
 }

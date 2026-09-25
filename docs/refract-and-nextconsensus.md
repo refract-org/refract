@@ -1,35 +1,34 @@
 # How Refract Relates to NextConsensus
 
-Refract replays how a claim changed over time. NextConsensus judges what that history means for a specific decision.
+Refract records how a public source changed. [NextConsensus](https://nextconsensus.com), which builds and maintains Refract, is the first system downstream of it. This page says what crosses the boundary between the two and what does not. What NextConsensus does with the record is described by NextConsensus, on its own site, not here.
 
 ## The Split
 
 | | Refract | NextConsensus |
 |---|---------|--------------|
-| **Type** | Open infrastructure (AGPL-3.0) | Commercial healthcare platform |
-| **Scope** | Generic source observation | Healthcare claim review |
-| **Primitive** | Claim-state / source events | Scored claim postures |
-| **Object** | Citation, wording, section, and template changes | Dated claim assessments pinned to evidence |
-| **Output** | Deterministic event stream | Review-ready briefs and evidence maps |
-| **Question** | "How did this claim or source change over time?" | "Does this claim still hold up — and what would change that?" |
-| **User** | Developer / AI system | Coverage, formulary, market-access, and review teams |
-| **Moat** | Open substrate + ecosystem | Claim-to-evidence mapping and review workflows |
+| **Type** | Open infrastructure (AGPL-3.0) | Commercial, closed |
+| **Scope** | Domain-neutral observation of versioned sources | Healthcare: specific claims and the institutions that act on them |
+| **Writes** | A deterministic, byte-reproducible event stream | Its own record, in its own repositories |
+| **Question** | "How did this source change, and when?" | Its own — see [nextconsensus.com](https://nextconsensus.com) |
+| **User** | Developers and AI systems | NextConsensus's customers |
 
-## The Principle
+Refract's events are observations. Which change matters, to whom, and what might follow from it is decided downstream — in NextConsensus or in any other consumer — and Refract is built so that it cannot make that call: see [repository boundary](./repository-boundary.md).
 
-Refract replays claim history. NextConsensus judges what that history means now.
+## How NextConsensus Consumes Refract
 
-Refract is domain-neutral. It works on Wikipedia, fan wikis, policy documents, regulatory feeds, and any versioned source. It does not know what a "coverage decision" or a "market-access claim" is. It knows that a sentence appeared, a citation changed, a section moved, a dispute marker was added — across time.
-
-NextConsensus adds healthcare-specific sources, review workflows, and decision-context mapping. It turns "a citation was removed" into "the evidence binding for this coverage claim may need review."
+- **Three library packages.** NextConsensus imports `@refract-org/evidence-graph`, `@refract-org/ingestion` and `@refract-org/analyzers` from npm (`^0.5.0`, `^0.3.1`, `^0.5.0`) and nothing else from Refract. Some of its scripts also shell out to the `refract` CLI; those cannot run from npm until the next release, because the published `@refract-org/cli@0.5.7` does not start (see [COMPATIBILITY.md](../COMPATIBILITY.md)).
+- **One adapter file per repository.** In each NextConsensus repository that uses Refract, a single file is the only place `@refract-org/*` is imported, and everything else imports from that file. This is the pattern [AGENTS.md](../AGENTS.md) recommends to every consumer: an upgrade touches one file, and a diff of that file is the whole of what changed at the boundary.
+- **Events.** NextConsensus's app derives events itself, from revisions it fetches, with a hand copy of the CLI's per-pair diff; the copy had drifted from the CLI. From analyzers 0.5.1 that diff is exported as `buildRevisionEvents`, which the CLI also calls. Switching to it changes the shape of the events the app records, so it is a migration on the NextConsensus side, not an upgrade.
+- **What stays downstream.** Source weighting, name anonymization, domain classification of edits, and anything else that interprets an event live in those adapter files and the code behind them. None of it comes back into Refract, and `bun run check:boundaries` fails the build if domain vocabulary appears in this repository's packages.
+- **Versions.** A consumer should read `schemaVersion` off each event rather than infer it from a package version — see [SCHEMA_VERSIONING.md](../SCHEMA_VERSIONING.md) for why the published evidence-graph 0.5.0 still stamps `"0.4.0"`.
 
 ## Why the Boundary Matters
 
-Refract is open to make the observation layer verifiable. Anyone can inspect, test, extend, or fork it. This builds trust in the underlying provenance.
+Refract is open so that the observation layer can be inspected rather than trusted. Anyone can read, test, extend or fork it.
 
-NextConsensus is proprietary because it contains healthcare-specific source coverage, customer annotations, and review workflows — assets that compound with use and are expensive to replicate.
+NextConsensus keeps its domain-specific source coverage, customer annotations and review workflows closed, because they are its business and compound with use.
 
-The split also protects NextConsensus customers. A pharma or payer organization using NextConsensus can verify that the underlying observation events are correct by inspecting Refract. They cannot access another customer's proprietary claim reviews.
+The split also protects the people NextConsensus works with. Anyone can take the same source revisions, run the same Refract version, and get the same events — the record is checkable rather than a black box. That is tamper-evidence over an observation, not a claim that any reading of it is correct, and it gives no one access to another customer's work.
 
 ## What Refract Does Not Do
 
@@ -37,6 +36,4 @@ Refract is not a truth engine, fact-checker, medical device, investment model, o
 
 ## For Developers
 
-If you want to build a provenance-aware system on top of Refract, start with the [README](../README.md) and [architecture docs](./ARCHITECTURE.md). The event schema is published. The analyzer pipeline is deterministic and byte-reproducible. The CLI, adapters, and replay primitives are documented.
-
-If you want to check whether a healthcare claim still holds up against the current evidence, visit [nextconsensus.com](https://nextconsensus.com).
+To build a provenance-aware system on top of Refract, start with the [README](../README.md) and the [architecture notes](../ARCHITECTURE.md). The event schema is published and versioned, the analyzer pipeline is deterministic, and the CLI, adapters and replay primitives are documented. [COMPATIBILITY.md](../COMPATIBILITY.md) lists which versions are on npm and which consumers depend on them.

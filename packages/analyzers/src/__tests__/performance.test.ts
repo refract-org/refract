@@ -1,12 +1,28 @@
 import { citationTracker, sectionDiffer } from "@refract-org/analyzers";
 import { MediaWikiClient } from "@refract-org/ingestion";
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { FAKE_API, installFakeMediaWiki } from "../../../../tests/support/fake-mediawiki.js";
 
-const API = "https://en.wikipedia.org/w/api.php";
-
+/**
+ * The measured window starts after the fetch and covers only section and
+ * citation diffing, so the network was never part of what this asserts — it was
+ * just where the wikitext came from. Serving that from a fixture makes the
+ * timing bound mean what it says, and stops a 5,000 ms assertion from sharing a
+ * test with an unbounded HTTP request.
+ */
 describe("performance: pipeline throughput", () => {
-  it("processes detailed analysis of a small page within memory and time bounds", { timeout: 30000 }, async () => {
-    const client = new MediaWikiClient({ apiUrl: API });
+  let restore: () => void;
+
+  beforeAll(() => {
+    restore = installFakeMediaWiki();
+  });
+
+  afterAll(() => {
+    restore();
+  });
+
+  it("processes detailed analysis of a small page within memory and time bounds", async () => {
+    const client = new MediaWikiClient({ apiUrl: FAKE_API });
     const revisions = await client.fetchRevisions("Earth", { limit: 10 });
 
     const startTime = performance.now();

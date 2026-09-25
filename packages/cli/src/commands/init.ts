@@ -3,13 +3,8 @@ import { MediaWikiClient } from "@refract-org/ingestion";
 
 export async function runInit(): Promise<void> {
   console.log();
-  console.log("  ╔══════════════════════════════════════╗");
-  console.log("  ║       Refract — claim-history       ║");
-  console.log("  ║       layer for public knowledge     ║");
-  console.log("  ╚══════════════════════════════════════╝");
-  console.log();
   console.log("  Refract observes how Wikipedia pages change over time.");
-  console.log('  It answers "what changed?" — deterministically, reproducibly.');
+  console.log('  It answers "what changed?", and the same revisions always give the same answer.');
   console.log();
   console.log('  Running a quick analysis of "Earth" to show you what it does...');
   console.log();
@@ -33,7 +28,7 @@ export async function runInit(): Promise<void> {
     const types = [...new Set(allChanges.map((c) => c.changeType))];
     console.log(`  Found ${allChanges.length} section changes (${types.join(", ")})`);
   } catch {
-    console.log("  (Could not fetch live data — offline mode)");
+    console.log('  (Could not run the sample analysis of "Earth"; check that Wikipedia is reachable.)');
   }
 
   console.log();

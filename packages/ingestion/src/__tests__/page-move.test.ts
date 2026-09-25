@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeLive } from "../../../../tests/support/live.js";
 import { MediaWikiClient } from "../mediawiki-client.js";
 
-describe("Page move fetcher", () => {
+describeLive("Page move fetcher", () => {
   it("fetches page moves and returns correctly shaped results", { timeout: 30000 }, async () => {
     const client = new MediaWikiClient({ minDelayMs: 100 });
     const moves = await client.fetchPageMoves("Earth");

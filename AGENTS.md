@@ -33,6 +33,7 @@ bun install --frozen-lockfile
 bun run build      # tsc -b (all packages)
 bun run typecheck  # tsc --noEmit
 bun run test       # vitest run (all packages)
+REFRACT_TEST_LIVE=1 bun run test   # also run the MediaWiki API contract tests
 bun run lint       # biome lint packages/
 ```
 
@@ -67,7 +68,8 @@ See `docs/repository-boundary.md` and `docs/refract-and-nextconsensus.md`.
 
 ## MCP Server
 
-Refract exposes 5 MCP tools: `analyze`, `claim`, `export`, `cron`, `classify`.
+Refract exposes 6 MCP tools: `analyze`, `claim`, `export`, `cron`, `classify`,
+`get_statement_history`.
 Start with `refract mcp`. Agents connect via stdio.
 See `docs/mcp.md` for client configuration (Claude Desktop, Cline, etc.).
 

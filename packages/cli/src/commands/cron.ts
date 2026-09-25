@@ -54,6 +54,29 @@ function mergeObservationReports(prior: ObservationReport | null, current: Obser
   };
 }
 
+function readPriorObservation(obsFile: string): EvidenceEvent[] {
+  if (!existsSync(obsFile)) return [];
+  try {
+    return JSON.parse(readFileSync(obsFile, "utf-8")) as EvidenceEvent[];
+  } catch (err) {
+    console.error("refract: cron: failed to read prior observation file", err);
+    return [];
+  }
+}
+
+/**
+ * Prior events this run could have seen again. Strictly after the window's
+ * start: an event at the start itself is the edit into the first revision of
+ * the window, whose parent lies before it, so a windowed analysis never
+ * reproduces it — and when the window starts at the last prior event, that
+ * event would otherwise be reported resolved on every run.
+ */
+function withinWindow(events: EvidenceEvent[], fromTimestamp: string | undefined): EvidenceEvent[] {
+  if (!fromTimestamp) return events;
+  const from = new Date(fromTimestamp).getTime();
+  return events.filter((e) => new Date(e.timestamp).getTime() > from);
+}
+
 export async function runCron(
   pagesFile: string,
   intervalHours?: number,
@@ -83,25 +106,27 @@ export async function runCron(
     const safeName = title.replace(/[^a-zA-Z0-9_-]/g, "_");
     const obsFile = join(obsDir, `${safeName}.json`);
 
-    let fromTimestamp: string | undefined;
+    // The prior observation is read before analysis runs, and cron writes its
+    // own afterwards. It used to be read after runAnalyze, whose --since path
+    // overwrites ~/.wikihistory/observations/<page>.json with the events it
+    // just produced: with the default directory cron diffed the current run
+    // against itself and never found a new event, and with --cache-dir it read
+    // a directory nothing wrote, so every run was "baseline established".
+    const hadPrior = existsSync(obsFile);
+    const priorEvents = readPriorObservation(obsFile);
     let priorObservationAt: string | null = null;
+    let fromTimestamp: string | undefined;
 
     if (intervalHours !== undefined && intervalHours > 0) {
       const d = new Date(Date.now() - intervalHours * 60 * 60 * 1000);
       fromTimestamp = d.toISOString();
+    } else if (priorEvents.length > 0) {
+      const lastTimestamp = priorEvents[priorEvents.length - 1].timestamp;
+      priorObservationAt = lastTimestamp;
+      fromTimestamp = lastTimestamp;
     } else {
-      try {
-        const raw = readFileSync(obsFile, "utf-8");
-        const priorEvents = JSON.parse(raw) as EvidenceEvent[];
-        if (priorEvents.length > 0) {
-          const lastTimestamp = priorEvents[priorEvents.length - 1].timestamp;
-          priorObservationAt = lastTimestamp;
-          fromTimestamp = lastTimestamp;
-        }
-      } catch {
-        const d = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        fromTimestamp = d.toISOString();
-      }
+      const d = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      fromTimestamp = d.toISOString();
     }
 
     console.log(`  ${title}: observing since ${fromTimestamp ?? "beginning"}...`);
@@ -119,16 +144,20 @@ export async function runCron(
       auth,
     );
 
-    let priorEvents: EvidenceEvent[] = [];
-    try {
-      const raw = readFileSync(obsFile, "utf-8");
-      priorEvents = JSON.parse(raw) as EvidenceEvent[];
-    } catch (err) {
-      console.error("refract: cron: failed to read prior observation file", err);
-    }
-
-    const isFirstObservation = priorEvents.length === 0;
-    const obsDiff = diffObservations(priorEvents, events);
+    const isFirstObservation = !hadPrior;
+    // New is judged against everything seen before. Resolved is judged only
+    // against prior events inside this run's window: one outside it was not
+    // looked at this time, which is not the same as having gone away.
+    const seen = diffObservations(priorEvents, events);
+    const obsDiff = {
+      new: seen.new,
+      unchanged: seen.unchanged,
+      resolved: diffObservations(withinWindow(priorEvents, fromTimestamp), events).resolved,
+    };
+    // A quiet run keeps the previous observation as the next run's anchor,
+    // rewriting it if analysis emptied the file on the way.
+    const keep = events.length > 0 || !hadPrior ? events : priorEvents;
+    writeFileSync(obsFile, JSON.stringify(keep, null, 2), "utf-8");
 
     const report: CronReport = {
       pageTitle: title,

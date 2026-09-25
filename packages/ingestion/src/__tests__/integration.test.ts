@@ -1,9 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { FAKE_API, installFakeMediaWiki } from "../../../../tests/support/fake-mediawiki.js";
+import { describeLive } from "../../../../tests/support/live.js";
 import { MediaWikiClient } from "../mediawiki-client.js";
 
 const STABLE_PAGE = "Earth";
 
-describe("Integration: ingestion + analyzers", () => {
+/**
+ * Split by what each test is actually about. The first asserts that a revision
+ * and a diff coming back from MediaWiki carry the fields this client promises —
+ * a claim about Wikipedia's response, which only the real API can settle. The
+ * other two are about Refract's own analyzers, and a fixture serves them
+ * without weakening anything.
+ */
+describeLive("Integration: MediaWiki response contract", () => {
   it("fetches revisions for a stable page and produces valid shape", { timeout: 60000 }, async () => {
     const client = new MediaWikiClient({ minDelayMs: 100 });
     const revisions = await client.fetchRevisions(STABLE_PAGE, {
@@ -59,9 +68,21 @@ describe("Integration: ingestion + analyzers", () => {
       }
     }
   });
+});
 
-  it("section differ extracts sections from revision content", { timeout: 30000 }, async () => {
-    const client = new MediaWikiClient();
+describe("Integration: analyzers over revision content", () => {
+  let restore: () => void;
+
+  beforeAll(() => {
+    restore = installFakeMediaWiki();
+  });
+
+  afterAll(() => {
+    restore();
+  });
+
+  it("section differ extracts sections from revision content", async () => {
+    const client = new MediaWikiClient({ apiUrl: FAKE_API });
     const revisions = await client.fetchRevisions(STABLE_PAGE, {
       limit: 1,
       direction: "newer",

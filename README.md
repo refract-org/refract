@@ -2,9 +2,7 @@
 
 # Refract
 
-**Open infrastructure for agent-readable knowledge change. Turns source histories into replayable semantic change events.**
-
-**Turn document histories into claim-state timelines.**
+**A deterministic observation engine for revision histories. It reads a page's edits and emits a typed event for each change.**
 
 [![CI](https://github.com/refract-org/refract/actions/workflows/ci.yml/badge.svg)](https://github.com/refract-org/refract/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/release/refract-org/refract)](https://github.com/refract-org/refract/releases)
@@ -17,33 +15,50 @@
 
 ## What does it do?
 
-Given a Wikipedia page, Refract produces a structured event stream showing **what changed, when, and how** — every sentence that appeared, was removed, or was modified; every citation that shifted; every revert and edit cluster.
+Given a Wikipedia page, Refract produces a structured event stream showing **what changed, when, and how** — every sentence that appeared, was removed, or was modified; every citation that shifted.
 
 ```bash
-npx @refract-org/cli analyze "Climate change" --brief
+npx @refract-org/cli analyze "Semaglutide" --depth brief
 ```
 
 Output:
 
 ```
-sentence_first_seen  | 2026-01-15 | "Climate change has led to increased frequency of extreme weather events."
-sentence_modified    | 2026-03-02 | "Climate change has intensified..." (edit magnitude: 0.31)
-citation_added       | 2026-03-02 | [IPCC AR6 Report] → paragraph 4
-sentence_removed     | 2026-04-10 | "Some researchers dispute..." (reverted next edit)
-revert               | 2026-04-11 | Full revert of 2026-04-10 edit (edit cluster: 3 edits in 2h)
+Analyzing "Semaglutide" at depth: brief...
+Fetching revisions from Wikipedia...
+Fetched 20 revisions.
+Correlated 4 talk page discussions.
+
+────────────────────
+  Analysis Results
+────────────────────
+  Page:    Semaglutide
+  Events:  203
+
+  ○ section changed (rev 714793761→714794084) [(lead)]
+    change=modified
+  ◇ template added (rev 714793761→714794084) [body]
+    name=R with possibilities type=added
+  ◇ wikilink added (rev 714794084→740186843) [body]
+    target=glucagon-like peptide-1 receptor agonist
+  ◇ wikilink removed (rev 714794084→740186843) [body]
+    target=glucagon-like peptide-1 agonist
+  ○ section changed (rev 714794084→740186843) [(lead)]
+    change=modified
+  ● sentence introduced (rev 714794084→740186843) [(lead)]
+    sentence_length=50
+  ● sentence removed (rev 714794084→740186843) [(lead)]
+    sentence_length=40
+  ◆ citation added (rev 740186843→781025475) [body]
+    type=added
+  … 195 more events
 ```
 
-<p align="center">
-  <img src="assets/refract-demo.gif" alt="Refract CLI analyzing a Wikipedia page" width="700" style="border-radius: 8px;">
-</p>
-
-No model. No API. **Byte-reproducible** — the same source produces the same events every time. The claim is published, not just asserted: a [hash-pinned ground-truth corpus](BENCHMARK.md#ground-truth-corpus) of 16,146 events across ten benchmark pages ships as a [release asset](https://github.com/refract-org/refract/releases/tag/benchmark-corpus-2026-08-27), reproducible byte-for-byte from the manifest bounds.
+No model is called, and the same source produces the same events on every run. A [hash-pinned ground-truth corpus](BENCHMARK.md#ground-truth-corpus) of 16,146 events across ten benchmark pages ships as a [release asset](https://github.com/refract-org/refract/releases/tag/benchmark-corpus-2026-08-27), reproducible byte-for-byte from the manifest bounds.
 
 Refract ingests versioned sources (MediaWiki, text files), computes structural and semantic change events, tracks claims and citations across time, and emits structured provenance data that downstream systems can query, replay, and audit.
 
 Works on any versioned text source: Wikipedia, regulatory documents, clinical guidelines, trial registries, policy archives, and legal texts. Refract replays how a claim changed over time. Downstream systems — like [NextConsensus](https://nextconsensus.com) — decide what that history means.
-
-A vector search tells you what's in the current document. Refract tells you when it got there, what it replaced, and whether it survived.
 
 Most knowledge systems answer *what does this source say now?* Refract helps answer: *what changed, when, where, and what did the record say at a specific point in time?*
 
@@ -58,17 +73,19 @@ Built and maintained by [NextConsensus](https://nextconsensus.com) and [Kanav Ja
 ### Prerequisites
 
 - Node.js 20+ or Bun 1.3+
-- A MediaWiki URL (Wikipedia, Wikibooks, any public wiki)
+- A page title. English Wikipedia is the default; for any other MediaWiki (Wikibooks, a Fandom wiki, a private wiki) pass its `api.php` URL with `--api`. A page URL is not parsed — it is looked up as a title and finds nothing.
+
+> **npm status, 2026-09-25:** The library packages were republished with matching source and verified to install and export their documented API — `@refract-org/evidence-graph@0.5.1`, `@refract-org/ingestion@0.3.2`, `@refract-org/analyzers@0.5.1`. The CLI is still `0.5.7` on npm and does not start, and the `0.5.16` publish is pending on bootstrapping `@refract-org/mcp` (a new package — trusted publishing cannot authenticate it until it exists on npm). Until that lands, run the CLI [from source](#from-source). `bun run check:release` now fails a release that would repeat this; see [CHANGELOG](./CHANGELOG.md).
 
 ### One-shot analysis
 
 ```bash
 # Using npx (no install required)
-npx @refract-org/cli analyze "https://en.wikipedia.org/wiki/Artificial_intelligence" --brief
+npx @refract-org/cli analyze "Artificial intelligence" --depth brief
 
 # Or install globally
 npm install -g @refract-org/cli
-refract analyze "Quantum computing" --depth forensic --format ndjson
+refract analyze "Quantum computing" --depth forensic
 ```
 
 ### Using the Python SDK
@@ -97,8 +114,9 @@ print(df.groupby("event_type").size())
 ```bash
 git clone https://github.com/refract-org/refract.git
 cd refract
-npm install
-npx refract analyze "https://en.wikipedia.org/wiki/Machine_learning" --brief
+bun install
+bun run build
+node packages/cli/dist/src/cli.js analyze "Machine learning" --depth brief
 ```
 
 ---
@@ -118,7 +136,7 @@ Refract emits **26 deterministic event types** from versioned sources:
 | **Page metadata** | `page_moved`, `protection_changed` |
 | **Talk page** | `talk_page_correlated`, `talk_thread_opened`, `talk_thread_archived`, `talk_reply_added`, `talk_activity_spike` |
 
-## Who This Is For
+## Who this is for
 
 - **Investigative journalists** — trace how a claim about a public figure evolved
   across revision history: when it was added, who softened it, when sources
@@ -136,7 +154,7 @@ Refract emits **26 deterministic event types** from versioned sources:
 - **Knowledge graph engineers** — extract entity and relationship changes across revision history for evolving ontologies
 - **Publishers & platform trust teams** — monitor how claims spread, get cited, and stabilize across the public record
 
-## What Downstream Systems Build
+## What downstream systems build
 
 Each consumer brings their own interpretation layer on top of Refract's deterministic event stream:
 
@@ -156,7 +174,7 @@ Each consumer brings their own interpretation layer on top of Refract's determin
 The common architecture: **Refract extracts the mechanical facts. The downstream system interprets what those facts mean for its domain.** No interpretation enters Refract's pipeline; no consumer re-extracts from raw revision history.
 
 
-## Why Refract Over Raw Wikipedia API?
+## Why Refract over raw Wikipedia API?
 
 You could write a script that calls the Wikipedia API and parses diffs.
 Many people do. Here is what Refract gives you that a raw script does not:
@@ -174,15 +192,16 @@ Many people do. Here is what Refract gives you that a raw script does not:
 | Your results change when you re-run | Byte-reproducible — same input, same output every time |
 | You build your own timeline | Timeline builder with claim lifecycle tracking |
 
-Refract is not magic. It is the 800+ lines of brittle Wikipedia analysis code
-you would otherwise write and maintain, packaged as a deterministic,
-versioned, testable engine. See `examples/04-from-scratch-to-refract.ts`
-for a side-by-side comparison.
+Refract is the Wikipedia analysis code you would otherwise write and maintain
+yourself — a revision fetcher, section, citation and template parsers, a revert
+detector — packaged as versioned, tested libraries.
+`examples/04-from-scratch-to-refract.ts` lists those pieces and then runs the
+Refract analyzers that replace them.
 
 
 ## Complementary technologies
 
-Refract pairs naturally with modern tools. The event stream is standard NDJSON — anything that reads JSON or speaks HTTP can consume it. See the [integrations docs](https://refract-org.github.io/refract-docs/integrations/) for full details.
+The event stream is standard NDJSON — anything that reads JSON or speaks HTTP can consume it. See the [integrations docs](https://refract-org.github.io/refract-docs/integrations/) for full details.
 
 | Category | Technology | How they fit |
 |----------|-----------|-------------|
@@ -197,12 +216,10 @@ Refract pairs naturally with modern tools. The event stream is standard NDJSON �
 | **Visualization** | Observable Framework, Mermaid, D3 | `refract visualize --format mermaid` produces Mermaid diagrams. |
 | **Model serving** | OpenAI API, DeepSeek, Ollama, vLLM, Workers AI | Any OpenAI-compatible endpoint plugs into `refract classify`. Workers AI runs at the edge. |
 | **Local inference** | WebGPU, MLX, llama.cpp | Run detection models on-device — no API key needed. Refract defaults are mechanical; any boundary can use a local model via Ollama or MCP sampling. |
-| **Notebooks** | Jupyter, Marimo, Observable | Load events into a DataFrame: `pd.read_json("events.jsonl", lines=True)`. Marimo's reactive runtime is ideal for live event stream analysis. |
-| **Serverless** | Cloudflare Workers, D1, R2 | Run `refract` via `npx` in a Worker. Store events in D1, export to R2, queue re-observations. Entirely edge-deployable. |
+| **Notebooks** | Jupyter, Marimo, Observable | Load events into a DataFrame: `pd.read_json("events.jsonl", lines=True)`. |
+| **Serverless** | Cloudflare Workers, D1, R2 | Import the library packages in a Worker (`nodejs_compat`; `evidence-graph` uses `node:crypto`). The CLI needs Node or Bun, so a Worker cannot run it — schedule it on a runner and load its NDJSON into D1 or R2. |
 
-## Quick Start
-
-The fastest way to understand what Refract does:
+## More commands
 
 ```bash
 # 1. Run the guided onboarding (recommended first step)
@@ -214,8 +231,8 @@ npx @refract-org/cli analyze "Bitcoin" --depth brief
 # 3. Open the local web explorer (starts a server at localhost:8899)
 npx @refract-org/cli explore "Bitcoin"
 
-# 4. Export as JSON for your own tools
-npx @refract-org/cli analyze "Bitcoin" --json | jq .events[0]
+# 4. Print events as JSON lines for your own tools (one event per line)
+npx @refract-org/cli analyze "Bitcoin" --depth brief --json | head -1 | jq .
 
 # 5. Export as structured data
 npx @refract-org/cli export "Bitcoin" --format ndjson > bitcoin-events.ndjson
@@ -224,15 +241,14 @@ npx @refract-org/cli export "Bitcoin" --format ndjson > bitcoin-events.ndjson
 > **What you're seeing**: Refract reports deterministic, reproducible claim and citation changes. It does not decide whether a change is true or important — that's for downstream applications.
 
 
-> **Install once, run fast**: `npx` downloads on every run (~20s cold start).
-> For repeated use: `bun add @refract-org/cli` (install once, `refract` command available instantly).
+> For repeated use, install the package once with `bun add @refract-org/cli`
+> rather than resolving it through `npx` on every run.
 
 ### Other install options
 
 | Method | Command |
 |--------|---------|
-| **Bun** (if installed) | `bunx @refract-org/cli analyze "Bitcoin"` |
-| **Bun** (one command) | `bunx @refract-org/cli analyze "Bitcoin"` |
+| **Bun** | `bunx @refract-org/cli analyze "Bitcoin"` |
 | **Local install** | `bun add @refract-org/cli && refract analyze "Bitcoin"` (or `wikihistory`) |
 | **Build from source** | `git clone https://github.com/refract-org/refract && cd refract && bun install && bun run build` |
 
@@ -254,11 +270,12 @@ import { sectionDiffer, citationTracker } from "@refract-org/analyzers";
 | `@refract-org/evidence-graph` | [![npm](https://img.shields.io/npm/v/@refract-org/evidence-graph)](https://www.npmjs.com/package/@refract-org/evidence-graph) | Core types, schemas, BYO-inference boundaries |
 | `@refract-org/ingestion` | [![npm](https://img.shields.io/npm/v/@refract-org/ingestion)](https://www.npmjs.com/package/@refract-org/ingestion) | Wikimedia API adapters — fetching, diffing, rate limits |
 | `@refract-org/analyzers` | [![npm](https://img.shields.io/npm/v/@refract-org/analyzers)](https://www.npmjs.com/package/@refract-org/analyzers) | Deterministic analyzers — sections, citations, reverts, templates |
+| `@refract-org/mcp` | — (first published with the next release) | MCP tool definitions and server; the executable is `refract mcp` from `@refract-org/cli` |
 | `@refract-org/cli` | [![npm](https://img.shields.io/npm/v/@refract-org/cli)](https://www.npmjs.com/package/@refract-org/cli) | CLI tool — `refract` / `wikihistory` commands, `classify` inference |
 | `@refract-org/persistence` | — | Local SQLite persistence (bun:sqlite, not published) |
 | `@refract-org/eval` | [![npm](https://img.shields.io/npm/v/@refract-org/eval)](https://www.npmjs.com/package/@refract-org/eval) | Evaluation harness — ground truth validation and benchmarks |
 
-## How It Compares
+## How it compares
 
 Refract tracks **claim provenance** — structured evidence linking a claim's lifecycle
 to specific revisions, sources, and policy signals. It complements existing tools:
@@ -301,7 +318,7 @@ Pass overrides via `--config` file or inline CLI flags (`--similarity`, `--spike
 refract analyze "Darth_Vader" --api https://starwars.fandom.com/api.php --cluster-window 30 --similarity 0.85
 ```
 
-## Private Instances
+## Private instances
 
 Refract connects to any MediaWiki instance — corporate wikis, institutional
 knowledge bases, private fan wikis. Use the `--api` flag with the wiki's
@@ -313,7 +330,7 @@ knowledge bases, private fan wikis. Use the `--api` flag with the wiki's
 |--------|-----------|-------------|
 | Bearer token | `--api-key <token>` | Sends `Authorization: Bearer <token>` with every request |
 | Basic auth | `--api-user <user> --api-password <pass>` | Sends HTTP basic auth credentials |
-| OAuth2 | `OAUTH_CLIENT_ID` + `OAUTH_CLIENT_SECRET` env vars | Sends `X-OAuth-Client-Id` and `X-OAuth-Client-Secret` headers |
+| Client credentials | `REFRACT_OAUTH_CLIENT_ID` + `REFRACT_OAUTH_CLIENT_SECRET` env vars | Sends `X-OAuth-Client-Id` and `X-OAuth-Client-Secret` headers (custom headers for wikis behind a gateway that expects them; not an OAuth 2.0 flow) |
 
 All three methods work with every command:
 
@@ -324,14 +341,14 @@ refract analyze "Page" --api https://corp-wiki.example.com/w/api.php --api-key "
 # Basic auth
 refract analyze "Page" --api https://corp-wiki.example.com/w/api.php --api-user "admin" --api-password "..."
 
-# OAuth2 (via env vars)
-OAUTH_CLIENT_ID="..." OAUTH_CLIENT_SECRET="..." \
+# Client-credential headers (via env vars)
+REFRACT_OAUTH_CLIENT_ID="..." REFRACT_OAUTH_CLIENT_SECRET="..." \
   refract analyze "Page" --api https://corp-wiki.example.com/w/api.php
 ```
 
 Credentials are never logged or exposed in error messages.
 
-### Local Docker Testing
+### Local Docker testing
 
 A Docker Compose setup is available for testing against a local MediaWiki
 instance with auth:
@@ -359,11 +376,9 @@ fandom wikis don't.
 | **Warring wikis** | Cross-wiki diff detects a Game of Thrones Fandom wiki fork vs parallel evolution on an independent ASOIAF wiki |
 | **Decade-spanning consensus** | 2008 talk page consensus about what's canon, overturned in 2023 — L3 outcome labels with temporal validity windows |
 
-If the engine handles fandom, it handles anything.
+## Why it exists
 
-## Why It Exists
-
-Machines do not just need more retrieved text. They need provenance, instability, disagreement, and temporal change — six things that a current snapshot cannot provide:
+A snapshot of a page cannot tell you:
 
 1. **Where it appeared** — when a claim first entered the public record
 2. **How it changed** — every addition, removal, reintroduction, and in-place modification
@@ -372,11 +387,11 @@ Machines do not just need more retrieved text. They need provenance, instability
 5. **What moved** — section reorganization, lead promotion, category shifts, page moves
 6. **What was discussed** — correlated talk page activity, thread lifecycle, activity spikes
 
-Refract makes that knowledge legible to machines by decomposing every statement into its history. More durable than search, monitoring, or summarization.
+Refract emits an event type for each of these; see [What Refract captures](#what-refract-captures).
 
 ---
 
-## What It Is Not
+## What it is not
 
 | Category | Why |
 |----------|-----|
@@ -419,9 +434,20 @@ These repos extend the core engine:
 | [refract-demo-data](https://github.com/refract-org/refract-demo-data) | Safe, fictional datasets for the eval harness (no real PII or medical data) |
 | [refract-py](https://github.com/refract-org/refract-py) | Python SDK — typed dataclasses and pandas integration for ML workflows |
 
+### Position in the revisable-delegation loop
+
+Refract is one of five systems that each hold a step of the loop an institution runs when it delegates consequential work to machines: believe, know what can be done, decide what authority is justified, act, detect mismatch, revise. Refract holds the **detect mismatch** step: it reports that a source changed, and nothing more. The shared record shape for the loop is [STD-07, the Revisable Delegation Record](https://ethotechnics.org/standards/std-07-revisable-delegation-record).
+
+- **Canonical export**: `EvidenceEvent`, the versioned event schema (see [`SCHEMA_VERSIONING.md`](./SCHEMA_VERSIONING.md)), as NDJSON or a Merkle-manifested bundle. In STD-07 terms an `EvidenceEvent` is the raw material for a `discrepancy` record: what the prior revision said, what the new one says, and the revision that is the source.
+- **Refract still does not decide which change matters**, and the conversion is built so that it cannot. `toDiscrepancyStream(events, decide)` in `@refract-org/evidence-graph` takes a callback that returns, per event, either the context for a discrepancy record or `null`. That callback is the judgment and it belongs to the caller: the `expected` clause is the assumption that was violated, which lives in the record that made it, and the `subject` is the name the *receiving* system knows the thing by, which Refract cannot know either. **No default is shipped for `decide`**, because a default would be Refract deciding after all — quietly, and for everyone. What the package supplies is the shape, the canonical hashing, and the `prior_hash` chaining, so a consumer does not reimplement STD-07 §5 from the specification.
+- **`refract delegation <page> --subject --expected --when [--section] [--out]`** is that judgment made once by an operator and then applied repeatably. All three of `--subject`, `--expected` and `--when` are required and none has a default; `--when` names a predicate over fields the event already carries (`weakening`, `strengthening`, `direction-changed`, `citation-removed`, `any`), and the operator picks one. `--when any` is a legitimate answer — every change on this page violates that expectation — and it is still a choice someone made rather than a behaviour that arrived switched on. With `--out` it writes the file a consumer reads on a schedule.
+- **A detect-only stream stops at conformance Level 1, and that is not a defect.** Measured against the [published checker](https://ethotechnics.org/diagnostics/record-conformance), a stream of nothing but discrepancies is held below Level 2 by "a discrepancy was never answered" — correctly, because answering is what the system that made the assumption does, and Refract is not that system. The level describes a loop, not a component; a Refract stream reaches Level 2 in the company of the answers its consumer writes.
+- **Wired to**: [NextConsensus](https://nextconsensus.com), which consumes the `@refract-org/analyzers`, `@refract-org/evidence-graph`, and `@refract-org/ingestion` packages through one adapter file — documented in [`docs/refract-and-nextconsensus.md`](./docs/refract-and-nextconsensus.md) and [`docs/repository-boundary.md`](./docs/repository-boundary.md). A second edge now runs on its own once two declarations are made: `refract delegation … --out <file>` writes the stream, and [Ambit](https://github.com/zz-plant/ambit)'s `ambit delegation source add` declares that file, after which every `ambit verify` reads it. Nothing in this repository schedules the write — a cron or CI job on the operator's side does — and Ambit deliberately does not fetch, so the file is the seam between them.
+- **Siblings**: [Ambit](https://github.com/zz-plant/ambit) (capability and authorization), [Whether](https://github.com/zz-plant/whether) (act), [Ethotechnics](https://ethotechnics.org) (the record shape and the vocabulary).
+
 ### Related projects
 
 - [**Stims**](https://github.com/zz-plant/stims) — Browser music visualizer inspired by MilkDrop
 - [**sabnzbd-mcp**](https://github.com/zz-plant/sabnzbd-mcp) — MCP server for SABnzbd (zero deps)
 - [**neckass**](https://github.com/zz-plant/neckass) — Privacy-first headline generator
-- [**ethotechnics.org**](https://github.com/zz-plant/ethotechnics.org) — Essays on ethical technology and human-centered design
+- [**ethotechnics.org**](https://github.com/zz-plant/ethotechnics.org) — Open framework for the operational accountability of high-stakes AI systems; publishes the record shape Refract's siblings share (see below)

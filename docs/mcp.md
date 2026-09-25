@@ -12,14 +12,20 @@ The server runs indefinitely on stdin/stdout. It accepts JSON-RPC 2.0 requests a
 
 ## Connecting an AI agent
 
+The server is the `mcp` command of the `@refract-org/cli` package. Name that
+package in the config: the unscoped npm package `refract` is an unrelated
+project, so `npx refract mcp` downloads and runs someone else's code.
+`@refract-org/mcp` is a library with no executable, so it cannot be the command
+either.
+
 ### Claude Desktop
 
 ```json
 {
   "mcpServers": {
-    "sequent": {
+    "refract": {
       "command": "npx",
-      "args": ["refract", "mcp"]
+      "args": ["-y", "@refract-org/cli", "mcp"]
     }
   }
 }
@@ -30,13 +36,16 @@ The server runs indefinitely on stdin/stdout. It accepts JSON-RPC 2.0 requests a
 ```json
 {
   "mcpServers": {
-    "sequent": {
+    "refract": {
       "command": "bunx",
-      "args": ["refract", "mcp"]
+      "args": ["@refract-org/cli", "mcp"]
     }
   }
 }
 ```
+
+With a source checkout instead of npm, point the command at the build:
+`"command": "node", "args": ["/path/to/refract/packages/cli/dist/src/cli.js", "mcp"]`.
 
 ## Available tools
 

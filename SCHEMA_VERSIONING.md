@@ -4,7 +4,9 @@ Refract's event schema carries `EVENT_SCHEMA_VERSION` on every `EvidenceEvent`. 
 
 ## Version format
 
-`MAJOR.MINOR.PATCH` (semantic versioning). Current: `0.4.0`.
+`MAJOR.MINOR.PATCH` (semantic versioning). Current: `0.5.0` (`EVENT_SCHEMA_VERSION` in `@refract-org/evidence-graph` 0.5.1).
+
+The published `@refract-org/evidence-graph@0.5.0` stamps `"0.4.0"`: its build predates the bump, which reached the source under the same package version. A consumer on 0.5.0 therefore sees `"0.4.0"` on events with the same `EventType` members (0.5.0 added optional fields only); 0.5.1 is the first package version that stamps `"0.5.0"`.
 
 ## Breaking changes (MAJOR bump)
 

@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeLive } from "../../../../tests/support/live.js";
 import { MediaWikiClient } from "../mediawiki-client.js";
 
-describe("Talk page fetcher", () => {
+describeLive("Talk page fetcher", () => {
   it("fetches talk page revisions for Earth (Talk:Earth)", { timeout: 60000 }, async () => {
     const client = new MediaWikiClient({ minDelayMs: 100 });
     const revisions = await client.fetchTalkRevisions("Earth", {

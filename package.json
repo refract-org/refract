@@ -1,6 +1,6 @@
 {
   "name": "refract",
-  "version": "0.5.15",
+  "version": "0.5.16",
   "type": "module",
   "private": true,
   "description": "A deterministic observation engine for public revision histories. Evidence, not truth.",
@@ -41,8 +41,9 @@
     "format": "biome format --write packages/",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "ci": "bun run build && biome ci packages/ && bun run typecheck && bun run check:boundaries && bun run test",
+    "ci": "bun run build && biome ci packages/ && bun run typecheck && bun run check:boundaries && bun run test && bun run check:release -- --pack",
     "check:boundaries": "bun scripts/check-boundaries.ts",
+    "check:release": "bun scripts/check-release.ts",
     "clean": "rm -rf packages/*/dist",
     "postinstall": "mkdir -p node_modules/@refract-org && for pkg in packages/*/; do name=$(basename $pkg); ln -sfn ../../packages/$name node_modules/@refract-org/$name 2>/dev/null; done",
     "prepare": "husky",

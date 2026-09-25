@@ -15,8 +15,59 @@ import type {
 import { RateLimiter } from "./rate-limiter.js";
 
 const DEFAULT_API_URL = "https://en.wikipedia.org/w/api.php";
-const DEFAULT_USER_AGENT = "Refract/0.1.0 (https://github.com/refract-org/refract; refract@nextconsensus.com)";
+export const DEFAULT_USER_AGENT = "Refract/0.1.0 (https://github.com/refract-org/refract; refract@nextconsensus.com)";
 const MAX_REVISIONS_PER_REQUEST = 500;
+const MAX_ATTEMPTS = 3;
+/** Longest a single Retry-After is honoured. Past this, giving up is better than hanging a run. */
+const MAX_RETRY_WAIT_MS = 60_000;
+
+/**
+ * Error codes MediaWiki returns in an HTTP 200 body that mean "not now" rather
+ * than "not ever": replication lag over the caller's maxlag, a rate limit, or a
+ * wiki in read-only maintenance.
+ */
+const RETRYABLE_API_ERRORS = new Set(["maxlag", "ratelimited", "readonly"]);
+
+/**
+ * An error MediaWiki reported in the response body. The action API answers most
+ * failures with HTTP 200 and an `error` object, so a client that only checks the
+ * status reads a lag or rate-limit refusal as an empty page and returns whatever
+ * it had collected so far as though it were the whole history.
+ */
+export class MediaWikiApiError extends Error {
+  readonly code: string;
+  readonly info: string;
+
+  constructor(code: string, info: string, url: string) {
+    super(`MediaWiki API error ${code}: ${info} for ${url}`);
+    this.name = "MediaWikiApiError";
+    this.code = code;
+    this.info = info;
+  }
+}
+
+/**
+ * Milliseconds a Retry-After header asks for. It may be delta-seconds or an
+ * HTTP-date; the date form used to parse to NaN, which setTimeout treats as 0,
+ * so the retry went out immediately and was refused again.
+ */
+export function retryAfterMs(header: string | null | undefined, now: number = Date.now()): number | undefined {
+  if (!header) return undefined;
+  const value = header.trim();
+  if (/^\d+$/.test(value)) return Math.min(Number(value) * 1000, MAX_RETRY_WAIT_MS);
+  const at = Date.parse(value);
+  if (Number.isNaN(at)) return undefined;
+  return Math.min(Math.max(0, at - now), MAX_RETRY_WAIT_MS);
+}
+
+function backoffMs(attempt: number): number {
+  return 2 ** attempt * 1000;
+}
+
+function describeFailure(err: unknown): string {
+  if (err instanceof Error) return err.name === "TimeoutError" ? "timed out" : err.message;
+  return String(err);
+}
 
 interface PageInfo {
   pageId: number;
@@ -87,12 +138,26 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
   private userAgent: string;
   private apiUrl: string;
   private auth?: AuthConfig;
+  private maxlag?: number;
 
-  constructor(options?: { apiUrl?: string; userAgent?: string; minDelayMs?: number; auth?: AuthConfig }) {
+  /**
+   * @param options.maxlag  Sent as `maxlag` on every request. Wikimedia asks
+   *   automated clients to set it (5 is customary) so they back off when
+   *   database replicas lag; a refusal is retried after the server's
+   *   Retry-After. Unset by default, which sends nothing.
+   */
+  constructor(options?: {
+    apiUrl?: string;
+    userAgent?: string;
+    minDelayMs?: number;
+    auth?: AuthConfig;
+    maxlag?: number;
+  }) {
     this.apiUrl = options?.apiUrl ?? DEFAULT_API_URL;
     this.userAgent = options?.userAgent ?? DEFAULT_USER_AGENT;
     this.rateLimiter = new RateLimiter(options?.minDelayMs ?? 100);
     this.auth = options?.auth;
+    this.maxlag = options?.maxlag;
   }
 
   async fetchTalkRevisions(pageTitle: string, options?: RevisionOptions, talkPrefix?: string): Promise<Revision[]> {
@@ -143,8 +208,7 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
       }
 
       const url = `${this.apiUrl}?${params.toString()}`;
-      const response = await this.fetch(url);
-      const data: RevisionQueryResponse = await response.json();
+      const data = await this.getJson<RevisionQueryResponse>(url);
 
       if (!data.query?.pages) {
         break;
@@ -170,7 +234,9 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
       }
     }
 
-    return revisions;
+    // A page of content-bearing revisions holds at most 50, whatever rvlimit
+    // asked for, so paging toward a limit can overshoot it by most of a page.
+    return options?.limit !== undefined ? revisions.slice(0, options.limit) : revisions;
   }
 
   async fetchPageMoves(pageTitle: string): Promise<PageMove[]> {
@@ -191,10 +257,7 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
       if (lecontinue) params.set("lecontinue", lecontinue);
 
       const url = `${this.apiUrl}?${params.toString()}`;
-      const response = await this.fetch(url);
-      const data = (await response.json()) as LogEventResponse & {
-        continue?: { lecontinue: string };
-      };
+      const data = await this.getJson<LogEventResponse & { continue?: { lecontinue: string } }>(url);
 
       if (!data.query?.logevents) break;
 
@@ -229,7 +292,10 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
         letype: "protect",
         letitle: pageTitle,
         lelimit: "50",
-        leprop: "details",
+        // leprop replaces the default property set rather than adding to it.
+        // "details" alone returned entries with no logid, title, timestamp,
+        // comment or action, so every protection event came back undated.
+        leprop: "ids|title|type|timestamp|comment|details",
         format: "json",
         formatversion: "2",
       });
@@ -237,8 +303,7 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
       if (lecontinue) params.set("lecontinue", lecontinue);
 
       const url = `${this.apiUrl}?${params.toString()}`;
-      const response = await this.fetch(url);
-      const data = (await response.json()) as {
+      const data = await this.getJson<{
         query?: {
           logevents?: Array<{
             logid: number;
@@ -247,16 +312,19 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
             comment: string;
             action: string;
             params?: {
-              detail?: Array<{ level?: string; expiry?: string }>;
+              // The API names this "details"; "detail" is read too so a
+              // fixture written against the old field still parses.
+              details?: Array<{ type?: string; level?: string; expiry?: string }>;
+              detail?: Array<{ type?: string; level?: string; expiry?: string }>;
             };
           }>;
         };
         continue?: { lecontinue: string };
-      };
+      }>(url);
 
       if (data.query?.logevents) {
         for (const entry of data.query.logevents) {
-          const level = entry.params?.detail?.[0]?.level;
+          const level = (entry.params?.details ?? entry.params?.detail)?.[0]?.level;
           events.push({
             logId: entry.logid,
             pageTitle: entry.title,
@@ -287,10 +355,9 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
       format: "json",
       formatversion: "2",
     });
-    const response = await this.fetch(`${this.apiUrl}?${params.toString()}`);
-    const data = (await response.json()) as {
+    const data = await this.getJson<{
       query?: { search?: Array<{ title: string; pageid: number }> };
-    };
+    }>(`${this.apiUrl}?${params.toString()}`);
     return (data.query?.search ?? []).map((r) => ({
       entityId: String(r.pageid),
       title: r.title,
@@ -309,8 +376,7 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
     });
 
     const url = `${this.apiUrl}?${params.toString()}`;
-    const response = await this.fetch(url);
-    const data: CompareResponse = await response.json();
+    const data = await this.getJson<CompareResponse>(url);
 
     if (!data.compare) {
       throw new Error(`Failed to fetch diff for revisions ${fromRevId} -> ${toRevId}`);
@@ -328,7 +394,34 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
     };
   }
 
-  private async fetch(url: string, retries = 3): Promise<Response> {
+  /**
+   * GET a JSON response, treating an `error` object in a 200 body as the
+   * failure it is: retried after the server's Retry-After when MediaWiki says
+   * "not now" (maxlag, ratelimited, readonly), thrown as MediaWikiApiError
+   * otherwise. Never returned as data.
+   */
+  private async getJson<T>(url: string): Promise<T> {
+    const target = this.maxlag === undefined ? url : `${url}&maxlag=${this.maxlag}`;
+    for (let attempt = 1; ; attempt++) {
+      const response = await this.fetch(target);
+      const data = (await response.json()) as T & { error?: { code?: string; info?: string } };
+      const error = data?.error;
+      if (!error) return data;
+
+      const code = error.code ?? "unknown";
+      if (RETRYABLE_API_ERRORS.has(code) && attempt < MAX_ATTEMPTS) {
+        const waitMs = retryAfterMs(response.headers?.get?.("Retry-After")) ?? backoffMs(attempt);
+        console.error(
+          `refract: retrying request (attempt ${attempt + 1}/${MAX_ATTEMPTS}, API error ${code}, wait ${waitMs}ms)...`,
+        );
+        await this.sleep(waitMs);
+        continue;
+      }
+      throw new MediaWikiApiError(code, error.info ?? "", target);
+    }
+  }
+
+  private async fetch(url: string, retries = MAX_ATTEMPTS): Promise<Response> {
     for (let attempt = 0; attempt < retries; attempt++) {
       await this.rateLimiter.acquire();
       const headers: Record<string, string> = {
@@ -349,27 +442,33 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
         headers["X-OAuth-Client-Secret"] = this.auth.oauthClientSecret;
       }
 
-      const response = await fetch(url, {
-        headers,
-        signal: AbortSignal.timeout(30000),
-      });
-
-      if (response.ok) return response;
-
-      if (response.status === 429) {
-        const retryAfter = response.headers.get("Retry-After");
-        const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : 1000;
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          headers,
+          signal: AbortSignal.timeout(30000),
+        });
+      } catch (err) {
+        // A reset connection or a timeout says nothing about the request
+        // itself, so it gets the same retries as a 503 instead of ending the run.
         if (attempt < retries - 1) {
+          const waitMs = backoffMs(attempt);
           console.error(
-            `refract: retrying request (attempt ${attempt + 2}/${retries}, status 429, wait ${waitMs}ms)...`,
+            `refract: retrying request (attempt ${attempt + 2}/${retries}, ${describeFailure(err)}, wait ${waitMs}ms)...`,
           );
           await this.sleep(waitMs);
           continue;
         }
+        throw new Error(`MediaWiki API request failed for ${url}: ${describeFailure(err)}`);
       }
 
-      if (response.status >= 500 && attempt < retries - 1) {
-        const waitMs = 2 ** attempt * 1000;
+      if (response.ok) return response;
+
+      if ((response.status === 429 || response.status >= 500) && attempt < retries - 1) {
+        // Honour the server's Retry-After on a 503 as well as a 429; Wikimedia
+        // sends one on both.
+        const waitMs =
+          retryAfterMs(response.headers?.get?.("Retry-After")) ?? (response.status === 429 ? 1000 : backoffMs(attempt));
         console.error(
           `refract: retrying request (attempt ${attempt + 2}/${retries}, status ${response.status}, wait ${waitMs}ms)...`,
         );

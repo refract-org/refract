@@ -1,0 +1,34 @@
+# The MediaWiki API contract tests, run where there is a network.
+#
+# Five tests check that the client still parses what Wikipedia actually
+# returns. They are skipped by default (see tests/support/live.ts), because a
+# 403 from a sandboxed egress proxy is not a fact about this code and a fixture
+# cannot stand in for them: the assertions would confirm only that the fixture
+# matches itself.
+#
+# Skipping them in the PR gate and nowhere running them would retire them. So
+# they run here instead, on a schedule and on demand — off the pull-request
+# path, so a Wikipedia outage cannot redden an unrelated PR, and loudly enough
+# that a change to MediaWiki's response shape is still caught.
+name: API contract
+
+on:
+  schedule:
+    - cron: "30 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: run the suite with the live gate open
+        env:
+          REFRACT_TEST_LIVE: "1"
+        run: bun run test

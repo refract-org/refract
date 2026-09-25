@@ -60,7 +60,13 @@ export interface TemplateChange {
 export type { RegisteredAnalyzer } from "./analyzer-registry.js";
 export { AnalyzerRegistry, registry } from "./analyzer-registry.js";
 export { buildCategoryEvents, diffCategories, extractCategories } from "./category-tracker.js";
-export { buildSourceId, buildSourceLineage, citationTracker } from "./citation-tracker.js";
+export {
+  analyzeCitationNetwork,
+  buildSourceId,
+  buildSourceLineage,
+  type CitationNetworkAnalysis,
+  citationTracker,
+} from "./citation-tracker.js";
 export type { EditClusterOptions } from "./edit-cluster-detector.js";
 export { detectEditClusters } from "./edit-cluster-detector.js";
 export type { HeuristicKind, HeuristicOptions, UserMetadata } from "./heuristic-classifier.js";
@@ -68,9 +74,23 @@ export { classifyHeuristic } from "./heuristic-classifier.js";
 export type { ObservationDiff } from "./observation-differ.js";
 export { diffObservations } from "./observation-differ.js";
 export { buildPageMoveEvents, windowPageMoves } from "./page-move-detector.js";
-export type { ProtectionChange, ProtectionTracker } from "./protection-tracker.js";
+export type {
+  PropagationOptions,
+  TextBorrowingSpan,
+  TextPropagationResult,
+} from "./propagation-detector.js";
+export { detectTextPropagation } from "./propagation-detector.js";
+export type { ProtectionChange, ProtectionLogRecord, ProtectionTracker } from "./protection-tracker.js";
 export { protectionTracker } from "./protection-tracker.js";
 export { revertDetector } from "./revert-detector.js";
+export type { ParsedContent, RevisionEventDepth, RevisionEventOptions } from "./revision-events.js";
+export {
+  annotateEvents,
+  buildRevisionEvents,
+  computeStructuralDiffs,
+  detectEditorialSignals,
+  parseContent,
+} from "./revision-events.js";
 export type { SectionEvent, SectionLineage } from "./section-differ.js";
 export { buildSectionLineage, sectionDiffer } from "./section-differ.js";
 export type { SemanticEnrichmentResult } from "./semantic-enrichment.js";
@@ -96,11 +116,13 @@ export { buildParamChangeEvents, diffTemplateParams, templateTracker } from "./t
 export { buildWikilinkEvents, diffWikilinks, extractWikilinks } from "./wikilink-extractor.js";
 export type { HeadingPosition } from "./wikitext-parser.js";
 export {
+  buildSectionCharMap,
   countCitations,
   countKeywordMentions,
   deriveSectionHeading,
   extractAnchorSnippet,
   extractHeadingMap,
+  findSectionForText,
   sanitizeWikitext,
   stripWikitext,
 } from "./wikitext-parser.js";

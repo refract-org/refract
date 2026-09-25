@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildSectionCharMap,
   countCitations,
   countKeywordMentions,
   deriveSectionHeading,
   extractAnchorSnippet,
   extractHeadingMap,
+  findSectionForText,
   sanitizeWikitext,
 } from "../wikitext-parser.js";
 
@@ -138,5 +140,73 @@ describe("extractAnchorSnippet", () => {
     const snippet = extractAnchorSnippet(text, ["TARGET"], 10);
     expect(snippet).toBeTruthy();
     expect(snippet?.length).toBeLessThan(50);
+  });
+});
+
+describe("findSectionForText", () => {
+  const wikitext = `Lead text about the topic.
+
+== History ==
+Historical content about the subject.
+
+== References ==
+{{reflist}}`;
+
+  it("finds section for text in lead", () => {
+    const section = findSectionForText(wikitext, "Lead text about the topic.");
+    expect(section).toBe("(lead)");
+  });
+
+  it("finds section for text in a named section", () => {
+    const section = findSectionForText(wikitext, "Historical content about the subject.");
+    expect(section).toBe("History");
+  });
+
+  it("returns lead for text that doesn't appear", () => {
+    const section = findSectionForText(wikitext, "Text that does not appear anywhere.");
+    expect(section).toBe("(lead)");
+  });
+
+  it("finds text under a heading that directly follows another", () => {
+    const nested = "Lead text.\n\n== Parent ==\n=== Child ===\nText that sits in the child section.";
+    expect(findSectionForText(nested, "Text that sits in the child section.")).toBe("Child");
+  });
+});
+
+describe("heading parsing on a hostile line", () => {
+  // A line of "=" or "==" followed by thousands of spaces took time cubic in
+  // its length until 2026-09-24: four minutes at 8,000 characters.
+  const spaces = " ".repeat(3000);
+  // After the text being located: findSectionForText compares offsets in
+  // whitespace-collapsed text with offsets in the wikitext, so a long run of
+  // spaces before the text would move it, whatever the regex.
+  const hostile = `Lead text.\n== History ==\nText in history.\n=${spaces}x\n==${spaces}x\n`;
+
+  it("builds the section map in linear time", () => {
+    const start = performance.now();
+    expect(buildSectionCharMap(hostile).map((m) => m.section)).toEqual(["(lead)", "History"]);
+    expect(performance.now() - start).toBeLessThan(1000);
+  });
+
+  it("locates text in linear time", () => {
+    const start = performance.now();
+    expect(findSectionForText(hostile, "Text in history.")).toBe("History");
+    expect(performance.now() - start).toBeLessThan(1000);
+  });
+
+  it("maps headings in linear time", () => {
+    const start = performance.now();
+    expect(extractHeadingMap(hostile).map((h) => h.heading)).toEqual(["History"]);
+    expect(performance.now() - start).toBeLessThan(1000);
+  });
+
+  it("keeps a heading to one line", () => {
+    // The old pattern's \s matched newlines, so "==" and "Title ==" on
+    // consecutive lines read as one heading.
+    expect(extractHeadingMap("Lead.\n==\nTitle ==\n")).toEqual([]);
+    expect(extractHeadingMap("== a = b ==  \n====\n")).toEqual([
+      { position: 0, heading: "a = b" },
+      { position: 14, heading: "" },
+    ]);
   });
 });

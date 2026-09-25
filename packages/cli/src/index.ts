@@ -3,6 +3,7 @@ import { Command } from "commander";
 import { buildConfig, buildObservationReport, runAnalyze } from "./commands/analyze.js";
 import { runClaim } from "./commands/claim.js";
 import { runCron } from "./commands/cron.js";
+import { DelegationInputError, runDelegation, WHEN_RULES } from "./commands/delegation.js";
 import type { DiffResult } from "./commands/diff.js";
 import { runDiff } from "./commands/diff.js";
 import { runEval } from "./commands/eval.js";
@@ -15,6 +16,7 @@ import { runStream } from "./commands/stream.js";
 import { runVisualize } from "./commands/visualize.js";
 import { runWatch } from "./commands/watch.js";
 import { bold, cyan, dim, formatEvent, gray, green, heading, red, success } from "./render.js";
+import { REFRACT_VERSION } from "./version.js";
 
 function withGlobal(cmd: Command): Command {
   return cmd
@@ -36,12 +38,16 @@ function withAnalyzerConfig(cmd: Command): Command {
     .option("--section-rename <mode>", "Section rename detection: exact | similarity | none");
 }
 
-function extractAuth(opts: Record<string, unknown>): AuthConfig | undefined {
+export function extractAuth(opts: Record<string, unknown>): AuthConfig | undefined {
   const apiKey = opts.apiKey as string | undefined;
   const apiUser = opts.apiUser as string | undefined;
   const apiPassword = opts.apiPassword as string | undefined;
-  const oauthClientId = process.env.OAUTH_CLIENT_ID;
-  const oauthClientSecret = process.env.OAUTH_CLIENT_SECRET;
+  // Namespaced so an unrelated OAUTH_CLIENT_ID/OAUTH_CLIENT_SECRET in the
+  // environment — common on CI runners — is not read as Refract's. Under the
+  // generic names they were sent as headers to whatever wiki was queried,
+  // including Wikipedia when --api was not given.
+  const oauthClientId = process.env.REFRACT_OAUTH_CLIENT_ID;
+  const oauthClientSecret = process.env.REFRACT_OAUTH_CLIENT_SECRET;
 
   if (!apiKey && !apiUser && !apiPassword && !oauthClientId && !oauthClientSecret) return undefined;
 
@@ -53,7 +59,7 @@ const program = new Command();
 program
   .name("refract")
   .description("Wikipedia edit history analysis — deterministic L1 observation engine")
-  .version("0.5.14")
+  .version(REFRACT_VERSION)
   .addHelpCommand("help [command]", "show help for a specific command");
 
 // ── init ──
@@ -254,6 +260,41 @@ exportCmd.action(async (page, opts) => {
     config,
     !!opts.flatten,
   );
+});
+
+// ── delegation ──
+// The operator supplies every judgment: what the receiving system calls this,
+// what assumption is at stake, and which events count. None has a default.
+const delegationCmd = program
+  .command("delegation <page>")
+  .description("write STD-07 discrepancy records for another system to read")
+  .requiredOption("--subject <id>", "what the receiving system calls the thing this is about")
+  .requiredOption("--expected <clause>", "the assumption these changes would violate")
+  .requiredOption("--when <rule>", `which events count: ${Object.keys(WHEN_RULES).join(", ")}`)
+  .option("-s, --section <name>", "only events in this section")
+  .option("-o, --out <file>", "write to a file instead of stdout");
+withGlobal(delegationCmd);
+withAnalyzerConfig(delegationCmd);
+delegationCmd.action(async (page, opts) => {
+  try {
+    await runDelegation(page, {
+      subject: opts.subject as string,
+      expected: opts.expected as string,
+      when: opts.when as string,
+      section: opts.section as string | undefined,
+      out: opts.out as string | undefined,
+      apiUrl: opts.api as string | undefined,
+      auth: extractAuth(opts),
+      config: buildConfig(opts),
+    });
+  } catch (error) {
+    if (error instanceof DelegationInputError) {
+      console.error(error.message);
+      process.exitCode = 2;
+      return;
+    }
+    throw error;
+  }
 });
 
 // ── watch ──

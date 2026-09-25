@@ -15,12 +15,12 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.3.14"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
@@ -33,6 +33,18 @@ jobs:
       # as "cancelled").
       - run: bun run test
 
+      # Would what this run publishes install and run for someone who gets it
+      # from npm? cli 0.5.7 cannot start: it was published against analyzers and
+      # ingestion source that never reached npm, because a package whose version
+      # was already published was skipped below even though its source had
+      # changed. The check fails on that, on an internal range that does not
+      # name the sibling's version, on a dependency that is never published, and
+      # on a CLI that stamps a different version than it ships as; then it packs
+      # every package, installs the tarballs together with npm, and runs the
+      # installed `refract --version`. See scripts/check-release.ts.
+      - name: Release check
+        run: bun scripts/check-release.ts --registry --pack
+
       - name: Publish packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -43,22 +55,48 @@ jobs:
           # "missing authentication (run `bunx npm login`)", which is what killed
           # every publish from v0.5.8 to v0.5.11.
           NPM="$(dirname "$(which node)")/npm"
+
+          # Trusted publishing (OIDC, no stored token) needs npm 11.5.1 or later;
+          # Node 22 bundles npm 10, which has no OIDC login and fails ENEEDAUTH
+          # when NPM_TOKEN is unset. That is how v0.5.15 died (run 33039984437).
+          # A token in NPM_TOKEN keeps working either way.
+          "$NPM" install -g npm@^11.5.1
           "$NPM" --version
 
-          for pkg in packages/evidence-graph packages/ingestion packages/analyzers packages/cli packages/eval; do
+          # Dependency order, from the same script that checked it. The list was
+          # hand-written and left out @refract-org/mcp, which the CLI imports at
+          # startup, so the next CLI would not have installed at all.
+          FAILED=""
+          for pkg in $(bun scripts/check-release.ts --order); do
             echo "::group::Publishing $pkg"
             NAME=$(node -p "require('./$pkg/package.json').name")
             VERSION=$(node -p "require('./$pkg/package.json').version")
             # Skip versions already on the registry: packages version
             # independently, so most tags republish only some of them, and npm
-            # rejects a duplicate PUT — which failed the whole run.
+            # rejects a duplicate PUT — which failed the whole run. Skipping is
+            # safe only because the release check has already shown that an
+            # existing version carries this tree's source.
             if "$NPM" view "$NAME@$VERSION" version >/dev/null 2>&1; then
               echo "$NAME@$VERSION already published — skipping"
             else
-              # No `|| true`. A failed publish must fail the run: v0.5.12 reported
-              # success while every package 404'd on PUT (npm's response to an
+              # A failed publish still fails the run — v0.5.12 reported success
+              # while every package 404'd on PUT (npm's response to an
               # unauthorized write), so the tag looked released and was not.
-              ( cd "$pkg" && "$NPM" publish --access public --provenance )
+              # But it must not stop the packages after it: v0.5.16 died at
+              # @refract-org/mcp (a new package, which cannot use trusted
+              # publishing until it exists on npm) and left eval and cli
+              # unpublished behind it. Attempt every package, then fail once.
+              if ( cd "$pkg" && "$NPM" publish --access public --provenance ); then
+                echo "$NAME@$VERSION published"
+              else
+                echo "::error::Publish failed for $NAME@$VERSION"
+                FAILED="$FAILED $NAME@$VERSION"
+              fi
             fi
             echo "::endgroup::"
           done
+
+          if [ -n "$FAILED" ]; then
+            echo "Publish failed for:$FAILED"
+            exit 1
+          fi

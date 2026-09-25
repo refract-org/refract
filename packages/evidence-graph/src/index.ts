@@ -1,3 +1,17 @@
+export type {
+  DelegationRecord,
+  DiscrepancyContext,
+} from "./delegation.js";
+export {
+  canonicalizeDelegationRecord,
+  hashDelegationRecord,
+  REVISABLE_DELEGATION_SCHEMA_VERSION,
+  REVISABLE_DELEGATION_STANDARD_URL,
+  sealDelegationRecords,
+  toDelegationNdjson,
+  toDiscrepancyRecord,
+  toDiscrepancyStream,
+} from "./delegation.js";
 export { CLAIM_IDENTITY_VERSION, createClaimIdentity, createEventIdentity } from "./hash-identity.js";
 export type {
   ActivitySpikeInput,
@@ -18,14 +32,16 @@ export {
   buildInferencePrompt,
   parseInferenceResponse,
 } from "./inference.js";
-export type { MerkleProof, ReplayManifest } from "./replay-manifest.js";
+export type { MerkleProof, ReplayManifest, VerificationBundle } from "./replay-manifest.js";
 export {
   buildMerkleTree,
   createReplayManifest,
+  createVerificationBundle,
   getMerkleProof,
   hashLeaf,
   singleEventProof,
   verifyMerkleProof,
+  verifyVerificationBundle,
 } from "./replay-manifest.js";
 export type {
   ClaimIdentity,
