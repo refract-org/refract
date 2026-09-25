@@ -335,3 +335,75 @@ function classifyAuthority(ref: CitationRef): SourceAuthority {
 
   return "unrated";
 }
+
+export interface CitationNetworkAnalysis {
+  uniqueSourceCount: number;
+  domainDistribution: Record<string, number>;
+  topSources: Array<{ sourceId: string; url?: string; count: number }>;
+  sourceConcentrationIndex: number;
+  isHighConcentration: boolean;
+}
+
+function extractDomain(url?: string): string {
+  if (!url) return "unknown";
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname.replace(/^www\./, "");
+  } catch {
+    return "unknown";
+  }
+}
+
+/**
+ * Analyzes the network structure, domain diversity, and concentration of a collection of citations.
+ * High concentration indicates heavy reliance on a narrow set of domains or sources.
+ */
+export function analyzeCitationNetwork(citations: CitationRef[]): CitationNetworkAnalysis {
+  if (citations.length === 0) {
+    return {
+      uniqueSourceCount: 0,
+      domainDistribution: {},
+      topSources: [],
+      sourceConcentrationIndex: 0,
+      isHighConcentration: false,
+    };
+  }
+
+  const sourceCounts = new Map<string, { ref: CitationRef; count: number }>();
+  const domainDistribution: Record<string, number> = {};
+
+  for (const c of citations) {
+    const sId = buildSourceId(c);
+    const existing = sourceCounts.get(sId);
+    if (existing) {
+      existing.count++;
+    } else {
+      sourceCounts.set(sId, { ref: c, count: 1 });
+    }
+
+    const domain = extractDomain(c.url);
+    domainDistribution[domain] = (domainDistribution[domain] ?? 0) + 1;
+  }
+
+  const total = citations.length;
+  // Herfindahl-Hirschman concentration index: sum of squared market shares of domains
+  let hhi = 0;
+  for (const count of Object.values(domainDistribution)) {
+    const share = count / total;
+    hhi += share * share;
+  }
+
+  const topSources = Array.from(sourceCounts.entries())
+    .map(([sourceId, { ref, count }]) => ({ sourceId, url: ref.url, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+
+  const roundedHhi = Number(hhi.toFixed(4));
+  return {
+    uniqueSourceCount: sourceCounts.size,
+    domainDistribution,
+    topSources,
+    sourceConcentrationIndex: roundedHhi,
+    isHighConcentration: roundedHhi > 0.4 && total >= 3,
+  };
+}

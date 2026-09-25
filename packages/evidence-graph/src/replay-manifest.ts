@@ -112,3 +112,74 @@ export function singleEventProof(manifest: ReplayManifest, eventIndex: number): 
   const levels = buildMerkleTree(manifest.outputEventHashes);
   return getMerkleProof(levels, eventIndex);
 }
+
+export interface VerificationBundle {
+  format: "refract-verification-bundle/v1";
+  exportedAt: string;
+  manifest: ReplayManifest;
+  events: EvidenceEvent[];
+  proofs: MerkleProof[];
+}
+
+export function createVerificationBundle(params: {
+  pageTitle: string;
+  analyzerVersions: Record<string, string>;
+  revisions: Revision[];
+  events: EvidenceEvent[];
+}): VerificationBundle {
+  const manifest = createReplayManifest(params);
+  const proofs = manifest.outputEventHashes.map((_, idx) => singleEventProof(manifest, idx));
+
+  return {
+    format: "refract-verification-bundle/v1",
+    exportedAt: new Date().toISOString(),
+    manifest,
+    events: params.events,
+    proofs,
+  };
+}
+
+export function verifyVerificationBundle(bundle: VerificationBundle): {
+  valid: boolean;
+  errors: string[];
+} {
+  const errors: string[] = [];
+
+  if (bundle.format !== "refract-verification-bundle/v1") {
+    errors.push(`Invalid bundle format: ${bundle.format}`);
+  }
+
+  // 1. Check manifest hash integrity
+  const { manifestHash, ...manifestBody } = bundle.manifest;
+  const expectedManifestHash = createHash("sha256").update(JSON.stringify(manifestBody)).digest("hex");
+  if (manifestHash !== expectedManifestHash) {
+    errors.push("Manifest hash mismatch");
+  }
+
+  // 2. Check event count matches output hashes
+  if (bundle.events.length !== bundle.manifest.outputEventHashes.length) {
+    errors.push(
+      `Event count (${bundle.events.length}) does not match manifest hashes count (${bundle.manifest.outputEventHashes.length})`,
+    );
+  }
+
+  // 3. Verify Merkle root matches computed root
+  const tree = buildMerkleTree(bundle.manifest.outputEventHashes);
+  const computedRoot = tree.at(-1)?.[0] ?? "";
+  if (computedRoot !== bundle.manifest.merkleRoot) {
+    errors.push("Manifest Merkle root does not match computed root from hashes");
+  }
+
+  // 4. Verify each individual proof
+  for (let i = 0; i < bundle.proofs.length; i++) {
+    const proof = bundle.proofs[i];
+    if (!verifyMerkleProof(proof)) {
+      errors.push(`Merkle proof verification failed for event index ${i}`);
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}

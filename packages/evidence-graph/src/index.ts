@@ -32,14 +32,16 @@ export {
   buildInferencePrompt,
   parseInferenceResponse,
 } from "./inference.js";
-export type { MerkleProof, ReplayManifest } from "./replay-manifest.js";
+export type { MerkleProof, ReplayManifest, VerificationBundle } from "./replay-manifest.js";
 export {
   buildMerkleTree,
   createReplayManifest,
+  createVerificationBundle,
   getMerkleProof,
   hashLeaf,
   singleEventProof,
   verifyMerkleProof,
+  verifyVerificationBundle,
 } from "./replay-manifest.js";
 export type {
   ClaimIdentity,

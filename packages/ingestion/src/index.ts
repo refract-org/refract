@@ -106,10 +106,13 @@ export interface RevisionOptions {
   endRevId?: number;
 }
 
+export { GitRevisionSource, type GitRevisionSourceOptions } from "./git-source.js";
 export { DEFAULT_USER_AGENT, MediaWikiApiError, MediaWikiClient, retryAfterMs } from "./mediawiki-client.js";
 export { RateLimiter } from "./rate-limiter.js";
+export { SnapshotDirectorySource, type SnapshotItem } from "./snapshot-source.js";
 export type { StreamClientOptions, StreamEvent } from "./stream-client.js";
 export { WikimediaStreamClient } from "./stream-client.js";
+export { WaybackRevisionSource, type WaybackSourceOptions } from "./wayback-source.js";
 export type { PageToEntityMap, WikidataClaim, WikidataEntity, WikidataValue } from "./wikidata-mapper.js";
 export {
   fetchWikidataEntity,

@@ -60,7 +60,13 @@ export interface TemplateChange {
 export type { RegisteredAnalyzer } from "./analyzer-registry.js";
 export { AnalyzerRegistry, registry } from "./analyzer-registry.js";
 export { buildCategoryEvents, diffCategories, extractCategories } from "./category-tracker.js";
-export { buildSourceId, buildSourceLineage, citationTracker } from "./citation-tracker.js";
+export {
+  analyzeCitationNetwork,
+  buildSourceId,
+  buildSourceLineage,
+  type CitationNetworkAnalysis,
+  citationTracker,
+} from "./citation-tracker.js";
 export type { EditClusterOptions } from "./edit-cluster-detector.js";
 export { detectEditClusters } from "./edit-cluster-detector.js";
 export type { HeuristicKind, HeuristicOptions, UserMetadata } from "./heuristic-classifier.js";
@@ -68,6 +74,12 @@ export { classifyHeuristic } from "./heuristic-classifier.js";
 export type { ObservationDiff } from "./observation-differ.js";
 export { diffObservations } from "./observation-differ.js";
 export { buildPageMoveEvents, windowPageMoves } from "./page-move-detector.js";
+export type {
+  PropagationOptions,
+  TextBorrowingSpan,
+  TextPropagationResult,
+} from "./propagation-detector.js";
+export { detectTextPropagation } from "./propagation-detector.js";
 export type { ProtectionChange, ProtectionLogRecord, ProtectionTracker } from "./protection-tracker.js";
 export { protectionTracker } from "./protection-tracker.js";
 export { revertDetector } from "./revert-detector.js";
