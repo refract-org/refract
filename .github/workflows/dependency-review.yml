@@ -9,6 +9,14 @@ permissions:
 jobs:
   dependency-review:
     runs-on: ubuntu-latest
+    # This job has never passed in this repository: the org has the dependency
+    # graph disabled, so the action errors in seconds with "Dependency review
+    # is not supported on this repository" — on every manifest-touching PR
+    # since June, including every dependabot PR, which sat unmergeable behind
+    # it for two months. It cannot be enabled at repo level. Keep the job
+    # running for signal, but non-blocking, until the org enables the
+    # dependency graph (then remove this flag).
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v7
       - uses: actions/dependency-review-action@v4
