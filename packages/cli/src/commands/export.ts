@@ -1,6 +1,11 @@
 import { createHash } from "node:crypto";
 import type { AnalyzerConfig, EvidenceEvent, PolicySignal, Report, Revision } from "@refract-org/evidence-graph";
-import { createEventIdentity, createReplayManifest, EVENT_SCHEMA_VERSION } from "@refract-org/evidence-graph";
+import {
+  createEventIdentity,
+  createReplayManifest,
+  createVerificationBundle,
+  EVENT_SCHEMA_VERSION,
+} from "@refract-org/evidence-graph";
 import type { AuthConfig } from "@refract-org/ingestion";
 import { renderHtmlReport } from "../html-renderer.js";
 import { REFRACT_VERSION } from "../version.js";
@@ -25,14 +30,42 @@ export async function runExport(
   manifest?: boolean,
   config?: AnalyzerConfig,
   flatten?: boolean,
+  proof?: boolean,
+  fromRev?: number,
+  toRev?: number,
+  since?: string,
 ): Promise<void> {
+  if (proof) {
+    const { events, revisions } = await runAnalyze(
+      pageTitle,
+      "detailed",
+      fromRev,
+      toRev,
+      since,
+      false,
+      apiUrl,
+      undefined,
+      undefined,
+      auth,
+      config,
+    );
+    const proofBundle = createVerificationBundle({
+      pageTitle,
+      analyzerVersions: { refract: REFRACT_VERSION },
+      revisions,
+      events,
+    });
+    console.log(JSON.stringify(proofBundle, null, 2));
+    return;
+  }
+
   if (bundle) {
     const { events, revisions } = await runAnalyze(
       pageTitle,
       "detailed",
-      undefined,
-      undefined,
-      undefined,
+      fromRev,
+      toRev,
+      since,
       false,
       apiUrl,
       undefined,
@@ -49,9 +82,9 @@ export async function runExport(
     const { events, revisions } = await runAnalyze(
       pageTitle,
       "detailed",
-      undefined,
-      undefined,
-      undefined,
+      fromRev,
+      toRev,
+      since,
       false,
       apiUrl,
       undefined,
@@ -72,9 +105,9 @@ export async function runExport(
   const { events, revisions } = await runAnalyze(
     pageTitle,
     "detailed",
-    undefined,
-    undefined,
-    undefined,
+    fromRev,
+    toRev,
+    since,
     false,
     apiUrl,
     undefined,

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.17 (2026-09-26)
+
+### Added
+- **`refract verify` CLI command and verification HTML receipts.** `refract verify <bundle.json> [--html <receipt.html>]` cryptographically validates Merkle inclusion proofs for verification bundles and can emit a standalone, self-contained HTML audit receipt showing proof verification status for every event.
+- **Verification bundle export.** `refract export --proof` emits a self-contained `.proof` bundle containing the page replay manifest, events, and individual Merkle inclusion proofs for legal/evidentiary auditing.
+- **Export CLI range filtering.** `refract export` now supports `--from <revId>`, `--to <revId>`, and `--since <timestamp>` filters matching `refract analyze`.
+
+### Fixed
+- **`hash-identity.ts` deterministic facts safety.** Safely handles optional `deterministicFacts` arrays in `createEventIdentity` without throwing on events where deterministic facts are omitted.
+- **Package version alignment and dependency ranges.** Bumped `@refract-org/evidence-graph` to 0.5.2, `@refract-org/ingestion` to 0.3.3, `@refract-org/analyzers` to 0.5.2, and synchronized internal dependency ranges across `@refract-org/mcp`, `@refract-org/eval`, and `@refract-org/cli`.
+
 ## 0.5.16 (2026-09-25)
 
 Nothing has reached npm since 0.5.7, and 0.5.7's CLI does not start: it declares `@refract-org/analyzers@^0.3.0` — 0.3.x only, under npm's rule for 0.x — and imports code that exists only in analyzers 0.5.0; forcing 0.5.0 fails on an ingestion export no published ingestion has. This release is the first that can be installed from npm and run.

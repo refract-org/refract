@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.refract-org/refract",
   "description": "Deterministic observation engine for knowledge change. Analyzes Wikipedia and MediaWiki revision histories, tracks claims and citations across time, and emits structured provenance events with semantic enrichment.",
-  "version": "0.5.16",
+  "version": "0.5.17",
   "website": "https://github.com/refract-org/refract",
   "documentation": "https://github.com/refract-org/refract#readme",
   "transport": "stdio",
@@ -11,7 +11,7 @@
     {
       "registry_type": "npm",
       "identifier": "@refract-org/cli",
-      "version": "0.5.16"
+      "version": "0.5.17"
     }
   ],
   "tools": [

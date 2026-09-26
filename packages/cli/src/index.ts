@@ -13,6 +13,7 @@ import { runInit } from "./commands/init.js";
 import { runMcpServer } from "./commands/mcp.js";
 import { runSnapshot } from "./commands/snapshot.js";
 import { runStream } from "./commands/stream.js";
+import { runVerify } from "./commands/verify.js";
 import { runVisualize } from "./commands/visualize.js";
 import { runWatch } from "./commands/watch.js";
 import { bold, cyan, dim, formatEvent, gray, green, heading, red, success } from "./render.js";
@@ -245,6 +246,10 @@ const exportCmd = program
   .option("-f, --format <format>", "output format: json, csv, ndjson, parquet", "json")
   .option("--bundle", "export as signed evidence bundle with SHA-256 hash")
   .option("--manifest", "export as replay manifest listing all hashes")
+  .option("--proof", "export as self-contained verification bundle with Merkle proofs")
+  .option("--from <revId>", "start revision ID", parseInt)
+  .option("--to <revId>", "end revision ID", parseInt)
+  .option("--since <timestamp>", "re-observe from ISO timestamp")
   .option("--flatten", "flatten nested fields into flat columns (for csv format)");
 withGlobal(exportCmd);
 withAnalyzerConfig(exportCmd);
@@ -259,7 +264,20 @@ exportCmd.action(async (page, opts) => {
     !!opts.manifest,
     config,
     !!opts.flatten,
+    !!opts.proof,
+    opts.from as number | undefined,
+    opts.to as number | undefined,
+    opts.since as string | undefined,
   );
+});
+
+// ── verify ──
+const verifyCmd = program
+  .command("verify <bundlePath>")
+  .description("verify cryptographic Merkle inclusion proofs of a Refract verification bundle")
+  .option("--html <outPath>", "render an interactive verification receipt HTML file");
+verifyCmd.action(async (bundlePath, opts) => {
+  await runVerify(bundlePath, opts.html as string | undefined);
 });
 
 // ── delegation ──

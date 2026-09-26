@@ -1,6 +1,6 @@
 {
   "name": "refract",
-  "version": "0.5.16",
+  "version": "0.5.17",
   "type": "module",
   "private": true,
   "description": "A deterministic observation engine for public revision histories. Evidence, not truth.",
