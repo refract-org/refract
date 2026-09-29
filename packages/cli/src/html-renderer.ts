@@ -1,4 +1,5 @@
 import type { EvidenceEvent, Revision, VerificationBundle } from "@refract-org/evidence-graph";
+import { verifyMerkleProof } from "@refract-org/evidence-graph";
 
 const EVENT_COLORS: Record<string, string> = {
   sentence_first_seen: "#4caf50",
@@ -385,22 +386,30 @@ export function renderVerificationHtmlReceipt(
   bundle: VerificationBundle,
   verification: { valid: boolean; errors: string[] },
 ): string {
-  const statusColor = verification.valid ? "#2e7d32" : "#c62828";
-  const statusText = verification.valid ? "VERIFIED VALID" : "INTEGRITY COMPROMISED";
-  const statusBadge = verification.valid ? "✓ Cryptographically Verified" : "✗ Verification Failed";
+  const pageTitle = escapeHtml(bundle.manifest.pageTitle);
+  const status = verification.valid
+    ? `<p class="status pass">All checks passed.</p>`
+    : `<p class="status fail">Checks failed:</p>
+    <ul class="errors">${verification.errors.map((err) => `<li>${escapeHtml(err)}</li>`).join("")}</ul>`;
 
+  // The same per-proof check verifyVerificationBundle runs: the proof's leaf
+  // hash and siblings hash up to the root the proof records.
   const rows = bundle.events
     .map((e, idx) => {
       const proof = bundle.proofs[idx];
-      const hasProof = !!proof;
+      const proofCell = !proof
+        ? `<span class="dim">missing</span>`
+        : verifyMerkleProof(proof)
+          ? `<span class="pass">pass</span>`
+          : `<span class="fail">fail</span>`;
       return `
       <tr>
         <td>${idx + 1}</td>
-        <td><code>${escapeHtml(e.eventType)}</code></td>
+        <td><code>${escapeHtml(String(e.eventType))}</code></td>
         <td>${escapeHtml(e.timestamp || "—")}</td>
-        <td>${e.fromRevisionId} &rarr; ${e.toRevisionId}</td>
+        <td>${escapeHtml(String(e.fromRevisionId))} &rarr; ${escapeHtml(String(e.toRevisionId))}</td>
         <td>${escapeHtml(e.section || "—")}</td>
-        <td><span style="color:#2e7d32">${hasProof ? "✓ Merkle Root Match" : "—"}</span></td>
+        <td>${proofCell}</td>
       </tr>`;
     })
     .join("\n");
@@ -410,121 +419,65 @@ export function renderVerificationHtmlReceipt(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Refract Verification Receipt — ${escapeHtml(bundle.manifest.pageTitle)}</title>
+<title>Refract verification receipt — ${pageTitle}</title>
 <style>
-  :root {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --border: #334155;
-    --text: #f8fafc;
-    --dim: #94a3b8;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    --sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-  body {
-    margin: 0;
-    padding: 40px 20px;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    line-height: 1.6;
-  }
-  .container { max-width: 900px; margin: 0 auto; }
-  .header {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 32px;
-    margin-bottom: 24px;
-  }
-  .badge {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.05em;
-    background: ${statusColor}22;
-    color: ${statusColor};
-    border: 1px solid ${statusColor}44;
-    margin-bottom: 16px;
-  }
-  h1 { margin: 0 0 8px 0; font-size: 26px; }
-  .meta-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border);
-  }
-  .meta-item label { display: block; font-size: 12px; color: var(--dim); text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
-  .meta-item code { font-family: var(--mono); font-size: 13px; word-break: break-all; color: #38bdf8; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  th, td {
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-  }
-  th { background: #162032; font-weight: 600; color: var(--dim); }
-  code { font-family: var(--mono); font-size: 12px; }
-  .footer { text-align: center; margin-top: 32px; color: var(--dim); font-size: 13px; }
+:root {
+  --bg: #0d1117; --fg: #c9d1d9; --border: #30363d; --card: #161b22; --dim: #8b949e;
+  --pass: #3fb950; --fail: #f85149;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 16px; background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; }
+main { max-width: 900px; margin: 0 auto; }
+h1 { margin: 0 0 12px; font-size: 20px; font-weight: 600; }
+.status { margin: 0 0 8px; font-weight: 600; }
+.pass { color: var(--pass); }
+.fail { color: var(--fail); }
+.dim { color: var(--dim); }
+.errors { margin: 0 0 16px; padding-left: 20px; color: var(--fail); }
+.note { margin: 0 0 8px; color: var(--dim); }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 20px 0 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+dt { color: var(--dim); }
+dd { margin: 0; min-width: 0; }
+code { font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; background: var(--card); }
+th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; white-space: nowrap; }
+th { font-weight: 600; color: var(--dim); }
+tr:last-child td { border-bottom: none; }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <div class="badge">${statusBadge} &bull; ${statusText}</div>
-    <h1>Audit Receipt: ${escapeHtml(bundle.manifest.pageTitle)}</h1>
-    <p style="color:var(--dim); margin:0;">Deterministic provenance record generated by Refract observation engine.</p>
-    <div class="meta-grid">
-      <div class="meta-item">
-        <label>Generated At</label>
-        <div>${escapeHtml(bundle.manifest.generatedAt)}</div>
-      </div>
-      <div class="meta-item">
-        <label>Event Count</label>
-        <div>${bundle.events.length} verifiable events</div>
-      </div>
-      <div class="meta-item" style="grid-column: 1 / -1;">
-        <label>Merkle Root Hash</label>
-        <code>${escapeHtml(bundle.manifest.merkleRoot)}</code>
-      </div>
-      <div class="meta-item" style="grid-column: 1 / -1;">
-        <label>Manifest Hash</label>
-        <code>${escapeHtml(bundle.manifest.manifestHash)}</code>
-      </div>
-    </div>
-  </div>
-
+<main>
+  <h1>Verification receipt: ${pageTitle}</h1>
+  ${status}
+  <p class="note">Checked: the manifest hash matches the manifest; the Merkle root matches the event hashes the manifest lists; there is one event per listed hash; each inclusion proof hashes up to the root it records.</p>
+  <p class="note">Not checked: that an event's content produces the hash listed for it, that every event has a proof, or that a proof's root is the manifest's root. Nothing in the bundle is signed, and anyone who edits it can recompute every hash.</p>
+  <dl>
+    <dt>Manifest generated</dt><dd>${escapeHtml(bundle.manifest.generatedAt)}</dd>
+    <dt>Events</dt><dd>${bundle.events.length}</dd>
+    <dt>Inclusion proofs</dt><dd>${bundle.proofs.length}</dd>
+    <dt>Merkle root</dt><dd><code>${escapeHtml(bundle.manifest.merkleRoot)}</code></dd>
+    <dt>Manifest hash</dt><dd><code>${escapeHtml(bundle.manifest.manifestHash)}</code></dd>
+  </dl>
+  <div class="table-wrap">
   <table>
     <thead>
       <tr>
         <th>#</th>
-        <th>Event Type</th>
+        <th>Event type</th>
         <th>Timestamp</th>
-        <th>Revision Span</th>
+        <th>Revisions</th>
         <th>Section</th>
-        <th>Proof Status</th>
+        <th>Proof</th>
       </tr>
     </thead>
     <tbody>
       ${rows}
     </tbody>
   </table>
-
-  <div class="footer">
-    Verified with Refract. Independent, model-free observation of public knowledge revision histories.
   </div>
-</div>
+</main>
 </body>
 </html>`;
 }
