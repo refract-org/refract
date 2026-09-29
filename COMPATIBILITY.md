@@ -25,7 +25,7 @@ as this tree. `publish.yml` publishes in the order the script prints.
 
 | Package | In this tree | On npm (2026-09-29) | Downstream consumers |
 |---|---|---|---|
-| `@refract-org/evidence-graph` | 0.5.2 | 0.5.2 | every package; NextConsensus; refract-ui (mirrored types) |
+| `@refract-org/evidence-graph` | 0.5.3 | 0.5.2 | every package; NextConsensus; refract-ui (mirrored types) |
 | `@refract-org/ingestion` | 0.3.3 | 0.3.3 | mcp, cli; NextConsensus |
 | `@refract-org/analyzers` | 0.5.2 | 0.5.2 | mcp, cli; NextConsensus |
 | `@refract-org/mcp` | 0.1.0 | 0.1.0 | cli |

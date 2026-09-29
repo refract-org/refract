@@ -1,5 +1,9 @@
-import type { EvidenceEvent, Revision, VerificationBundle } from "@refract-org/evidence-graph";
-import { verifyMerkleProof } from "@refract-org/evidence-graph";
+import type {
+  EvidenceEvent,
+  Revision,
+  VerificationBundle,
+  VerificationBundleResult,
+} from "@refract-org/evidence-graph";
 
 const EVENT_COLORS: Record<string, string> = {
   sentence_first_seen: "#4caf50",
@@ -384,7 +388,7 @@ renderPage();
 
 export function renderVerificationHtmlReceipt(
   bundle: VerificationBundle,
-  verification: { valid: boolean; errors: string[] },
+  verification: VerificationBundleResult,
 ): string {
   const pageTitle = escapeHtml(bundle.manifest.pageTitle);
   const status = verification.valid
@@ -392,16 +396,22 @@ export function renderVerificationHtmlReceipt(
     : `<p class="status fail">Checks failed:</p>
     <ul class="errors">${verification.errors.map((err) => `<li>${escapeHtml(err)}</li>`).join("")}</ul>`;
 
-  // The same per-proof check verifyVerificationBundle runs: the proof's leaf
-  // hash and siblings hash up to the root the proof records.
-  const rows = bundle.events
+  // Each row shows verifyVerificationBundle's own result for that event and
+  // its proof, so a row cannot pass what the verdict above failed.
+  const pass = `<span class="pass">pass</span>`;
+  const fail = `<span class="fail">fail</span>`;
+  const unchecked = `<span class="dim">not checked</span>`;
+  const rows = (bundle.events ?? [])
     .map((e, idx) => {
-      const proof = bundle.proofs[idx];
-      const proofCell = !proof
-        ? `<span class="dim">missing</span>`
-        : verifyMerkleProof(proof)
-          ? `<span class="pass">pass</span>`
-          : `<span class="fail">fail</span>`;
+      const checked = verification.events[idx];
+      const hashCell = !checked ? unchecked : checked.hashMatches ? pass : fail;
+      const proofCell = !checked
+        ? unchecked
+        : checked.proof === "missing"
+          ? `<span class="dim">missing</span>`
+          : checked.proof === "pass"
+            ? pass
+            : fail;
       return `
       <tr>
         <td>${idx + 1}</td>
@@ -409,6 +419,7 @@ export function renderVerificationHtmlReceipt(
         <td>${escapeHtml(e.timestamp || "—")}</td>
         <td>${escapeHtml(String(e.fromRevisionId))} &rarr; ${escapeHtml(String(e.toRevisionId))}</td>
         <td>${escapeHtml(e.section || "—")}</td>
+        <td>${hashCell}</td>
         <td>${proofCell}</td>
       </tr>`;
     })
@@ -451,12 +462,12 @@ tr:last-child td { border-bottom: none; }
 <main>
   <h1>Verification receipt: ${pageTitle}</h1>
   ${status}
-  <p class="note">Checked: the manifest hash matches the manifest; the Merkle root matches the event hashes the manifest lists; there is one event per listed hash; each inclusion proof hashes up to the root it records.</p>
-  <p class="note">Not checked: that an event's content produces the hash listed for it, that every event has a proof, or that a proof's root is the manifest's root. Nothing in the bundle is signed, and anyone who edits it can recompute every hash.</p>
+  <p class="note">Checked: the manifest hash matches the manifest; the Merkle root matches the event hashes the manifest lists; each event, in order, hashes to the hash listed for it; each listed hash has one inclusion proof, for that hash, that hashes up to the manifest's Merkle root.</p>
+  <p class="note">Not checked: the event fields outside the event hash (<code>layer</code>, <code>claimId</code>, <code>schemaVersion</code>, the semantic enrichment fields, each fact's <code>provenance</code> and <code>sourceSpan</code>, <code>modelInterpretation</code>), or that Refract derives these events from the page's revisions. Nothing in the bundle is signed, and anyone who edits it can recompute every hash.</p>
   <dl>
     <dt>Manifest generated</dt><dd>${escapeHtml(bundle.manifest.generatedAt)}</dd>
-    <dt>Events</dt><dd>${bundle.events.length}</dd>
-    <dt>Inclusion proofs</dt><dd>${bundle.proofs.length}</dd>
+    <dt>Events</dt><dd>${(bundle.events ?? []).length}</dd>
+    <dt>Inclusion proofs</dt><dd>${(bundle.proofs ?? []).length}</dd>
     <dt>Merkle root</dt><dd><code>${escapeHtml(bundle.manifest.merkleRoot)}</code></dd>
     <dt>Manifest hash</dt><dd><code>${escapeHtml(bundle.manifest.manifestHash)}</code></dd>
   </dl>
@@ -469,6 +480,7 @@ tr:last-child td { border-bottom: none; }
         <th>Timestamp</th>
         <th>Revisions</th>
         <th>Section</th>
+        <th>Event hash</th>
         <th>Proof</th>
       </tr>
     </thead>
