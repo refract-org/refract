@@ -75,7 +75,7 @@ Built and maintained by [NextConsensus](https://nextconsensus.com) and [Kanav Ja
 - Node.js 20+ or Bun 1.3+
 - A page title. English Wikipedia is the default; for any other MediaWiki (Wikibooks, a Fandom wiki, a private wiki) pass its `api.php` URL with `--api`. A page URL is not parsed — it is looked up as a title and finds nothing.
 
-> **npm status, 2026-09-25:** The library packages were republished with matching source and verified to install and export their documented API — `@refract-org/evidence-graph@0.5.1`, `@refract-org/ingestion@0.3.2`, `@refract-org/analyzers@0.5.1`. The CLI is still `0.5.7` on npm and does not start, and the `0.5.16` publish is pending on bootstrapping `@refract-org/mcp` (a new package — trusted publishing cannot authenticate it until it exists on npm). Until that lands, run the CLI [from source](#from-source). `bun run check:release` now fails a release that would repeat this; see [CHANGELOG](./CHANGELOG.md).
+> **npm status, 2026-09-29:** `@refract-org/cli@0.5.17` installs from npm and runs. The CLI before it on npm, 0.5.7, does not start; if `refract --version` fails with a `SyntaxError`, `npm install -g @refract-org/cli` replaces it.
 
 ### One-shot analysis
 
@@ -270,7 +270,7 @@ import { sectionDiffer, citationTracker } from "@refract-org/analyzers";
 | `@refract-org/evidence-graph` | [![npm](https://img.shields.io/npm/v/@refract-org/evidence-graph)](https://www.npmjs.com/package/@refract-org/evidence-graph) | Core types, schemas, BYO-inference boundaries |
 | `@refract-org/ingestion` | [![npm](https://img.shields.io/npm/v/@refract-org/ingestion)](https://www.npmjs.com/package/@refract-org/ingestion) | Wikimedia API adapters — fetching, diffing, rate limits |
 | `@refract-org/analyzers` | [![npm](https://img.shields.io/npm/v/@refract-org/analyzers)](https://www.npmjs.com/package/@refract-org/analyzers) | Deterministic analyzers — sections, citations, reverts, templates |
-| `@refract-org/mcp` | — (first published with the next release) | MCP tool definitions and server; the executable is `refract mcp` from `@refract-org/cli` |
+| `@refract-org/mcp` | [![npm](https://img.shields.io/npm/v/@refract-org/mcp)](https://www.npmjs.com/package/@refract-org/mcp) | MCP tool definitions and server; the executable is `refract mcp` from `@refract-org/cli` |
 | `@refract-org/cli` | [![npm](https://img.shields.io/npm/v/@refract-org/cli)](https://www.npmjs.com/package/@refract-org/cli) | CLI tool — `refract` / `wikihistory` commands, `classify` inference |
 | `@refract-org/persistence` | — | Local SQLite persistence (bun:sqlite, not published) |
 | `@refract-org/eval` | [![npm](https://img.shields.io/npm/v/@refract-org/eval)](https://www.npmjs.com/package/@refract-org/eval) | Evaluation harness — ground truth validation and benchmarks |
