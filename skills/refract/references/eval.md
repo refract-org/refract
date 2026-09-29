@@ -1,6 +1,6 @@
 # Evaluation Harness
 
-The eval package (`packages/eval`, not published to npm) provides an independent validation layer (L3) that compares pipeline output against expected results.
+The eval package (`@refract-org/eval`, in `packages/eval`) provides an independent validation layer (L3) that compares pipeline output against expected results.
 
 ## EvalHarness Interface
 

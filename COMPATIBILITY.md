@@ -23,24 +23,20 @@ as this tree. `publish.yml` publishes in the order the script prints.
 
 ## Version Matrix
 
-| Package | In this tree | On npm (2026-09-25) | Downstream consumers |
+| Package | In this tree | On npm (2026-09-29) | Downstream consumers |
 |---|---|---|---|
-| `@refract-org/evidence-graph` | 0.5.1 | 0.5.1 | every package; NextConsensus; refract-ui (mirrored types) |
-| `@refract-org/ingestion` | 0.3.2 | 0.3.2 | mcp, cli; NextConsensus |
-| `@refract-org/analyzers` | 0.5.1 | 0.5.1 | mcp, cli; NextConsensus |
-| `@refract-org/mcp` | 0.1.0 | not published — blocks the cli publish | cli |
-| `@refract-org/eval` | 0.2.2 | 0.2.1 | cli (optional) |
-| `@refract-org/cli` | 0.5.16 | 0.5.7 — cannot start | refract-py, Docker image, operators |
+| `@refract-org/evidence-graph` | 0.5.2 | 0.5.2 | every package; NextConsensus; refract-ui (mirrored types) |
+| `@refract-org/ingestion` | 0.3.3 | 0.3.3 | mcp, cli; NextConsensus |
+| `@refract-org/analyzers` | 0.5.2 | 0.5.2 | mcp, cli; NextConsensus |
+| `@refract-org/mcp` | 0.1.0 | 0.1.0 | cli |
+| `@refract-org/eval` | 0.2.2 | 0.2.2 | cli (optional) |
+| `@refract-org/cli` | 0.5.17 | 0.5.17 | refract-py, Docker image, operators |
 | `@refract-org/persistence` | 0.1.1 | private | cli `--cache` from a source checkout |
 
-**The CLI on npm does not run.** `@refract-org/cli@0.5.7` declares
-`@refract-org/analyzers@^0.3.0` (0.3.x only, under npm's rule for 0.x) and imports
-code that only exists in analyzers 0.5.0; forcing 0.5.0 fails on an ingestion export
-that no published ingestion has. The 0.5.16 publish is pending on bootstrapping
-`@refract-org/mcp` on npm (a new package — trusted publishing cannot authenticate it
-until it exists), so until that lands, run the CLI from a source checkout. The three
-library packages on npm — 0.5.1, 0.3.2, 0.5.1 — install and import normally and carry
-the source of this tree.
+`npm install @refract-org/cli@0.5.17` into an empty directory resolves the npm column
+above, and `refract --version` prints 0.5.17. It is the first CLI on npm since 0.5.7,
+which does not start: it declares `@refract-org/analyzers@^0.3.0` and imports code
+that only analyzers 0.5.0 has.
 
 ## External Consumer Versions
 
@@ -86,6 +82,7 @@ As documented in `schema.md`:
 
 | refract CLI | `@refract-org/evidence-graph` | `EVENT_SCHEMA_VERSION` |
 |---|---|---|
+| 0.5.17 | 0.5.2 | `"0.5.0"` |
 | 0.5.15–0.5.16 | 0.5.1 | `"0.5.0"` |
 | 0.5.0–0.5.7 | 0.4.x–0.5.0 | `"0.4.0"` |
 | 0.4.x | 0.3.x | `"0.3.0"` |
