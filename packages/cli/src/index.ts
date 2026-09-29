@@ -244,7 +244,7 @@ const exportCmd = program
   .command("export <page>")
   .description("export analysis as structured data")
   .option("-f, --format <format>", "output format: json, csv, ndjson, parquet", "json")
-  .option("--bundle", "export as signed evidence bundle with SHA-256 hash")
+  .option("--bundle", "export as evidence bundle with a SHA-256 hash of its contents")
   .option("--manifest", "export as replay manifest listing all hashes")
   .option("--proof", "export as self-contained verification bundle with Merkle proofs")
   .option("--from <revId>", "start revision ID", parseInt)
@@ -274,8 +274,8 @@ exportCmd.action(async (page, opts) => {
 // ── verify ──
 const verifyCmd = program
   .command("verify <bundlePath>")
-  .description("verify cryptographic Merkle inclusion proofs of a Refract verification bundle")
-  .option("--html <outPath>", "render an interactive verification receipt HTML file");
+  .description("check the manifest hash, Merkle root and inclusion proofs in a verification bundle")
+  .option("--html <outPath>", "also write the result as an HTML receipt");
 verifyCmd.action(async (bundlePath, opts) => {
   await runVerify(bundlePath, opts.html as string | undefined);
 });

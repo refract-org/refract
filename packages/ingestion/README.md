@@ -1,6 +1,6 @@
 # @refract-org/ingestion
 
-Revision-history adapters — MediaWiki APIs, Git repositories, snapshot archives, the Wayback Machine. Any versioned text source becomes an async iterable of `Revision`s.
+Revision-history adapters — MediaWiki APIs, Git repositories, snapshot archives, the Wayback Machine. Each yields a history as an async iterable of `Revision`s.
 
 ```bash
 bun add @refract-org/ingestion

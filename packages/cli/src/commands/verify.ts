@@ -23,20 +23,25 @@ export async function runVerify(bundlePath: string, htmlOutPath?: string): Promi
 
   const result = verifyVerificationBundle(bundle);
 
-  console.log(bold("\nRefract Verification Receipt"));
+  console.log(bold("\nRefract verification bundle"));
   console.log(dim("──────────────────────────────────────────────────"));
-  console.log(`Page/Entity:   ${cyan(bundle.manifest?.pageTitle || "unknown")}`);
-  console.log(`Generated At:  ${bundle.manifest?.generatedAt || "unknown"}`);
-  console.log(`Manifest Hash: ${bundle.manifest?.manifestHash || "none"}`);
-  console.log(`Merkle Root:   ${bundle.manifest?.merkleRoot || "none"}`);
+  console.log(`Page:          ${cyan(bundle.manifest?.pageTitle || "unknown")}`);
+  console.log(`Generated:     ${bundle.manifest?.generatedAt || "unknown"}`);
+  console.log(`Manifest hash: ${bundle.manifest?.manifestHash || "none"}`);
+  console.log(`Merkle root:   ${bundle.manifest?.merkleRoot || "none"}`);
   console.log(`Events:        ${bundle.events?.length ?? 0}`);
-  console.log(`Merkle Proofs: ${bundle.proofs?.length ?? 0}`);
+  console.log(`Proofs:        ${bundle.proofs?.length ?? 0}`);
   console.log(dim("──────────────────────────────────────────────────"));
 
   if (result.valid) {
-    console.log(success(`INTEGRITY VERIFIED: All events and Merkle proofs valid.`));
+    console.log(success("Checks passed: manifest hash, Merkle root, event count, each proof against its own root."));
+    console.log(
+      dim(
+        "Not checked: event contents against their listed hashes, or proof roots against the manifest root. Nothing in the bundle is signed.",
+      ),
+    );
   } else {
-    console.error(red(`INTEGRITY CHECK FAILED:`));
+    console.error(red("Checks failed:"));
     for (const err of result.errors) {
       console.error(red(`  - ${err}`));
     }

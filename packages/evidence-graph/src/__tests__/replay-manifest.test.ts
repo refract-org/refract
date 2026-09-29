@@ -104,7 +104,7 @@ describe("VerificationBundle", () => {
     expect(verification.errors).toHaveLength(0);
   });
 
-  it("detects tampered event in bundle", async () => {
+  it("detects a tampered manifest Merkle root", async () => {
     const { createVerificationBundle, verifyVerificationBundle } = await import("../replay-manifest.js");
     const bundle = createVerificationBundle({
       pageTitle: "Test",
