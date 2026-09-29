@@ -274,7 +274,7 @@ exportCmd.action(async (page, opts) => {
 // ── verify ──
 const verifyCmd = program
   .command("verify <bundlePath>")
-  .description("check the manifest hash, Merkle root and inclusion proofs in a verification bundle")
+  .description("check a verification bundle's events, manifest hash, Merkle root and inclusion proofs")
   .option("--html <outPath>", "also write the result as an HTML receipt");
 verifyCmd.action(async (bundlePath, opts) => {
   await runVerify(bundlePath, opts.html as string | undefined);

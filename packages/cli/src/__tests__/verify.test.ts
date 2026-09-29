@@ -62,8 +62,8 @@ describe("runVerify", () => {
     expect(htmlContent).toContain('<span class="pass">pass</span>');
   });
 
-  it("marks a proof that does not hash to its root as failed in the receipt", () => {
-    const bundle = createVerificationBundle({
+  function oneEventBundle() {
+    return createVerificationBundle({
       pageTitle: "Test Article",
       analyzerVersions: { refract: "0.5.15" },
       revisions: [],
@@ -78,13 +78,46 @@ describe("runVerify", () => {
         },
       ],
     });
+  }
+
+  // The last two cells of the receipt's one event row: its event hash and its proof.
+  function hashAndProofCells(html: string): string[] {
+    return [...html.matchAll(/<td>(.*?)<\/td>/g)].map((m) => m[1]).slice(-2);
+  }
+
+  const pass = '<span class="pass">pass</span>';
+  const fail = '<span class="fail">fail</span>';
+
+  it("marks a proof that does not hash to its root as failed in the receipt", () => {
+    const bundle = oneEventBundle();
     bundle.proofs[0].rootHash = "0".repeat(64);
 
     const html = renderVerificationHtmlReceipt(bundle, verifyVerificationBundle(bundle));
 
     expect(html).toContain("Checks failed:");
     expect(html).toContain("Merkle proof verification failed for event index 0");
-    expect(html).toContain('<span class="fail">fail</span>');
-    expect(html).not.toContain('<span class="pass">pass</span>');
+    expect(hashAndProofCells(html)).toEqual([pass, fail]);
+  });
+
+  it("marks a self-consistent proof whose root is not the manifest's as failed", () => {
+    const bundle = oneEventBundle();
+    const fakeLeaf = "f".repeat(16);
+    bundle.proofs[0] = { leafHash: fakeLeaf, leafIndex: 0, siblings: [], rootHash: fakeLeaf };
+
+    const html = renderVerificationHtmlReceipt(bundle, verifyVerificationBundle(bundle));
+
+    expect(html).toContain("Proof root for event index 0 does not match the manifest Merkle root");
+    expect(hashAndProofCells(html)).toEqual([pass, fail]);
+  });
+
+  it("marks an edited event's hash as failed in the receipt", () => {
+    const bundle = oneEventBundle();
+    bundle.events[0].after = "Edited content.";
+
+    const html = renderVerificationHtmlReceipt(bundle, verifyVerificationBundle(bundle));
+
+    expect(html).toContain("Checks failed:");
+    expect(html).toContain("Event index 0 hashes to");
+    expect(hashAndProofCells(html)).toEqual([fail, pass]);
   });
 });
