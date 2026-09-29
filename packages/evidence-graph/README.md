@@ -23,10 +23,10 @@ bun add @refract-org/evidence-graph
 
 ### Verification bundles (0.5.1+)
 
-Merkle-tree proofs that an analysis output came from a given set of inputs, verifiable offline later.
+A replay manifest (input revision hashes, output event hashes and their Merkle root), the events, and a Merkle inclusion proof per event hash, in one object. Nothing in a bundle is signed.
 
 - `createVerificationBundle(...)` — package a replay manifest, its events, and Merkle proofs
-- `verifyVerificationBundle(bundle)` — re-check leaf hashes, manifest hash and proof chains against the Merkle root
+- `verifyVerificationBundle(bundle)` — recompute the manifest hash and the Merkle root from the manifest's event hashes, compare the event count, and check that each proof hashes to the root it records (the events themselves are not rehashed, and a proof's root is not compared with the manifest's)
 - `hashLeaf`, `getMerkleProof`, `verifyMerkleProof` — the proof primitives
 - Types: `ReplayManifest`, `MerkleProof`, `VerificationBundle`
 

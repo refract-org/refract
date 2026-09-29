@@ -27,7 +27,7 @@ bun add @refract-org/cli
 - `--cache` — cache revisions in local SQLite (needs Bun and `@refract-org/persistence`, which is not published; from a source checkout only)
 - `--from <revId>`, `--to <revId>` — scope to revision range
 - `--pages-file <path>` — batch analyze multiple pages
-- `--bundle` — export as signed evidence bundle with SHA-256 hash
+- `--bundle` — export as evidence bundle with a SHA-256 hash of its contents (not signed)
 - `--manifest` — export as replay manifest with Merkle tree of event hashes
 - `--api <url>` — override MediaWiki API endpoint
 - `--api-key <token>` — API key for private wiki auth
