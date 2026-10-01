@@ -74,4 +74,17 @@ describe("diff command", () => {
       expect(o.count).toBeGreaterThanOrEqual(0);
     }
   });
+
+  it("calculates citation network concentration and supports detectBorrowing", async () => {
+    const result = await runDiff("Earth", [FAKE_API, FAKE_API], "brief", {
+      detectBorrowing: true,
+    });
+
+    expect(result.wikis[0].citationNetwork).toBeDefined();
+    expect(result.pairwiseBorrowing).toBeDefined();
+    expect(result.pairwiseBorrowing).toHaveLength(1);
+    expect(result.pairwiseBorrowing?.[0].sourceWikiLabel).toBe("A");
+    expect(result.pairwiseBorrowing?.[0].targetWikiLabel).toBe("B");
+    expect(result.pairwiseBorrowing?.[0].propagation.jaccardSimilarity).toBeGreaterThanOrEqual(0);
+  });
 });
