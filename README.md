@@ -54,7 +54,7 @@ Correlated 4 talk page discussions.
   … 195 more events
 ```
 
-No model is called, and the same source produces the same events on every run. A [hash-pinned ground-truth corpus](BENCHMARK.md#ground-truth-corpus) of 16,146 events across ten benchmark pages ships as a [release asset](https://github.com/refract-org/refract/releases/tag/benchmark-corpus-2026-08-27), reproducible byte-for-byte from the manifest bounds.
+No model is called, and the same source produces the same events on every run. A [hash-pinned ground-truth corpus](BENCHMARK.md#ground-truth-corpus) of 15,926 events across ten benchmark pages ships as a [release asset](https://github.com/refract-org/refract/releases/tag/benchmark-corpus-2026-08-27), reproducible byte-for-byte from the manifest bounds.
 
 Refract ingests versioned sources (MediaWiki, text files), computes structural and semantic change events, tracks claims and citations across time, and emits structured provenance data that downstream systems can query, replay, and audit.
 
