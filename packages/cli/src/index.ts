@@ -66,9 +66,10 @@ program
 // ── init ──
 program
   .command("init")
-  .description("onboarding — run a quick analysis and see what Refract can do")
-  .action(async () => {
-    await runInit();
+  .description("onboarding — inspect a bundled fictional history offline")
+  .option("-j, --json", "print the sample events as NDJSON")
+  .action(async (opts) => {
+    await runInit({ json: !!opts.json });
   });
 
 // ── analyze ──

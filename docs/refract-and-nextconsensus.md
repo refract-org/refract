@@ -1,6 +1,6 @@
 # How Refract Relates to NextConsensus
 
-Refract records how a public source changed. [NextConsensus](https://nextconsensus.com), which builds and maintains Refract, is the first system downstream of it. This page says what crosses the boundary between the two and what does not. What NextConsensus does with the record is described by NextConsensus, on its own site, not here.
+Refract gives mutable knowledge a memory by deriving observations from available revision histories. [NextConsensus](https://nextconsensus.com), which builds and maintains Refract, is the first system downstream of it. This page says what crosses the boundary between the two and what does not. What NextConsensus does with the record is described by NextConsensus, on its own site, not here.
 
 ## The Split
 
@@ -8,7 +8,7 @@ Refract records how a public source changed. [NextConsensus](https://nextconsens
 |---|---------|--------------|
 | **Type** | Open infrastructure (AGPL-3.0) | Commercial, closed |
 | **Scope** | Domain-neutral observation of versioned sources | Healthcare: specific claims and the institutions that act on them |
-| **Writes** | A deterministic, byte-reproducible event stream | Its own record, in its own repositories |
+| **Writes** | Revision-linked observations reproducible from the same captured inputs, versions, and configuration | Its own record, in its own repositories |
 | **Question** | "How did this source change, and when?" | Its own — see [nextconsensus.com](https://nextconsensus.com) |
 | **User** | Developers and AI systems | NextConsensus's customers |
 
@@ -28,7 +28,7 @@ Refract is open so that the observation layer can be inspected rather than trust
 
 NextConsensus keeps its domain-specific source coverage, customer annotations and review workflows closed, because they are its business and compound with use.
 
-The split also protects the people NextConsensus works with. Anyone can take the same source revisions, run the same Refract version, and get the same events — the record is checkable rather than a black box. That is tamper-evidence over an observation, not a claim that any reading of it is correct, and it gives no one access to another customer's work.
+An observer with the same captured revisions, supporting metadata, analyzer versions, and configuration can reconstruct the event observations. Bundle verification separately checks internal hash and proof consistency; it does not authenticate the external source or establish complete coverage. Neither process gives access to another customer's work. See [replay and verification](../ARCHITECTURE.md#replay-and-verification).
 
 ## What Refract Does Not Do
 

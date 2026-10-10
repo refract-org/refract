@@ -1,57 +1,58 @@
-import { sectionDiffer } from "@refract-org/analyzers";
-import { MediaWikiClient } from "@refract-org/ingestion";
+import { annotateEvents, buildRevisionEvents } from "@refract-org/analyzers";
+import { createEventIdentity } from "@refract-org/evidence-graph";
+import { onboardingPageTitle, onboardingRevisions } from "../onboarding-sample.js";
 
-export async function runInit(): Promise<void> {
-  console.log();
-  console.log("  Refract observes how Wikipedia pages change over time.");
-  console.log('  It answers "what changed?", and the same revisions always give the same answer.');
-  console.log();
-  console.log('  Running a quick analysis of "Earth" to show you what it does...');
-  console.log();
+export async function runInit(options: { json?: boolean } = {}): Promise<void> {
+  const events = annotateEvents(buildRevisionEvents(onboardingRevisions, { depth: "detailed" }));
+  for (const event of events) {
+    event.deterministicFacts.push({ fact: "source_kind", detail: "fictional_onboarding_sample" });
+    event.deterministicFacts.push({ fact: "source_page", detail: onboardingPageTitle });
+    event.eventId = createEventIdentity(event);
+  }
 
-  try {
-    const client = new MediaWikiClient();
-    const revisions = await client.fetchRevisions("Earth", { limit: 5 });
-    console.log(`  Fetched ${revisions.length} revisions of "Earth".`);
-    console.log(`  Latest: ${revisions[revisions.length - 1].timestamp}`);
-
-    const allChanges = [];
-    for (let i = 1; i < revisions.length; i++) {
-      allChanges.push(
-        ...sectionDiffer.diffSections(
-          sectionDiffer.extractSections(revisions[i - 1].content),
-          sectionDiffer.extractSections(revisions[i].content),
-        ),
-      );
-    }
-
-    const types = [...new Set(allChanges.map((c) => c.changeType))];
-    console.log(`  Found ${allChanges.length} section changes (${types.join(", ")})`);
-  } catch {
-    console.log('  (Could not run the sample analysis of "Earth"; check that Wikipedia is reachable.)');
+  if (options.json) {
+    for (const event of events) console.log(JSON.stringify(event));
+    return;
   }
 
   console.log();
-  console.log("  ── What's next ──");
+  console.log("  Refract gives mutable knowledge a memory.");
+  console.log("  This offline example uses five fictional revisions of Rivergate Library.");
+  console.log("  The text, dates, revision IDs, and reference URL are sample data.");
   console.log();
-  console.log("  Analyze any page:");
-  console.log('    refract analyze "Bitcoin" --depth detailed');
+
+  const explanations: Record<string, string> = {
+    sentence_modified: "Matched wording changed between these revisions.",
+    citation_removed: "A reference disappeared; its significance needs review.",
+    sentence_removed: "Previously observed wording has no match in the next revision.",
+    sentence_reintroduced: "Previously observed wording returned in this sample history.",
+  };
+  for (const event of events) {
+    const explanation = explanations[event.eventType];
+    if (!explanation) continue;
+    console.log(
+      `  ${event.timestamp.slice(0, 10)}  ${event.eventType} (sample revision ${event.fromRevisionId} → ${event.toRevisionId})`,
+    );
+    if (event.before) console.log(`    Before: ${event.before}`);
+    if (event.after) console.log(`    After:  ${event.after}`);
+    console.log(`    ${explanation}`);
+    console.log();
+  }
+
+  console.log("  Source inputs: packages/cli/src/onboarding-sample.ts in the Refract repository.");
+  console.log("  The events above are computed by the same analyzers used for wiki revisions.");
   console.log();
-  console.log("  View results in a browser:");
+  console.log("  Try the data workflow offline:");
+  console.log("    refract init --json > sample-events.ndjson");
+  console.log();
+  console.log("  Then try a real page (requires network access):");
+  console.log('    refract analyze "Bitcoin" --depth brief --json');
+  console.log("  This reads the latest 20 revisions and prints metadata as NDJSON.");
+  console.log();
+  console.log("  View a timeline in your browser:");
   console.log('    refract explore "Bitcoin"');
+  console.log("  This starts a local server; Ctrl+C stops it.");
   console.log();
-  console.log("  Track a specific claim:");
-  console.log('    refract claim "Bitcoin" --text "decentralized digital currency"');
-  console.log();
-  console.log("  See what a page said on a specific date:");
-  console.log('    refract snapshot "Bitcoin" --at 2024-01-15');
-  console.log();
-  console.log("  Monitor for changes:");
-  console.log("    refract cron pages.txt --interval 24 --notify-slack");
-  console.log();
-  console.log("  Connect an AI agent:");
-  console.log("    refract mcp");
-  console.log();
-  console.log("  Full docs: https://refract-org.github.io/refract-docs");
+  console.log("  Walkthrough and recipes: https://github.com/refract-org/refract/blob/main/docs/recipes.md");
   console.log();
 }

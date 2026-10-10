@@ -2,13 +2,13 @@
 
 This page shows the output of `refract analyze "Bitcoin" --depth brief` against
 Wikipedia's live API (revision range: 2009–2010, 20 revisions). This is what Refract
-produces — a structured event stream of everything that changed, when, and how.
+produces: observations of changes detected within the captured revision range.
 
 > **Note:** The full output file linked below was generated with Refract v0.3.x and
 > uses legacy event type names (e.g., `claim_reworded` instead of `sentence_modified`,
 > `section_changed` instead of `section_reorganized`). The inline examples below use
-> the current event types. Both files show the same observation — only the naming
-> has changed.
+> the current event type names. This is an archived example, not a promise that
+> current analyzer versions reproduce the legacy event counts or classifications.
 
 Full CLI output: [bitcoin-quick-analysis.txt](./bitcoin-quick-analysis.txt) (330 events).
 
@@ -56,16 +56,17 @@ Analysis of "Bitcoin" at depth brief found 330 events across 20 revisions.
   5 revisions — the page's elevator pitch evolved along with the project
 - **Wikilinks added:** `cryptography`, `proof-of-work`, `hashcash` — the article
   linked into Wikipedia's broader topic network as it matured
-- **Citation added:** The first source (`sourceforge.net/projects/bitcoin/`)
-  appeared in Dec 2009, marking the page's transition from announcement to
-  referenced article
+- **Citation added:** A reference to `sourceforge.net/projects/bitcoin/`
+  was detected in Dec 2009 within the analyzed range
 - **Template changes:** Stub templates were replaced with more specific ones
   (`bank-stub` → `web-software-stub`) as the article grew
 
 ## What This Shows
 
-Every event is **deterministic**: the same analysis on the same revision range
-always produces the same output. No model involved. No interpretation. Just
-structured, reproducible fact extraction from the Wikipedia API.
+The event observations are **deterministic**: the same captured inputs, analyzer
+versions, and configuration produce the same observations. The revision range
+bounds what was observed; it does not establish the page's complete history.
+Export timestamps can differ between runs. No model is called by the observation
+pipeline; downstream systems interpret the observations.
 
 > **v0.5.0+**: Events now include 6 enrichment fields (`editMagnitude`, `contentChange`, `keyTerms`, `certaintyProfile`, `directionSignal`, `quantitativeFindings`). These are computed deterministically during the analyze pipeline. Example output below shows the base event format; enrichment fields are present on all events when using v0.5.0+.

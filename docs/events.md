@@ -1,14 +1,23 @@
 # Event taxonomy
 
-Each Refract event describes what changed at a revision boundary. Events are deterministic — the same input always produces the same output.
+Each Refract event represents an observed transition anchored to source revisions.
+The same captured revision inputs, supporting metadata, analyzer versions, and
+configuration produce the same event observations. Generated export timestamps
+can differ between runs. Coverage is limited to the captured history and the
+changes recognized by the analyzer rules.
 
-## Claim lifecycle
+## Sentence changes
 
 | Event type | Trigger | Example |
 |---|---|---|
-| `sentence_first_seen` | New sentence text appears | A sentence about a company appears for the first time |
-| `sentence_removed` | Existing sentence deleted entirely | A controversial paragraph is removed |
-| `sentence_reintroduced` | Previously removed sentence returns | A deleted sentence is restored in a later edit |
+| `sentence_first_seen` | Sentence has no match above the overlap threshold and has not been seen in the analyzed range | Wording about a company is first observed in the captured history |
+| `sentence_removed` | Prior sentence has no match above the overlap threshold | Wording disappears or is rewritten beyond the matching threshold |
+| `sentence_modified` | Matched sentence wording differs under the comparison rules | A sentence is reworded with enough word overlap to match |
+| `sentence_reintroduced` | Previously observed normalized sentence text returns without a current match above the overlap threshold | Wording from an earlier captured revision returns |
+
+Sentence matching uses word overlap (default threshold: 0.8) and filters out
+sentence fragments of 20 characters or fewer. These events do not establish a
+continuous semantic claim identity. See [claim-state timelines](./concepts/claim-state-timelines.md).
 
 ## Citation changes
 
@@ -74,8 +83,8 @@ All events share a common structure:
 ```typescript
 interface EvidenceEvent {
   eventType: EventType;       // one of the types above
-  fromRevisionId: number;     // parent revision
-  toRevisionId: number;       // revision where the change occurred
+  fromRevisionId: number;     // prior analyzed revision
+  toRevisionId: number;       // next analyzed revision
   section: string;            // section name
   before: string;             // text/state before
   after: string;              // text/state after
@@ -84,6 +93,10 @@ interface EvidenceEvent {
   timestamp: string;          // ISO 8601
 }
 ```
+
+If intermediate revisions are missing, the pair represents the detected
+difference between the captured states. It does not identify every intervening
+edit or the exact revision where each change originated.
 
 ## Semantic Enrichment Fields (v0.5.0+)
 

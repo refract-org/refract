@@ -1,0 +1,38 @@
+
+  Refract gives mutable knowledge a memory.
+  This offline example uses five fictional revisions of Rivergate Library.
+  The text, dates, revision IDs, and reference URL are sample data.
+
+  2025-01-02  sentence_modified (sample revision 1 → 2)
+    Before: Rivergate Library is open until six every weekday throughout the year
+    After:  Rivergate Library is open until eight every weekday throughout the year
+    Matched wording changed between these revisions.
+
+  2025-01-03  citation_removed (sample revision 2 → 3)
+    Before: <ref>{{cite web|url=https://example.org/rivergate/hours|title=Rivergate opening hours}}</ref>
+    A reference disappeared; its significance needs review.
+
+  2025-01-04  sentence_removed (sample revision 3 → 4)
+    Before: The library provides free printing for all registered members
+    Previously observed wording has no match in the next revision.
+
+  2025-01-05  sentence_reintroduced (sample revision 4 → 5)
+    After:  The library provides free printing for all registered members
+    Previously observed wording returned in this sample history.
+
+  Source inputs: packages/cli/src/onboarding-sample.ts in the Refract repository.
+  The events above are computed by the same analyzers used for wiki revisions.
+
+  Try the data workflow offline:
+    refract init --json > sample-events.ndjson
+
+  Then try a real page (requires network access):
+    refract analyze "Bitcoin" --depth brief --json
+  This reads the latest 20 revisions and prints metadata as NDJSON.
+
+  View a timeline in your browser:
+    refract explore "Bitcoin"
+  This starts a local server; Ctrl+C stops it.
+
+  Walkthrough and recipes: https://github.com/refract-org/refract/blob/main/docs/recipes.md
+

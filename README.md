@@ -2,7 +2,9 @@
 
 # Refract
 
-**A deterministic observation engine for revision histories. It reads a page's edits and emits a typed event for each change.**
+**Refract gives mutable knowledge a memory.**
+
+Temporal observability for knowledge: structured observations of changes in available revision histories.
 
 [![CI](https://github.com/refract-org/refract/actions/workflows/ci.yml/badge.svg)](https://github.com/refract-org/refract/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/release/refract-org/refract)](https://github.com/refract-org/refract/releases)
@@ -15,7 +17,7 @@
 
 ## What does it do?
 
-Given a Wikipedia page, Refract produces a structured event stream showing **what changed, when, and how** — every sentence that appeared, was removed, or was modified; every citation that shifted.
+Given a Wikipedia page, Refract analyzes a selected revision range and emits a structured event stream showing **what changed, when, and how**: detected changes to sentences, citations, and document structure. Each observation is anchored to source revisions.
 
 ```bash
 npx @refract-org/cli analyze "Semaglutide" --depth brief
@@ -54,17 +56,31 @@ Correlated 4 talk page discussions.
   … 195 more events
 ```
 
-No model is called, and the same source produces the same events on every run. A [hash-pinned ground-truth corpus](BENCHMARK.md#ground-truth-corpus) of 15,926 events across ten benchmark pages ships as a [release asset](https://github.com/refract-org/refract/releases/tag/benchmark-corpus-2026-08-27), reproducible byte-for-byte from the manifest bounds.
+No model is called by the observation pipeline. The same captured inputs, analyzer versions, and configuration produce the same event observations; export timestamps can differ between runs. A [hash-pinned ground-truth corpus](BENCHMARK.md#ground-truth-corpus) of 15,926 events across ten benchmark pages ships as a [release asset](https://github.com/refract-org/refract/releases/tag/benchmark-corpus-2026-08-27).
 
-Refract ingests versioned sources (MediaWiki, text files), computes structural and semantic change events, tracks claims and citations across time, and emits structured provenance data that downstream systems can query, replay, and audit.
+Refract turns available revision histories into structured, reproducible observations of changes to text, citations, and document structure. Downstream systems can query that history to understand what appeared, changed, disappeared, or returned, and decide what those observations mean.
 
-Works on any versioned text source: Wikipedia, regulatory documents, clinical guidelines, trial registries, policy archives, and legal texts. Refract replays how a claim changed over time. Downstream systems — like [NextConsensus](https://nextconsensus.com) — decide what that history means.
+The CLI fetches histories from MediaWiki. Library consumers can supply versioned text through the common revision model. Coverage depends on the revisions and supporting metadata available to the run. Downstream systems — like [NextConsensus](https://nextconsensus.com) — interpret the resulting observations.
 
-Most knowledge systems answer *what does this source say now?* Refract helps answer: *what changed, when, where, and what did the record say at a specific point in time?*
+Alongside *what does this source say now?*, Refract helps answer: *what changed between these revisions? When was this wording first observed in the analyzed range? Which citations appeared or disappeared? Did previously observed text return?*
 
 Built and maintained by [NextConsensus](https://nextconsensus.com) and [Kanav Jain](https://kanav.net). Domain-neutral — Refract observes change, applications interpret relevance.
 
 [Repository boundary](./docs/repository-boundary.md)
+
+## Core concepts
+
+The central primitive is the **observed transition, anchored to its source revisions**:
+
+`available revision history → deterministic observations → queryable event history`
+
+Refract derives events from externally maintained states and revision traces. This resembles event sourcing in reverse, but the reconstruction is bounded by the captured inputs and analyzer rules. Missing revisions, unrecorded actions, and editorial intent cannot be recovered from a diff alone.
+
+Claim IDs identify text in a page and section. Matching rules can associate wording across revisions, but arbitrary rewrites or moves do not preserve a universal claim identity. State labels summarize rule-based observations; a label such as `contested` does not by itself establish an editorial dispute.
+
+Replay manifests record input content hashes, analyzer versions, and output event hashes. Merkle proofs check event-hash membership against a manifest root. Bundle verification checks internal consistency; independent reconstruction requires retained inputs and the same analyzer versions and configuration. Export timestamps are separate from reproducible observations.
+
+See [claim-state timelines](./docs/concepts/claim-state-timelines.md) for identity and matching limits, and [architecture](./ARCHITECTURE.md#replay-and-verification) for the verification scope.
 
 ---
 
@@ -165,13 +181,13 @@ Each consumer brings their own interpretation layer on top of Refract's determin
 | **Provenance-aware RAG** | Retrieval that weights results by claim stability | Enrich each retrieved chunk with its claim history — stable, recently changed, source-fragile, contested. The RAG system uses the signal to filter or demote low-confidence results. |
 | **Regulatory monitoring** | Early-warning dashboards for policy changes | Run `refract cron` on drug pages, guideline entries, and regulatory topics. When new events fire (citation removal, template dispute, section reorganization), alert the monitoring team with the structured diff. |
 | **Competitive intelligence** | Cross-jurisdiction claim divergence maps | Use `refract diff` to compare the same topic across wikis (English vs German Wikipedia, Fandom vs independent wiki). Track how framing differs and when it diverged. |
-| **Fact-checking** | Claim provenance timelines | Given a claim text, query its lifecycle across the event stream — first appearance, source additions, revert history, talk page correlation, stabilization time. Return a verifiable timeline. |
-| **Academic research** | Large-scale knowledge dynamics studies | Export `ObservationReport` with Merkle-verifiable claim histories. Run cohort analyses on claim stability across topics, time periods, and editorial environments. |
+| **Fact-checking** | Claim provenance timelines | Inspect matched wording, citation changes, reverts, and talk-page correlations within the analyzed range. The consumer reviews what those observations establish. |
+| **Academic research** | Large-scale knowledge dynamics studies | Export `ObservationReport` to study detected changes across topics and time periods. Use verification bundles to check event-hash and proof consistency, and retained inputs to independently reconstruct observations. |
 | **Journalism forensics** | Edit pattern analysis for public figures | Track how a specific claim about a person or topic evolved. Look for coordinated editing, source softening, or removal without replacement. |
 | **Fan wiki canon tracking** | Canon divergence detection across competing wikis | Compare the same fictional universe's page across Fandom and independent wikis. Detect when one wiki retcons content while the other doesn't — and by how much. |
 | **Knowledge graph engineering** | Evolving ontologies from category and link changes | Use `refract analyze --depth forensic` to capture category_added/removed and wikilink_added/removed events. Build an entity graph that evolves with the public record. |
 
-The common architecture: **Refract extracts the mechanical facts. The downstream system interprets what those facts mean for its domain.** No interpretation enters Refract's pipeline; no consumer re-extracts from raw revision history.
+The common architecture: **Refract derives observations under deterministic rules. The downstream system interprets what those observations mean for its domain.** Consumers can inspect the rules and reconstruct observations from the same captured inputs.
 
 
 ## Why Refract over raw Wikipedia API?
@@ -187,10 +203,10 @@ Many people do. Here is what Refract gives you that a raw script does not:
 | You detect reverts by pattern matching | 6 regex patterns + edit cluster detection |
 | You correlate talk pages by hand | Automatic talk-page correlation and activity spikes |
 | Your output format is ad-hoc | Standardized JSON/NDJSON with deterministic event IDs |
-| You write your own replay logic | Replay manifests with Merkle proofs for auditability |
+| You record your own input and output hashes | Replay manifests and Merkle proofs for checking bundle consistency |
 | You maintain your own Wikipedia client | Rate limiting, retries, auth, pagination — built in |
-| Your results change when you re-run | Byte-reproducible — same input, same output every time |
-| You build your own timeline | Timeline builder with claim lifecycle tracking |
+| You maintain your own reproducible extraction rules | Same captured inputs, analyzer versions, and configuration produce the same observations |
+| You build your own timeline | Revision-linked events and claim histories under documented matching rules |
 
 Refract is the Wikipedia analysis code you would otherwise write and maintain
 yourself — a revision fetcher, section, citation and template parsers, a revert
