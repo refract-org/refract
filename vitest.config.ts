@@ -11,7 +11,7 @@ export default defineConfig({
     // suites again through every dependent package: performance.test.ts ran
     // four times, and one failure was reported as four. Vitest's own default
     // is **/node_modules/**; naming `exclude` at all replaced it.
-    exclude: ["**/node_modules/**", "**/.opencode/**", "**/dist/**"],
+    exclude: ["**/node_modules/**", "**/.opencode/**", "**/dist/**", "apps/**"],
     // Prints once per run which tests the live gate skipped. It has to be a
     // global hook: vitest discards console output from a file whose tests are
     // all skipped, which is every file the gate closes.

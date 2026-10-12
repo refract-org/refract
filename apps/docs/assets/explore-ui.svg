@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 520" width="840" height="520">
+  <title>Refract explorer interface</title>
+  <defs>
+    <filter id="shadow" x="-5%" y="-2%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .title { font-size: 18px; font-weight: 700; fill: #111827; }
+    .ui-label { font-size: 11px; fill: #6b7280; }
+    .event-type { font-size: 10px; font-weight: 600; }
+    .event-detail { font-size: 9px; fill: #4b5563; }
+    .tab-active { font-size: 11px; font-weight: 700; fill: #2563eb; }
+    .tab-inactive { font-size: 11px; fill: #6b7280; }
+    .row-text { font-size: 10px; fill: #374151; }
+    .header-text { font-size: 10px; font-weight: 700; fill: #374151; }
+    .diff-text { font-size: 10px; fill: #4b5563; font-family: 'SF Mono', 'Fira Code', monospace; }
+    .badge { font-size: 9px; font-weight: 600; }
+  </style>
+
+  <rect width="840" height="520" fill="#fafbfc" rx="8"/>
+
+  <text x="420" y="32" text-anchor="middle" class="title">refract explore — Web UI</text>
+  <text x="420" y="50" text-anchor="middle" class="ui-label">Local web server (default port 8899) — timeline, evidence table, diff viewer</text>
+
+  <!-- Browser chrome -->
+  <rect x="30" y="68" width="780" height="440" rx="8" fill="#fff" stroke="#d1d5db" stroke-width="1.5" filter="url(#shadow)"/>
+  
+  <!-- Title bar -->
+  <rect x="30" y="68" width="780" height="32" rx="8" fill="#f3f4f6"/>
+  <rect x="38" y="68" width="8" height="32" rx="4" fill="#10b981"/>
+  <rect x="52" y="68" width="8" height="32" rx="4" fill="#f59e0b"/>
+  <rect x="66" y="68" width="8" height="32" rx="4" fill="#ef4444"/>
+  <text x="420" y="89" text-anchor="middle" font-size="11" fill="#374151">Refract Explorer — Bitcoin (330 events)</text>
+
+  <!-- Top bar -->
+  <rect x="42" y="108" width="756" height="28" rx="4" fill="#f9fafb"/>
+  <text x="60" y="126" class="tab-active">Timeline</text>
+  <text x="155" y="126" class="tab-inactive">Events</text>
+  <text x="230" y="126" class="tab-inactive">Diff</text>
+  <text x="290" y="126" class="tab-inactive">Claims</text>
+  <text x="380" y="126" class="ui-label">Depth: detailed ▼</text>
+  <text x="550" y="126" class="ui-label">Section: all ▼</text>
+  <text x="680" y="126" class="ui-label">Export ▼</text>
+
+  <!-- Timeline view -->
+  <rect x="42" y="143" width="756" height="355" rx="4" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- Timeline events -->
+  <rect x="52" y="153" width="736" height="32" rx="4" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="0.5"/>
+  <text x="64" y="173" class="event-type" fill="#065f46">sentence_first_seen</text>
+  <text x="200" y="173" class="event-detail">"Bitcoin is a digital currency introduced in 2009"</text>
+  <text x="640" y="173" class="ui-label">2009-03-08 · rev 275832690</text>
+  <text x="760" y="173" class="badge" fill="#10b981">+new</text>
+
+  <rect x="52" y="189" width="736" height="32" rx="4" fill="#eff6ff" stroke="#93c5fd" stroke-width="0.5"/>
+  <text x="64" y="209" class="event-type" fill="#1e40af">citation_added</text>
+  <text x="200" y="209" class="event-detail">sourceforge.net/projects/bitcoin/</text>
+  <text x="640" y="209" class="ui-label">2009-12-10 · rev 308164529</text>
+  <text x="760" y="209" class="badge" fill="#3b82f6">+src</text>
+
+  <rect x="52" y="225" width="736" height="32" rx="4" fill="#fef3c7" stroke="#fcd34d" stroke-width="0.5"/>
+  <text x="64" y="245" class="event-type" fill="#92400e">sentence_modified</text>
+  <text x="200" y="245" class="event-detail">"...introduced in 2009 by Satoshi Nakamoto"</text>
+  <text x="640" y="245" class="ui-label">2009-12-12 · rev 308180771</text>
+  <text x="760" y="245" class="badge" fill="#f59e0b">~chg</text>
+
+  <rect x="52" y="261" width="736" height="32" rx="4" fill="#fef2f2" stroke="#fca5a5" stroke-width="0.5"/>
+  <text x="64" y="281" class="event-type" fill="#991b1b">revert_detected</text>
+  <text x="200" y="281" class="event-detail">Content reverted: "decentralized" → "not decentralized" → "decentralized"</text>
+  <text x="640" y="281" class="ui-label">2010-01-18 · rev 312000000</text>
+  <text x="760" y="281" class="badge" fill="#ef4444">↺rv</text>
+
+  <rect x="52" y="297" width="736" height="32" rx="4" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="0.5"/>
+  <text x="64" y="317" class="event-type" fill="#6d28d9">template_added</text>
+  <text x="200" y="317" class="event-detail">&#123;&#123;citations needed&#125;&#125;</text>
+  <text x="640" y="317" class="ui-label">2010-02-22 · rev 315000000</text>
+  <text x="760" y="317" class="badge" fill="#7c3aed">▸tmpl</text>
+
+  <rect x="52" y="333" width="736" height="32" rx="4" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="0.5"/>
+  <text x="64" y="353" class="event-type" fill="#065f46">category_added</text>
+  <text x="200" y="353" class="event-detail">Category:Cryptocurrencies</text>
+  <text x="640" y="353" class="ui-label">2010-03-12 · rev 318000000</text>
+  <text x="760" y="353" class="badge" fill="#10b981">+cat</text>
+
+  <!-- Scrollbar -->
+  <rect x="788" y="154" width="6" height="175" rx="3" fill="#e5e7eb"/>
+  <rect x="788" y="160" width="6" height="60" rx="3" fill="#d1d5db"/>
+
+  <!-- Event detail panel (bottom) -->
+  <rect x="52" y="375" width="736" height="115" rx="4" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="64" y="393" font-size="10" font-weight="700" fill="#374151">Selected: sentence_modified</text>
+
+  <!-- Before/After diff -->
+  <rect x="64" y="403" width="350" height="80" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.5"/>
+  <text x="76" y="420" class="ui-label" font-weight="600" fill="#ef4444">BEFORE (rev 308164529)</text>
+  <text x="76" y="438" class="diff-text">Bitcoin is a digital currency introduced</text>
+  <text x="76" y="454" class="diff-text">in 2009 as open-source software.</text>
+  <text x="76" y="474" class="diff-text" fill="#ef4444">− in 2009 as open-source software.</text>
+
+  <rect x="426" y="403" width="350" height="80" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.5"/>
+  <text x="438" y="420" class="ui-label" font-weight="600" fill="#10b981">AFTER (rev 308180771)</text>
+  <text x="438" y="438" class="diff-text">Bitcoin is a digital currency introduced</text>
+  <text x="438" y="454" class="diff-text">in 2009 by Satoshi Nakamoto as</text>
+  <text x="438" y="474" class="diff-text" fill="#10b981">+ in 2009 by Satoshi Nakamoto as open-source software.</text>
+
+  <!-- Footer -->
+  <text x="420" y="512" text-anchor="middle" class="ui-label">Start the explorer: refract explore "Bitcoin" &nbsp;|&nbsp; Opens browser at http://localhost:8899</text>
+</svg>
