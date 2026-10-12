@@ -27,13 +27,8 @@
   },
   "license": "AGPL-3.0",
   "workspaces": [
-    "packages/evidence-graph",
-    "packages/ingestion",
-    "packages/analyzers",
-    "packages/cli",
-    "packages/mcp",
-    "packages/persistence",
-    "packages/eval"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
     "build": "tsc -b",
