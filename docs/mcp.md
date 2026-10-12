@@ -51,7 +51,8 @@ With a source checkout instead of npm, point the command at the build:
 
 ### `analyze`
 
-Analyze a MediaWiki page's full edit history.
+Analyze a MediaWiki page's revision history. Use `from` and `to` for a pinned
+range; the default brief run reads a recent window. See [range and depth rules](./usage.md).
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -64,7 +65,8 @@ Analyze a MediaWiki page's full edit history.
 
 ### `claim`
 
-Track a specific claim's provenance across revisions.
+Track text matches across revisions. The result is bounded by the fetched
+history and [text-matching rules](./concepts/claim-state-timelines.md#identity-and-matching).
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -93,7 +95,10 @@ Re-observe pages — for scheduled monitoring.
 
 ### `get_statement_history`
 
-Track the history of a specific statement across revisions. Returns when the statement — or a semantic neighbor — appeared, disappeared, or changed, with revision IDs, timestamps, an overall status, and a short change summary.
+Track normalized text or partial word matches across revisions. Returns matched
+revision IDs, timestamps, an overall status, and a short change summary. A
+partial match is not a guarantee of equivalent meaning; state labels summarize
+the matching rules. See [state labels](./concepts/claim-state-timelines.md#state-labels).
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -126,3 +131,15 @@ For private wikis, pass `apiKey`, `apiUser`, and `apiPassword` as parameters on 
   }
 }
 ```
+
+### Passage matching and latest state
+
+`get_statement_history` now includes `latest_revision_id`, `latest_match`, and
+`caveats`. Detailed results retain candidate text and each variant's match kind.
+`latest_match` distinguishes exact text, a sentence word-overlap candidate, no
+match, and unavailable source text. Status `unknown` covers partial latest
+matches or withheld latest text. Disappearance is measured against the latest
+fetched revision, not the last historical match.
+
+Use [saved source reviews](./review.md) through the CLI when you need an explicit
+review baseline; fetching a statement history does not acknowledge a review.

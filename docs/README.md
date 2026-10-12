@@ -1,12 +1,15 @@
 # Refract Documentation
 
-Refract gives mutable knowledge a memory: temporal observability for knowledge
-through structured observations of available revision histories.
+Refract gives mutable knowledge a memory. See how Wikipedia text and citations
+changed since your last review, with text and revision links to inspect.
 
 ## Getting Started
 
+- [Review your sources](./review.md) — watchlists, saved baselines, coverage, and explicit acknowledgment
+
 - [Quick Start](../README.md#quick-start) — first commands to try
-- [init command](../README.md) — guided onboarding
+- [Offline walkthrough](./recipes.md#try-the-offline-walkthrough) — changed wording, a removed reference, and returned text
+- [History range and output guide](./usage.md) — what gets fetched and where results appear
 - [Core Concepts](../README.md#core-concepts) — observed transitions, identity, and replay
 - [Claim-State Timelines](./concepts/claim-state-timelines.md) — observed transitions, identity, matching, and coverage limits
 
@@ -20,8 +23,9 @@ through structured observations of available revision histories.
 
 ## Guides
 
-- [Example Output](./example-output.md) — what a full analysis looks like
+- [Bitcoin walkthrough](./example-output.md) — two captured observations with source revision links
 - [Recipes](./recipes.md) — common workflows and patterns
+- [Data and library integrations](./integrations.md) — adapters, event queries, and review feeds
 - [MCP Server](./mcp.md) — using Refract as an MCP tool provider
 - [Security](./security.md) — reporting vulnerabilities
 
@@ -29,4 +33,5 @@ through structured observations of available revision histories.
 
 - [Contributing](../CONTRIBUTING.md) — how to get started
 - [Roadmap](../ROADMAP.md) — planned work and priorities
+- [Repository map and consolidation proposal](./repositories.md) — ownership, shared contracts, and staged migration
 - [Refract vs. NextConsensus](./refract-and-nextconsensus.md) — how the two relate
