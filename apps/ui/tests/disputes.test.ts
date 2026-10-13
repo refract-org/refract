@@ -23,7 +23,7 @@ describe("EditVelocityChart", () => {
 		const events: EvidenceEvent[] = [
 			{
 				eventId: "e1",
-				eventType: "claim_first_seen",
+				eventType: "sentence_first_seen",
 				fromRevisionId: 1,
 				toRevisionId: 2,
 				timestamp: "2026-05-10T10:00:00Z",

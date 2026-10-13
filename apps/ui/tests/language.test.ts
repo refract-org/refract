@@ -26,7 +26,7 @@ describe("CertaintyTimeline", () => {
 		const events: EvidenceEvent[] = [
 			{
 				eventId: "ev-1",
-				eventType: "claim_strengthened",
+				eventType: "sentence_modified",
 				fromRevisionId: 100,
 				toRevisionId: 101,
 				timestamp: "2026-01-01T00:00:00Z",
@@ -42,7 +42,7 @@ describe("CertaintyTimeline", () => {
 			},
 			{
 				eventId: "ev-2",
-				eventType: "claim_softened",
+				eventType: "sentence_modified",
 				fromRevisionId: 101,
 				toRevisionId: 102,
 				timestamp: "2026-01-02T00:00:00Z",

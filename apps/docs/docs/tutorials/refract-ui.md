@@ -9,7 +9,7 @@ event breakdowns — using the standalone Refract UI.
 
 - [Node.js](https://nodejs.org) 20+ or [Bun](https://bun.sh) v1.2+
 - [Refract CLI](https://www.npmjs.com/package/@refract-org/cli) (`npx @refract-org/cli` works)
-- Clone of [refract-ui](https://github.com/refract-org/refract-ui)
+- Clone of the [Refract repository](https://github.com/refract-org/refract); the viewer is in `apps/ui`
 
 Refract UI is a zero-dependency web app (vanilla TS + Vite). It runs entirely in your
 browser — no server, no API key, no data leaves your machine.
@@ -32,8 +32,9 @@ clusters, talk page activity, category shifts — everything the visualizer can 
 In a second terminal:
 
 ```bash
-cd refract-ui
+cd refract
 bun install
+cd apps/ui
 bun run dev
 ```
 
@@ -113,4 +114,4 @@ relationships between event types become visible at a glance.
 - [Complete end-to-end workflow](../complete-workflow.md) — analyze, export, query, visualize
 - [Track Wikipedia changes](wikipedia-history.md) — build a claim timeline
 - [Analytics with DuckDB](../analytics.md) — query the raw data
-- [Refract UI source](https://github.com/refract-org/refract-ui) — run it locally
+- [Refract UI source](https://github.com/refract-org/refract/tree/main/apps/ui) — run it locally

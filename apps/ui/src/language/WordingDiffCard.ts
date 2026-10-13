@@ -1,4 +1,5 @@
 import type { EvidenceEvent } from "../types.js";
+import { WORDING_EVENT_TYPES } from "../types.js";
 
 interface WordingChange {
 	revisionId: number;
@@ -88,15 +89,8 @@ export class WordingDiffCard {
 	}
 
 	private computeChanges(): WordingChange[] {
-		const wordingTypes = new Set([
-			"sentence_modified",
-			"sentence_first_seen",
-			"sentence_removed",
-			"sentence_reintroduced",
-		]);
-
 		const wordingEvents = this.events.filter((e) =>
-			wordingTypes.has(e.eventType),
+			WORDING_EVENT_TYPES.has(e.eventType),
 		);
 
 		return wordingEvents.map((e) => ({

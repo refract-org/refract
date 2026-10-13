@@ -166,7 +166,12 @@ refract/
 │   ├── mcp/               # Model Context Protocol server implementation
 │   ├── persistence/       # SQLite local caching and revision store
 │   └── eval/              # Evaluation harness & benchmark verification
-└── docs/                  # Architecture specs, recipes & boundary definitions
+├── apps/
+│   ├── docs/              # Public documentation site (CC-BY-4.0)
+│   └── ui/                # Browser-only file viewer
+├── docs/                  # Architecture specs, recipes & boundary definitions
+│   └── examples/          # Captured revision inputs and engine output
+└── demo-data/             # Local datasets
 ```
 
 ## Development and testing
@@ -179,6 +184,8 @@ bun run build
 bun run test
 bun run lint
 ```
+
+The apps are workspaces with their own checks, run from their directories: `bun run lint`, `bun run test` and `bun run build` in `apps/docs` or `apps/ui`. CI runs them in `docs-site.yml` and `viewer.yml`, separately from the engine gate.
 
 ## Packages
 
@@ -216,18 +223,20 @@ integration without AGPL obligations. See [nextconsensus.com](https://nextconsen
 
 ## Ecosystem
 
-These repos extend the core engine:
+These build on the core engine:
 
-| Repo | Purpose |
-|------|---------|
-| [refract-docs](https://github.com/refract-org/refract-docs) | Public documentation site — [integrations](https://refract-org.github.io/refract-docs/integrations/), quickstart, CLI, SDK, tutorials |
-| [refract-ui](https://github.com/refract-org/refract-ui) | Standalone visualization — load JSONL, render timelines, diffs, citations |
+| Project | Purpose |
+|---------|---------|
+| [Docs site](./apps/docs) | Public documentation site — [integrations](https://refract-org.github.io/refract-docs/integrations/), quickstart, CLI, SDK, tutorials |
+| [Viewer](./apps/ui) | Browser-only file viewer — load JSONL, render timelines, diffs, citations |
 | [Demo data](./demo-data) | Local datasets; the [offline walkthrough](./docs/recipes.md#try-the-offline-walkthrough) uses a fictional library history |
 | [refract-py](https://github.com/refract-org/refract-py) | Python adapter — calls the CLI and returns dataclasses or DataFrames |
 
-The core owns event contracts, CLI behavior, and reproducible examples. The other
-repos publish guides or consume those interfaces. See the [repository map and
-consolidation proposal](./docs/repositories.md) for ownership and migration steps.
+The core owns event contracts, CLI behavior, and reproducible examples. The docs
+site and the viewer live under `apps/` with their own licenses; the viewer imports
+the engine's event types and is checked against its captured output. The Python
+adapter is still a separate repository. See the [repository map](./docs/repositories.md)
+for ownership and the remaining migration steps.
 
 ### Position in the revisable-delegation loop
 

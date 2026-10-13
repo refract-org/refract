@@ -1,41 +1,14 @@
-import type { EvidenceEvent } from "../types.js";
+import type { EvidenceEvent, EvidenceLayer } from "../types.js";
+import { isEventType } from "../types.js";
 
-const VALID_EVENT_TYPES = new Set([
-	"sentence_first_seen",
-	"sentence_removed",
-	"sentence_modified",
-	"sentence_reintroduced",
-	"citation_added",
-	"citation_removed",
-	"citation_replaced",
-	"template_added",
-	"template_removed",
-	"template_parameter_changed",
-	"revert_detected",
-	"edit_cluster_detected",
-	"talk_activity_spike",
-	"section_reorganized",
-	"lead_promotion",
-	"lead_demotion",
-	"page_moved",
-	"wikilink_added",
-	"wikilink_removed",
-	"category_added",
-	"category_removed",
-	"protection_changed",
-	"talk_page_correlated",
-	"talk_thread_opened",
-	"talk_thread_archived",
-	"talk_reply_added",
-]);
-
-const VALID_LAYERS = new Set([
-	"observed",
-	"policy_coded",
-	"model_interpretation",
-	"speculative",
-	"unknown",
-]);
+const LAYER_RECORD: Record<EvidenceLayer, true> = {
+	observed: true,
+	policy_coded: true,
+	model_interpretation: true,
+	speculative: true,
+	unknown: true,
+};
+const VALID_LAYERS = new Set<string>(Object.keys(LAYER_RECORD));
 
 export class ImportUpload {
 	private container: HTMLElement;
@@ -150,10 +123,7 @@ export class ImportUpload {
 
 		const e = obj as Record<string, unknown>;
 
-		if (
-			typeof e.eventType !== "string" ||
-			!VALID_EVENT_TYPES.has(e.eventType)
-		) {
+		if (!isEventType(e.eventType)) {
 			return {
 				valid: false,
 				error: `Invalid or missing eventType: ${e.eventType}`,

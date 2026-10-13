@@ -1,4 +1,4 @@
-# Repository map and consolidation proposal
+# Repository map and consolidation
 
 Refract has one observation engine and three supporting projects. A user can
 analyze, review, and export sources with the core CLI alone. The viewer and Python
@@ -6,12 +6,17 @@ adapter provide optional ways to consume its output.
 
 ## Current ownership
 
-| Repository | Owns | Consumes | Local checks |
+| Location | Owns | Consumes | Checks |
 |---|---|---|---|
-| [refract](https://github.com/refract-org/refract) | Event schemas, analyzers, ingestion, CLI, explorer, review state, captured examples | Source revision histories | `bun run ci` and `bun run check:examples` |
-| [refract-docs](https://github.com/refract-org/refract-docs) | Public site, navigation, tutorials, Pages deployment | Documented CLI and schema contracts | `npm ci`, `npm run lint`, `npm test`, `npm run build` |
-| [refract-ui](https://github.com/refract-org/refract-ui) | Browser-only file viewer | NDJSON events; local types mirror the engine | `bun install --frozen-lockfile`, `bun run lint`, `bun run test`, `bun run build` |
+| `refract` (`packages/`, `docs/`) | Event schemas, analyzers, ingestion, CLI, explorer, review state, captured examples | Source revision histories | `ci.yml`: `bun run ci` and `bun run check:examples` |
+| `refract` `apps/docs/` | Public site, navigation, tutorials | Documented CLI and schema contracts | `docs-site.yml`: `bun run lint`, `bun run test`, `bun run build` |
+| `refract` `apps/ui/` | Browser-only file viewer | NDJSON events; event types imported from `@refract-org/evidence-graph` | `viewer.yml`: `bun run lint`, `bun run test` (with the engine contract), `bun run build` |
 | [refract-py](https://github.com/refract-org/refract-py) | Python subprocess adapter and notebook integrations | CLI flags and NDJSON output | `hatch test`, `hatch build` |
+
+The docs site still deploys from the [refract-docs](https://github.com/refract-org/refract-docs)
+repository, whose source was imported into `apps/docs/` with its history; the
+[refract-ui](https://github.com/refract-org/refract-ui) source was imported into
+`apps/ui/` the same way. Neither old repository has changed since the import.
 
 This inventory was checked on 2026-10-12. The organization has no current
 `refract-labs` or `refract-demo-data` repository. Datasets live in `demo-data/`;
@@ -39,7 +44,7 @@ with a changed engine contract. A meaningful compatibility check must pass
 engine-produced output into the downstream parser, including empty and partial
 results. See [COMPATIBILITY.md](../COMPATIBILITY.md).
 
-## Proposed destination: one repository
+## Destination: one repository
 
 Consolidate development into `refract`, keeping independent build and release
 boundaries:
@@ -50,7 +55,7 @@ refract/
   docs/                # canonical engine and file-format guides
   docs/examples/       # captured revision inputs and outputs
   apps/docs/           # site builder, navigation, assets, tutorial content
-  apps/viewer/         # browser-only file viewer, its build and tests
+  apps/ui/             # browser-only file viewer, its build and tests
   clients/python/      # Python package, Hatch config and tests
   demo-data/           # existing datasets
 ```
@@ -73,10 +78,18 @@ tested; repository consolidation does not require a simultaneous toolchain move.
    tutorial and asset paths. Build and preview the complete site before changing
    deployment. Preserve `/refract-docs/` URLs through an explicit redirect or
    deployment arrangement, including deep links, search, sitemap, and images.
-2. **Move the viewer.** Import its history under `apps/viewer/`, preserve its
-   AGPL-3.0 license, and keep its browser-only operation. Replace independently
+   *Status:* history imported (#37); lint, tests and build run in `docs-site.yml`.
+   Deployment has not moved, and reference pages are not yet mapped to `docs/`.
+2. **Move the viewer.** Import its history under `apps/ui/`, preserve its
+   license, and keep its browser-only operation. Replace independently
    maintained event lists with a checked schema fixture or type-only adapter;
    do not bundle ingestion, a CLI, or source credentials into the browser.
+   *Status:* done. History imported (#37). The viewer imports `EventType` and
+   `EvidenceEvent` from `@refract-org/evidence-graph` as types only; its event
+   list is a `Record<EventType, …>` the compiler checks against the engine; and
+   `tests/engine-contract.test.ts` imports, lists and re-exports the engine
+   output in `docs/examples/`. Its `LICENSE` file is MIT while its
+   `package.json` declares AGPL-3.0; that needs a decision, not a move.
 3. **Move the Python adapter.** Import its history under `clients/python/`,
    preserve its AGPL-3.0 license, and build/install the wheel in a fresh
    environment. Verify Python 3.10 and the CI runtime. Document a working install
@@ -86,9 +99,7 @@ tested; repository consolidation does not require a simultaneous toolchain move.
    only after installs, deployments, and links have been verified. Preserve any
    required redirect-only Pages deployment.
 
-Each move should be a separate PR with before/after build evidence. The current
-PRs propose this structure and repair existing drift; they do not migrate or
-archive repositories.
+Each move should be a separate PR with before/after build evidence.
 
 ## Checks in the consolidated repository
 
@@ -99,7 +110,10 @@ contract checks. Keep the core release gate independent of site or Python builds
 At minimum, the contract checks should cover:
 
 - Every current event type can be imported by the viewer, rendered, and exported
-  with its original revision identifiers and text.
+  with its original revision identifiers and text. Today the engine output in
+  `docs/examples/` covers seven types; the other nineteen go through the same
+  path as events built from the viewer's compiler-checked list, not as engine
+  output.
 - The Python adapter reads captured core NDJSON and preserves event and analyzer
   identity. Its CLI argument tests run against the built CLI for fixed inputs.
 - Published commands in the public quickstart work with the documented release.

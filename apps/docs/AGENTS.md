@@ -1,31 +1,31 @@
 # Agent instructions for refract-docs
 
-Refract-docs is the public documentation site for the Refract project — an open-source deterministic observation engine for public revision histories.
+Refract-docs is the public documentation site for the Refract project — an open-source deterministic observation engine for public revision histories. Its source is `apps/docs` in the Refract monorepo.
 
 ## Quick Start
 
 ```bash
-npm install          # Install dependencies
-npm run build        # Build static HTML — docs/ → dist/
-npm run lint         # Biome check
-npm run test         # Vitest (verifies docs compile)
+bun install          # at the repository root; installs every workspace
+bun run build        # Build static HTML — docs/ → dist/
+bun run lint         # Biome check
+bun run test         # Vitest (verifies docs compile)
 ```
 
 ## Tooling
 
-- **Package manager:** npm
+- **Package manager:** Bun, through the repository root's workspace and lockfile
 - **Linter/Formatter:** Biome
 - **Tests:** Vitest
-- **Pre-commit:** Husky runs Biome on staged files
-- **CI:** ci.yml (main) + deploy.yml (GitHub Pages)
+- **Pre-commit:** the repository root's Husky hook runs lint-staged, which uses this directory's `.lintstagedrc.json`
+- **CI:** `.github/workflows/docs-site.yml` at the repository root
 - **Commit style:** Conventional Commits
 
 ## Verification
 
 ```bash
-npm run lint     # Biome check
-npm run test     # Build verification
-npm run build    # Production build
+bun run lint     # Biome check
+bun run test     # Build verification
+bun run build    # Production build
 ```
 
 ## Repository structure
@@ -69,5 +69,5 @@ docs/
 
 ```bash
 node build.mjs      # builds static HTML from docs/ → dist/
-npm test            # runs build (verifies docs compile without errors)
+bun run test        # runs build (verifies docs compile without errors)
 ```

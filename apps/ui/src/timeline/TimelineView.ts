@@ -83,6 +83,9 @@ export class TimelineView {
 		for (const event of this.filtered) {
 			const item = document.createElement("div");
 			item.className = `timeline-item event-${event.eventType}`;
+			if (event.directionSignal && event.directionSignal !== "neutral") {
+				item.classList.add(`direction-${event.directionSignal}`);
+			}
 			if (event === this.selected) {
 				item.classList.add("selected");
 			}

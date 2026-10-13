@@ -28,21 +28,7 @@ jobs:
       # registry comparison runs in publish.yml, where npm's state is the point.
       - run: bun run check:release -- --pack
 
-# There was a `downstream` job here that checked out refract-org/refract-ui and
-# ran its test suite on every pull request and push. It could not detect a
-# regression in this repository, because refract-ui does not consume this one:
-# its package.json declares `dependencies: {}`, nothing under its src/ imports
-# an @refract-org package, and its AGENTS.md records the arrangement on purpose
-# — "Types mirror @refract-org/evidence-graph schemas (defined locally in
-# src/types.ts)". So the job installed a second repository and ran its single
-# test against its own local types, with this PR's diff nowhere in the picture.
-#
-# Measured on run 34146471011: gate 14s, downstream 8s, and because downstream
-# declared `needs: gate` it started only after gate finished — 29s of wall clock
-# for 17s of checking.
-#
-# A real downstream check is still worth having, and would have to compare
-# refract-ui's mirrored types against this repo's evidence-graph schemas, since
-# drift between them is the actual failure mode the mirror creates. Running
-# refract-ui's own suite cannot see that drift: those tests assert refract-ui
-# against the very copy that drifted.
+# The viewer (apps/ui) and the docs site (apps/docs) have their own path-filtered
+# workflows, viewer.yml and docs-site.yml, so neither can hold up this gate. The
+# viewer's runs whenever evidence-graph or the captured examples change: it
+# type-checks against the engine's EventType and imports the engine's output.

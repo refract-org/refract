@@ -7,9 +7,10 @@ Standalone web app for exploring Refract observation data. Load any JSONL file o
 ## Quick start
 
 ```bash
-git clone https://github.com/refract-org/refract-ui
-cd refract-ui
+git clone https://github.com/refract-org/refract
+cd refract
 bun install
+cd apps/ui
 bun run dev
 ```
 
@@ -59,4 +60,4 @@ Download filtered data as JSON, JSONL, or CSV using the toolbar buttons. Filters
 
 ## Source
 
-[github.com/refract-org/refract-ui](https://github.com/refract-org/refract-ui) · [Full tutorial](tutorials/refract-ui)
+[Source: `apps/ui`](https://github.com/refract-org/refract/tree/main/apps/ui) · [Full tutorial](tutorials/refract-ui)

@@ -14,7 +14,7 @@ describe("EventFilter", () => {
 	it("initializes with all types active and renders filter chips", () => {
 		const allTypes: EventType[] = [
 			"citation_added",
-			"claim_first_seen",
+			"sentence_first_seen",
 			"revert_detected",
 		];
 		const onChange = vi.fn();
@@ -26,7 +26,7 @@ describe("EventFilter", () => {
 	});
 
 	it("toggles a filter type and triggers onChange callback", () => {
-		const allTypes: EventType[] = ["citation_added", "claim_first_seen"];
+		const allTypes: EventType[] = ["citation_added", "sentence_first_seen"];
 		const onChange = vi.fn();
 		const filter = new EventFilter({ container, allTypes, onChange });
 
@@ -36,7 +36,7 @@ describe("EventFilter", () => {
 	});
 
 	it("clears and selects all types", () => {
-		const allTypes: EventType[] = ["citation_added", "claim_first_seen"];
+		const allTypes: EventType[] = ["citation_added", "sentence_first_seen"];
 		const onChange = vi.fn();
 		const filter = new EventFilter({ container, allTypes, onChange });
 
@@ -71,7 +71,7 @@ describe("TimelineView", () => {
 		const events: EvidenceEvent[] = [
 			{
 				eventId: "evt-01",
-				eventType: "claim_first_seen",
+				eventType: "sentence_first_seen",
 				fromRevisionId: 10,
 				toRevisionId: 11,
 				timestamp: "2026-05-01T00:00:00Z",

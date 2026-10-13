@@ -16,7 +16,7 @@ and process for improving Refract docs.
 ## Repository structure
 
 ```
-refract-docs/
+apps/docs/              # in the refract repository
 ├── docs/               # Markdown source (one .md per page)
 │   ├── tutorials/      # Tutorial pages
 │   └── ...
