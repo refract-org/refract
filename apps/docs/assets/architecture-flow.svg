@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 900" width="720" height="900">
+  <title>Refract data flow</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6b7280"/>
+    </marker>
+    <linearGradient id="l1Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:0.12"/>
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.06"/>
+    </linearGradient>
+    <linearGradient id="l2Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:0.12"/>
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:0.06"/>
+    </linearGradient>
+    <linearGradient id="dsGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:0.08"/>
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.03"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-2%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .title { font-size: 18px; font-weight: 700; fill: #111827; }
+    .subtitle { font-size: 13px; fill: #6b7280; }
+    .box-title { font-size: 14px; font-weight: 700; }
+    .box-desc { font-size: 11px; fill: #4b5563; }
+    .l1-title { fill: #1d4ed8; }
+    .l2-title { fill: #047857; }
+    .layer-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; }
+    .arrow-label { font-size: 11px; fill: #6b7280; }
+    .boundary-label { font-size: 10px; fill: #7c3aed; font-style: italic; }
+  </style>
+
+  <rect width="720" height="900" fill="#fafbfc" rx="8"/>
+
+  <!-- Title -->
+  <text x="360" y="40" text-anchor="middle" class="title">Refract — Data Flow</text>
+  <text x="360" y="60" text-anchor="middle" class="subtitle">Two-Knowledge-Split Architecture</text>
+
+  <!-- === L1: Deterministic === -->
+  <rect x="60" y="90" width="600" height="340" rx="10" fill="url(#l1Grad)" stroke="#bfdbfe" stroke-width="1.5"/>
+  <rect x="60" y="90" width="6" height="340" rx="3" fill="#2563eb"/>
+  <text x="560" y="108" class="layer-label" fill="#1d4ed8">LAYER 1 — DETERMINISTIC</text>
+
+  <rect x="310" y="120" width="100" height="34" rx="17" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="360" y="142" text-anchor="middle" font-size="12" font-weight="600" fill="#1e40af">Wikipedia API</text>
+
+  <line x1="360" y1="154" x2="360" y2="175" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="100" y="180" width="240" height="60" rx="6" fill="#fff" stroke="#93c5fd" stroke-width="1" filter="url(#shadow)"/>
+  <text x="220" y="203" text-anchor="middle" class="box-title l1-title">Fetch + Extract</text>
+  <text x="220" y="222" text-anchor="middle" class="box-desc">Revisions, diffs, sections, citations</text>
+
+  <rect x="380" y="180" width="240" height="60" rx="6" fill="#fff" stroke="#93c5fd" stroke-width="1" filter="url(#shadow)"/>
+  <text x="500" y="203" text-anchor="middle" class="box-title l1-title">Diff + Analyze</text>
+  <text x="500" y="222" text-anchor="middle" class="box-desc">Template tracking, revert detection</text>
+
+  <!-- L1 invariants -->
+  <rect x="140" y="270" width="440" height="50" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="360" y="291" text-anchor="middle" font-size="11" font-weight="600" fill="#1e40af">L1 Invariant: No model calls. Byte-for-byte reproducible.</text>
+  <text x="360" y="307" text-anchor="middle" font-size="11" fill="#3b82f6">Output: deterministic_facts[] arrays — evidence events with provenance</text>
+
+  <!-- L1 Output -->
+  <rect x="270" y="335" width="180" height="28" rx="4" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="360" y="354" text-anchor="middle" font-size="11" font-weight="600" fill="#1e40af">Evidence Objects (L1)</text>
+
+  <!-- Arrow L1 → Report -->
+  <line x1="360" y1="363" x2="360" y2="395" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="440" y="383" class="arrow-label">evidence events</text>
+
+  <!-- Report Assembly -->
+  <rect x="230" y="400" width="260" height="45" rx="6" fill="#fff" stroke="#d1d5db" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="360" y="420" text-anchor="middle" class="box-title" fill="#111827">Report Assembly</text>
+  <text x="360" y="438" text-anchor="middle" class="box-desc">L1 facts → layered, timestamped output</text>
+
+  <!-- Arrow Report → L2 -->
+  <line x1="360" y1="445" x2="360" y2="480" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="440" y="465" class="arrow-label">report</text>
+
+  <!-- === L2: Independent Ground Truth === -->
+  <rect x="60" y="490" width="600" height="180" rx="10" fill="url(#l2Grad)" stroke="#a7f3d0" stroke-width="1.5"/>
+  <rect x="60" y="490" width="6" height="180" rx="3" fill="#059669"/>
+  <text x="560" y="508" class="layer-label" fill="#047857">LAYER 2 — INDEPENDENT GROUND TRUTH</text>
+
+  <rect x="140" y="530" width="440" height="55" rx="6" fill="#fff" stroke="#6ee7b7" stroke-width="1" filter="url(#shadow)"/>
+  <rect x="140" y="530" width="440" height="22" rx="6" fill="#ecfdf5"/>
+  <text x="360" y="546" text-anchor="middle" font-size="11" font-weight="600" fill="#047857">Validate + Measure</text>
+  <text x="360" y="566" text-anchor="middle" class="box-desc">Talk page consensus · RFC closures · ArbCom decisions · Page protection events</text>
+
+  <!-- L2 invariants -->
+  <rect x="140" y="605" width="440" height="45" rx="6" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="360" y="623" text-anchor="middle" font-size="10" font-weight="600" fill="#047857">L2 Invariant: Independently sourced, timestamped. Never redefined by L1 output.</text>
+  <text x="360" y="639" text-anchor="middle" font-size="10" fill="#10b981">Stored in @refract-org/eval — compared via validation harness</text>
+
+  <!-- === Engine Boundary === -->
+  <rect x="30" y="75" width="660" height="610" rx="12" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="8,4"/>
+  <text x="50" y="92" font-size="9" font-weight="700" fill="#6b7280" letter-spacing="2">REFRACT ENGINE</text>
+
+  <!-- === Downstream Interpretation === -->
+  <rect x="60" y="705" width="600" height="175" rx="10" fill="url(#dsGrad)" stroke="#ddd6fe" stroke-width="1.5"/>
+  <rect x="60" y="705" width="6" height="175" rx="3" fill="#7c3aed"/>
+  <text x="560" y="723" class="layer-label" fill="#6d28d9">DOWNSTREAM</text>
+
+  <text x="360" y="746" text-anchor="middle" font-size="11" fill="#6d28d9" font-style="italic">Model-assisted interpretation lives outside Refract</text>
+
+  <rect x="100" y="765" width="520" height="65" rx="6" fill="#fff" stroke="#a78bfa" stroke-width="1" filter="url(#shadow)"/>
+  <rect x="100" y="765" width="520" height="22" rx="6" fill="#f5f3ff"/>
+  <text x="360" y="781" text-anchor="middle" font-size="11" font-weight="600" fill="#6d28d9">Consumer Interpretation</text>
+  <text x="360" y="800" text-anchor="middle" class="box-desc">Pluggable model adapters · BYO-inference · Confidence-scored output</text>
+  <text x="360" y="818" text-anchor="middle" class="box-desc">NextConsensus · Fact-checkers · RAG · Monitoring dashboards · Research</text>
+
+  <text x="360" y="880" text-anchor="middle" font-size="10" fill="#6b7280">Refract provides the deterministic record. The consumer provides the judgment.</text>
+</svg>

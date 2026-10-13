@@ -1,6 +1,6 @@
 # How Refract Relates to NextConsensus
 
-Refract records how a public source changed. [NextConsensus](https://nextconsensus.com), which builds and maintains Refract, is the first system downstream of it. This page says what crosses the boundary between the two and what does not. What NextConsensus does with the record is described by NextConsensus, on its own site, not here.
+Refract gives mutable knowledge a memory by deriving observations from available revision histories. [NextConsensus](https://nextconsensus.com), which builds and maintains Refract, is the first system downstream of it. This page says what crosses the boundary between the two and what does not. What NextConsensus does with the record is described by NextConsensus, on its own site, not here.
 
 ## The Split
 
@@ -8,7 +8,7 @@ Refract records how a public source changed. [NextConsensus](https://nextconsens
 |---|---------|--------------|
 | **Type** | Open infrastructure (AGPL-3.0) | Commercial, closed |
 | **Scope** | Domain-neutral observation of versioned sources | Healthcare: specific claims and the institutions that act on them |
-| **Writes** | A deterministic, byte-reproducible event stream | Its own record, in its own repositories |
+| **Writes** | Revision-linked observations reproducible from the same captured inputs, versions, and configuration | Its own record, in its own repositories |
 | **Question** | "How did this source change, and when?" | Its own — see [nextconsensus.com](https://nextconsensus.com) |
 | **User** | Developers and AI systems | NextConsensus's customers |
 
@@ -16,7 +16,7 @@ Refract's events are observations. Which change matters, to whom, and what might
 
 ## How NextConsensus Consumes Refract
 
-- **Three library packages.** NextConsensus imports `@refract-org/evidence-graph`, `@refract-org/ingestion` and `@refract-org/analyzers` from npm (`^0.5.0`, `^0.3.1`, `^0.5.0`) and nothing else from Refract. Some of its scripts also shell out to the `refract` CLI; those cannot run from npm until the next release, because the published `@refract-org/cli@0.5.7` does not start (see [COMPATIBILITY.md](../COMPATIBILITY.md)).
+- **Three library packages.** NextConsensus imports `@refract-org/evidence-graph`, `@refract-org/ingestion` and `@refract-org/analyzers` from npm (`^0.5.0`, `^0.3.1`, `^0.5.0`) and nothing else from Refract. Some of its scripts also shell out to the `refract` CLI, which runs from npm as of `@refract-org/cli@0.5.17` (2026-09-29); 0.5.7 before it does not start (see [COMPATIBILITY.md](../COMPATIBILITY.md)).
 - **One adapter file per repository.** In each NextConsensus repository that uses Refract, a single file is the only place `@refract-org/*` is imported, and everything else imports from that file. This is the pattern [AGENTS.md](../AGENTS.md) recommends to every consumer: an upgrade touches one file, and a diff of that file is the whole of what changed at the boundary.
 - **Events.** NextConsensus's app derives events itself, from revisions it fetches, with a hand copy of the CLI's per-pair diff; the copy had drifted from the CLI. From analyzers 0.5.1 that diff is exported as `buildRevisionEvents`, which the CLI also calls. Switching to it changes the shape of the events the app records, so it is a migration on the NextConsensus side, not an upgrade.
 - **What stays downstream.** Source weighting, name anonymization, domain classification of edits, and anything else that interprets an event live in those adapter files and the code behind them. None of it comes back into Refract, and `bun run check:boundaries` fails the build if domain vocabulary appears in this repository's packages.
@@ -28,7 +28,7 @@ Refract is open so that the observation layer can be inspected rather than trust
 
 NextConsensus keeps its domain-specific source coverage, customer annotations and review workflows closed, because they are its business and compound with use.
 
-The split also protects the people NextConsensus works with. Anyone can take the same source revisions, run the same Refract version, and get the same events — the record is checkable rather than a black box. That is tamper-evidence over an observation, not a claim that any reading of it is correct, and it gives no one access to another customer's work.
+An observer with the same captured revisions, supporting metadata, analyzer versions, and configuration can reconstruct the event observations. Bundle verification separately checks internal hash and proof consistency; it does not authenticate the external source or establish complete coverage. Neither process gives access to another customer's work. See [replay and verification](../ARCHITECTURE.md#replay-and-verification).
 
 ## What Refract Does Not Do
 

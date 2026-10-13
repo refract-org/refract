@@ -1,7 +1,9 @@
 # Repository Boundary
 
-Refract is open-source core observability for MediaWiki and public revision histories.
-Refract observes change across time. Healthcare-specific logic lives in private repos.
+Refract gives mutable knowledge a memory through temporal observability for
+MediaWiki and other available revision histories. It derives observations of
+changes across time, anchored to source revisions. Domain-specific interpretation
+belongs in downstream applications.
 
 ## In Scope
 
@@ -9,9 +11,8 @@ Refract observes change across time. Healthcare-specific logic lives in private 
 - Deterministic extraction of what changed between revisions.
 - Provenance records for claims, sources, page structure, links, categories,
   templates, talk-page references, and page moves.
-- Claim-state timelines: structured records of how claims evolved across revisions.
-- Optional model-assisted interpretation that receives only extracted evidence
-  and emits bounded labels with confidence.
+- Claim-state timelines under deterministic identity and text-matching rules.
+- Replay manifests and verification bundles for checking hash and proof consistency.
 - Generic benchmarks that check whether Refract detected publicly observable
   revision-history events.
 - Connectors for public or user-controlled MediaWiki instances.
@@ -22,6 +23,9 @@ Refract observes change across time. Healthcare-specific logic lives in private 
   routing, authority-weighting, clinical source ranking, bitemporal gap
   detection, claim-context mapping, and review workflow triggers.
 - Claims that Refract determines truth, predicts external events, or ranks people.
+- Model-assisted interpretation, recommendations, and domain-specific judgments.
+- Guarantees of complete history, source authenticity, or semantic identity through
+  arbitrary rewrites based only on revision diffs and bundle hashes.
 
 ## Test
 

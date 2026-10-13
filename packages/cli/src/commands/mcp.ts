@@ -650,6 +650,13 @@ export async function runMcpServer(): Promise<void> {
       };
       if (request.jsonrpc !== "2.0") continue;
 
+      // No id makes this a notification, and JSON-RPC 2.0 forbids replying to
+      // one, even to say the method is unknown. MCP clients send
+      // notifications/initialized after the handshake and
+      // notifications/cancelled when they abandon a request; neither needs
+      // action here, and any other notification is dropped the same way.
+      if (!("id" in msg)) continue;
+
       await handleRequest(request, options).catch((err) => {
         process.stderr.write(`Unhandled error: ${err.message}\n`);
       });
@@ -676,9 +683,6 @@ async function handleRequest(
       });
       break;
     }
-
-    case "initialized":
-      break;
 
     case "tools/list":
       send({ jsonrpc: "2.0", id: request.id, result: { tools: TOOLS } });

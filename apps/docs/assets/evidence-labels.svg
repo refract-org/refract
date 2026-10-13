@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 440" width="840" height="440">
+  <title>Evidence labels</title>
+  <defs>
+    <filter id="shadow" x="-2%" y="-5%" width="104%" height="120%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .title { font-size: 18px; font-weight: 700; fill: #111827; }
+    .subtitle { font-size: 13px; fill: #6b7280; }
+    .label-name { font-size: 15px; font-weight: 700; }
+    .label-desc { font-size: 12.5px; fill: #4b5563; }
+    .label-source { font-size: 11px; fill: #6b7280; }
+  </style>
+
+  <rect width="840" height="440" fill="#fafbfc" rx="8"/>
+
+  <text x="420" y="36" text-anchor="middle" class="title">Evidence Label Taxonomy</text>
+  <text x="420" y="56" text-anchor="middle" class="subtitle">Every interpretation carries a provenance label</text>
+
+  <!-- Observed -->
+  <rect x="30" y="80" width="800" height="62" rx="8" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="80" width="6" height="62" rx="3" fill="#10b981"/>
+  <rect x="54" y="94" width="16" height="16" rx="3" fill="#10b981"/>
+  <text x="62" y="107" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+  <text x="82" y="108" class="label-name" fill="#065f46">Observed</text>
+  <text x="180" y="108" class="label-desc">Deterministic, byte-for-byte reproducible</text>
+  <text x="450" y="108" class="label-source">Source: L1 deterministic</text>
+  <rect x="660" y="96" width="60" height="18" rx="9" fill="#d1fae5"/>
+  <text x="690" y="109" text-anchor="middle" font-size="10" font-weight="600" fill="#065f46">L1</text>
+  <rect x="728" y="96" width="84" height="18" rx="9" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+  <text x="770" y="109" text-anchor="middle" font-size="10" font-weight="600" fill="#047857">Reproducible ✓</text>
+
+  <!-- Policy-coded -->
+  <rect x="30" y="155" width="800" height="62" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="155" width="6" height="62" rx="3" fill="#3b82f6"/>
+  <rect x="54" y="169" width="16" height="16" rx="3" fill="#3b82f6"/>
+  <text x="62" y="182" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">⚖</text>
+  <text x="82" y="183" class="label-name" fill="#1e40af">Policy-coded</text>
+  <text x="180" y="183" class="label-desc">Matches known Wikipedia policy signals</text>
+  <text x="450" y="183" class="label-source">Source: L1 + policy ontology</text>
+  <rect x="660" y="171" width="60" height="18" rx="9" fill="#dbeafe"/>
+  <text x="690" y="184" text-anchor="middle" font-size="10" font-weight="600" fill="#1e40af">L1</text>
+  <rect x="728" y="171" width="84" height="18" rx="9" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+  <text x="770" y="184" text-anchor="middle" font-size="10" font-weight="600" fill="#1d4ed8">Rules-based ✓</text>
+
+  <!-- Model interpretation -->
+  <rect x="30" y="230" width="800" height="62" rx="8" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="230" width="6" height="62" rx="3" fill="#8b5cf6"/>
+  <rect x="54" y="244" width="16" height="16" rx="3" fill="#8b5cf6"/>
+  <text x="62" y="257" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">◉</text>
+  <text x="82" y="258" class="label-name" fill="#5b21b6">Model interpretation</text>
+  <text x="180" y="258" class="label-desc">LLM-assisted, with confidence score</text>
+  <text x="450" y="258" class="label-source">Source: L2 LLM</text>
+  <rect x="660" y="246" width="60" height="18" rx="9" fill="#ede9fe"/>
+  <text x="690" y="259" text-anchor="middle" font-size="10" font-weight="600" fill="#6d28d9">L2</text>
+  <rect x="728" y="246" width="84" height="18" rx="9" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1"/>
+  <text x="770" y="259" text-anchor="middle" font-size="10" font-weight="600" fill="#6d28d9">Bounded ✓</text>
+
+  <!-- Speculative -->
+  <rect x="30" y="305" width="800" height="62" rx="8" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="305" width="6" height="62" rx="3" fill="#f59e0b"/>
+  <rect x="54" y="319" width="16" height="16" rx="3" fill="#f59e0b"/>
+  <text x="62" y="332" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">~</text>
+  <text x="82" y="333" class="label-name" fill="#92400e">Speculative</text>
+  <text x="180" y="333" class="label-desc">Below confidence threshold (&lt;0.5)</text>
+  <text x="450" y="333" class="label-source">Source: L2 low-confidence</text>
+  <rect x="660" y="321" width="60" height="18" rx="9" fill="#fef3c7"/>
+  <text x="690" y="334" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">L2</text>
+  <rect x="728" y="321" width="84" height="18" rx="9" fill="#fef3c7" stroke="#fcd34d" stroke-width="1"/>
+  <text x="770" y="334" text-anchor="middle" font-size="10" font-weight="600" fill="#b45309">Flagged ⚠</text>
+
+  <!-- Unknown -->
+  <rect x="30" y="380" width="800" height="44" rx="8" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="380" width="6" height="44" rx="3" fill="#9ca3af"/>
+  <rect x="54" y="394" width="16" height="16" rx="3" fill="#9ca3af"/>
+  <text x="62" y="407" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">?</text>
+  <text x="82" y="408" class="label-name" fill="#374151">Unknown</text>
+  <text x="180" y="408" class="label-desc">Insufficient evidence to interpret</text>
+  <text x="430" y="408" class="label-source">Source: N/A</text>
+</svg>

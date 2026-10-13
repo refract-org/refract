@@ -33,7 +33,7 @@
     "@refract-org/mcp": "^0.1.0",
     "@refract-org/ingestion": "^0.3.3",
     "@refract-org/analyzers": "^0.5.2",
-    "@refract-org/evidence-graph": "^0.5.2",
+    "@refract-org/evidence-graph": "^0.5.3",
     "commander": "^12.0.0"
   },
   "optionalDependencies": {

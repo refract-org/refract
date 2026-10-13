@@ -34,10 +34,14 @@ export async function runVerify(bundlePath: string, htmlOutPath?: string): Promi
   console.log(dim("──────────────────────────────────────────────────"));
 
   if (result.valid) {
-    console.log(success("Checks passed: manifest hash, Merkle root, event count, each proof against its own root."));
+    console.log(
+      success(
+        "Checks passed: manifest hash, Merkle root, each event against the hash listed for it, one proof per hash up to the manifest's root.",
+      ),
+    );
     console.log(
       dim(
-        "Not checked: event contents against their listed hashes, or proof roots against the manifest root. Nothing in the bundle is signed.",
+        "Not checked: event fields outside the event hash (layer, claimId, schemaVersion, enrichment fields, fact provenance, modelInterpretation), or that the events follow from the revisions. Nothing in the bundle is signed.",
       ),
     );
   } else {

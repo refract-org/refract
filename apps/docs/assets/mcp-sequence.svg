@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 620" width="720" height="620">
+  <title>Refract MCP protocol sequence</title>
+  <defs>
+    <marker id="arrowReq" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 10 0 L 0 5 L 10 10 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrowRes" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#059669"/>
+    </marker>
+    <filter id="shadow" x="-5%" y="-2%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .title { font-size: 18px; font-weight: 700; fill: #111827; }
+    .subtitle { font-size: 13px; fill: #6b7280; }
+    .actor { font-size: 13px; font-weight: 700; fill: #111827; }
+    .msg { font-size: 10px; font-family: 'SF Mono', 'Fira Code', monospace; }
+    .label { font-size: 9px; fill: #6b7280; }
+    .note { font-size: 9px; fill: #6b7280; font-style: italic; }
+  </style>
+
+  <rect width="720" height="620" fill="#fafbfc" rx="8"/>
+
+  <text x="360" y="36" text-anchor="middle" class="title">MCP Protocol Flow — refract mcp</text>
+  <text x="360" y="56" text-anchor="middle" class="subtitle">stdin/stdout JSON-RPC 2.0 transport</text>
+
+  <!-- Lifelines -->
+  <line x1="140" y1="85" x2="140" y2="590" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="360" y1="85" x2="360" y2="590" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="580" y1="85" x2="580" y2="590" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- Actor boxes -->
+  <rect x="75" y="70" width="130" height="30" rx="4" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="140" y="90" text-anchor="middle" class="actor" fill="#1e40af">AI Agent</text>
+
+  <rect x="320" y="70" width="80" height="30" rx="4" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="360" y="90" text-anchor="middle" class="actor" fill="#374151">MCP Client</text>
+
+  <rect x="515" y="70" width="130" height="30" rx="4" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+  <text x="580" y="90" text-anchor="middle" class="actor" fill="#047857">refract mcp</text>
+
+  <!-- Step 1: Server starts -->
+  <rect x="28" y="115" width="664" height="60" rx="6" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="360" y="132" text-anchor="middle" class="label" fill="#374151">Startup</text>
+  <text x="360" y="148" text-anchor="middle" class="note">CLI: refract mcp → starts JSON-RPC server on stdio</text>
+  <text x="360" y="163" text-anchor="middle" class="note">Refract announces protocol version "2025-06-18", capabilities: [tools, sampling]</text>
+
+  <!-- Step 2: Initialize -->
+  <line x1="360" y1="190" x2="580" y2="190" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrowReq)"/>
+  <text x="470" y="186" class="label" fill="#3b82f6">initialize</text>
+  <text x="580" y="205" class="msg" fill="#3b82f6">{"jsonrpc":"2.0","method":"initialize"...}</text>
+
+  <line x1="580" y1="225" x2="360" y2="225" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowRes)"/>
+  <text x="470" y="221" class="label" fill="#059669">initialized</text>
+
+  <!-- Step 3: Agent asks for tools -->
+  <line x1="140" y1="250" x2="360" y2="250" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrowReq)"/>
+  <text x="250" y="246" class="label" fill="#3b82f6">agent: "list available tools"</text>
+
+  <line x1="360" y1="270" x2="580" y2="270" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrowReq)"/>
+  <text x="470" y="266" class="label" fill="#3b82f6">tools/list</text>
+  <text x="580" y="283" class="msg">{"jsonrpc":"2.0","method":"tools/list"...}</text>
+
+  <line x1="580" y1="303" x2="360" y2="303" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowRes)"/>
+  <text x="470" y="299" class="label" fill="#059669">tools response</text>
+  <text x="362" y="318" class="msg" fill="#4b5563">→"tools":[{name:"analyze"...},{name:"claim"...},...]</text>
+
+  <line x1="360" y1="340" x2="140" y2="340" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowRes)"/>
+  <text x="250" y="336" class="label" fill="#059669">tools list</text>
+
+  <!-- Step 4: Agent calls analyze -->
+  <line x1="140" y1="370" x2="360" y2="370" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrowReq)"/>
+  <text x="250" y="366" class="label" fill="#3b82f6">agent: "analyze Bitcoin"</text>
+
+  <line x1="360" y1="390" x2="580" y2="390" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrowReq)"/>
+  <text x="470" y="386" class="label" fill="#3b82f6">tools/call</text>
+  <text x="580" y="403" class="msg">{"jsonrpc":"2.0","method":"tools/call",</text>
+  <text x="580" y="416" class="msg"> "params":{"name":"analyze","arguments":</text>
+  <text x="580" y="429" class="msg">   {"page":"Bitcoin","depth":"detailed"}}</text>
+
+  <!-- Refract fetches Wikipedia -->
+  <rect x="540" y="445" width="170" height="40" rx="6" fill="#fef3c7" stroke="#fcd34d" stroke-width="1"/>
+  <text x="625" y="460" text-anchor="middle" class="label" fill="#92400e">→ Wikipedia API</text>
+  <text x="625" y="475" text-anchor="middle" class="note">Fetch revisions, run analyzers</text>
+
+  <!-- Step 5: Response -->
+  <line x1="580" y1="500" x2="360" y2="500" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowRes)"/>
+  <text x="470" y="496" class="label" fill="#059669">tools/call response</text>
+  <text x="362" y="515" class="msg" fill="#4b5563">→ "content":[{"text":"Analysis of Bitcoin",</text>
+  <text x="362" y="528" class="msg" fill="#4b5563">    "type":"text"}], "structuredContent": {</text>
+  <text x="362" y="541" class="msg" fill="#4b5563">    "events": [...evidence events...]}}</text>
+
+  <line x1="360" y1="558" x2="140" y2="558" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowRes)"/>
+  <text x="250" y="554" class="label" fill="#059669">analysis results</text>
+
+  <!-- Legend -->
+  <rect x="100" y="588" width="16" height="10" rx="2" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="122" y="597" font-size="8" fill="#6b7280">Request</text>
+  <rect x="190" y="588" width="16" height="10" rx="2" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+  <text x="212" y="597" font-size="8" fill="#6b7280">Response</text>
+  <text x="360" y="612" text-anchor="middle" class="note">Transport: stdin/stdout · Format: JSON-RPC 2.0 · Protocol version: 2025-06-18</text>
+</svg>

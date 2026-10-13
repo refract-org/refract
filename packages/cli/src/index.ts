@@ -66,9 +66,10 @@ program
 // ── init ──
 program
   .command("init")
-  .description("onboarding — run a quick analysis and see what Refract can do")
-  .action(async () => {
-    await runInit();
+  .description("onboarding — inspect a bundled fictional history offline")
+  .option("-j, --json", "print the sample events as NDJSON")
+  .action(async (opts) => {
+    await runInit({ json: !!opts.json });
   });
 
 // ── analyze ──
@@ -274,7 +275,7 @@ exportCmd.action(async (page, opts) => {
 // ── verify ──
 const verifyCmd = program
   .command("verify <bundlePath>")
-  .description("check the manifest hash, Merkle root and inclusion proofs in a verification bundle")
+  .description("check a verification bundle's events, manifest hash, Merkle root and inclusion proofs")
   .option("--html <outPath>", "also write the result as an HTML receipt");
 verifyCmd.action(async (bundlePath, opts) => {
   await runVerify(bundlePath, opts.html as string | undefined);
@@ -406,7 +407,8 @@ const diffCmd = program
   .option("--wiki-d <url>", "fourth wiki API URL (optional)")
   .option("--wiki-e <url>", "fifth wiki API URL (optional)")
   .option("--wiki-f <url>", "sixth wiki API URL (optional)")
-  .option("-d, --depth <depth>", "analysis depth: brief, detailed, forensic", "detailed");
+  .option("-d, --depth <depth>", "analysis depth: brief, detailed, forensic", "detailed")
+  .option("--detect-borrowing", "detect verbatim text borrowing and n-gram shingle similarity between wikis");
 diffCmd.action(async (topic, opts) => {
   const wikiUrls = [
     opts.wikiA as string,
@@ -417,18 +419,24 @@ diffCmd.action(async (topic, opts) => {
     ...(opts.wikiF ? [opts.wikiF as string] : []),
   ];
 
-  const result = await runDiff(topic, wikiUrls, opts.depth as string);
+  const result = await runDiff(topic, wikiUrls, opts.depth as string, {
+    detectBorrowing: !!opts.detectBorrowing,
+  });
   printUserFacingDiff(result);
 });
 
 function printUserFacingDiff(result: DiffResult): void {
-  const { wikis, comparison, outliers } = result;
+  const { wikis, comparison, outliers, pairwiseBorrowing } = result;
   const labels =
     wikis.length <= 26 ? wikis.map((_, i) => String.fromCharCode(65 + i)) : wikis.map((_, i) => `W${i + 1}`);
 
   console.log(heading(`Cross-Wiki Diff: "${result.pageTitle}"`));
   for (let i = 0; i < wikis.length; i++) {
-    console.log(`  ${bold(`Wiki ${labels[i]}:`)} ${dim(wikis[i].url)}`);
+    const net = wikis[i].citationNetwork;
+    const hhiStr = net
+      ? ` (HHI: ${net.sourceConcentrationIndex}${net.isHighConcentration ? " [concentrated]" : ""})`
+      : "";
+    console.log(`  ${bold(`Wiki ${labels[i]}:`)} ${dim(wikis[i].url)}${hhiStr}`);
   }
   console.log();
 
@@ -442,6 +450,18 @@ function printUserFacingDiff(result: DiffResult): void {
   console.log(`  ${"Reverts".padEnd(14)} ${wikis.map((w) => String(w.summary.reverts).padStart(6)).join(" ")}`);
   console.log(`  ${"Categories".padEnd(14)} ${wikis.map((w) => String(w.summary.categories).padStart(6)).join(" ")}`);
   console.log(`  ${"Wikilinks".padEnd(14)} ${wikis.map((w) => String(w.summary.wikilinks).padStart(6)).join(" ")}`);
+
+  if (pairwiseBorrowing && pairwiseBorrowing.length > 0) {
+    console.log(bold("\n── Cross-Wiki Text Propagation & Borrowing ──"));
+    for (const b of pairwiseBorrowing) {
+      const p = b.propagation;
+      const pct = (p.jaccardSimilarity * 100).toFixed(1);
+      const flag = p.isSignificantBorrowing ? red(" [SIGNIFICANT BORROWING]") : "";
+      console.log(
+        `  Wikis ${b.sourceWikiLabel} ↔ ${b.targetWikiLabel}: ${cyan(`${pct}%`)} Jaccard similarity (${p.sharedTokenCount} shared tokens, ${p.borrowedSpans.length} spans)${flag}`,
+      );
+    }
+  }
 
   if (comparison.eventTypeDiffs.length > 0) {
     console.log(bold("\n── Event Type Breakdown ──"));

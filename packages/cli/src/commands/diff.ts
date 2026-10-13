@@ -1,4 +1,12 @@
-import { extractCategories, extractWikilinks } from "@refract-org/analyzers";
+import {
+  analyzeCitationNetwork,
+  type CitationNetworkAnalysis,
+  citationTracker,
+  detectTextPropagation,
+  extractCategories,
+  extractWikilinks,
+  type TextPropagationResult,
+} from "@refract-org/analyzers";
 import type { EvidenceEvent } from "@refract-org/evidence-graph";
 import { runAnalyze } from "./analyze.js";
 
@@ -13,6 +21,7 @@ interface WikiSummary {
     categories: number;
     wikilinks: number;
   };
+  citationNetwork?: CitationNetworkAnalysis;
 }
 
 export interface EventTypeDiff {
@@ -31,6 +40,14 @@ export interface OutlierEntry {
   zScore: number;
 }
 
+export interface PairwiseTextBorrowing {
+  sourceWikiIndex: number;
+  sourceWikiLabel: string;
+  targetWikiIndex: number;
+  targetWikiLabel: string;
+  propagation: TextPropagationResult;
+}
+
 export interface DiffResult {
   pageTitle: string;
   wikis: WikiSummary[];
@@ -40,10 +57,16 @@ export interface DiffResult {
     totalSections: number[];
   };
   outliers: OutlierEntry[];
+  pairwiseBorrowing?: PairwiseTextBorrowing[];
   generatedAt: string;
 }
 
-export async function runDiff(topic: string, wikiUrls: string[], depth?: string): Promise<DiffResult> {
+export async function runDiff(
+  topic: string,
+  wikiUrls: string[],
+  depth?: string,
+  options?: { detectBorrowing?: boolean },
+): Promise<DiffResult> {
   console.log(`Diffing "${topic}" across ${wikiUrls.length} wikis...\n`);
 
   const resolvedDepth = depth ?? "detailed";
@@ -58,6 +81,24 @@ export async function runDiff(topic: string, wikiUrls: string[], depth?: string)
   const results = await Promise.all(wikiUrls.map((url) => buildSummary(topic, url, resolvedDepth)));
   const summaries = results.map((r) => r.summary);
   const allEvents = results.map((r) => r.events);
+  const latestContents = results.map((r) => r.latestContent);
+
+  let pairwiseBorrowing: PairwiseTextBorrowing[] | undefined;
+  if (options?.detectBorrowing && wikiUrls.length >= 2) {
+    pairwiseBorrowing = [];
+    for (let i = 0; i < wikiUrls.length; i++) {
+      for (let j = i + 1; j < wikiUrls.length; j++) {
+        const prop = detectTextPropagation(latestContents[i], latestContents[j]);
+        pairwiseBorrowing.push({
+          sourceWikiIndex: i,
+          sourceWikiLabel: labels[i],
+          targetWikiIndex: j,
+          targetWikiLabel: labels[j],
+          propagation: prop,
+        });
+      }
+    }
+  }
 
   const result: DiffResult = {
     pageTitle: topic,
@@ -68,6 +109,7 @@ export async function runDiff(topic: string, wikiUrls: string[], depth?: string)
       totalSections: summaries.map((s) => s.sections.length),
     },
     outliers: detectOutliers(summaries, labels),
+    pairwiseBorrowing,
     generatedAt: new Date().toISOString(),
   };
 
@@ -78,7 +120,7 @@ async function buildSummary(
   topic: string,
   apiUrl: string,
   depth: string,
-): Promise<{ summary: WikiSummary; events: EvidenceEvent[] }> {
+): Promise<{ summary: WikiSummary; events: EvidenceEvent[]; latestContent: string }> {
   const { events, revisions } = await runAnalyze(topic, depth, undefined, undefined, undefined, false, apiUrl);
 
   const sections = new Set<string>();
@@ -100,6 +142,9 @@ async function buildSummary(
     if (e.eventType === "revert_detected") revertCount++;
   }
 
+  const citations = citationTracker.extractCitations(latestContent);
+  const citationNetwork = analyzeCitationNetwork(citations);
+
   return {
     summary: {
       url: apiUrl,
@@ -112,8 +157,10 @@ async function buildSummary(
         categories: extractCategories(latestContent).length,
         wikilinks: extractWikilinks(latestContent).length,
       },
+      citationNetwork,
     },
     events,
+    latestContent,
   };
 }
 

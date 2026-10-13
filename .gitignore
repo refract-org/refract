@@ -14,4 +14,5 @@ opencode.json
 .cmux/
 .codex/
 .agent/
+.claude/
 benchmark/ground-truth/*.jsonl
