@@ -44,8 +44,8 @@ export class Persistence implements PersistenceAdapter {
 
     this.insertRevStmt = this.db.prepare(`
       INSERT OR REPLACE INTO revisions
-        (rev_id, page_id, page_title, timestamp, comment, content, size, minor)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (rev_id, page_id, page_title, timestamp, comment, content, size, minor, parent_id, content_available)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     this.insertClaimStmt = this.db.prepare(`
       INSERT OR REPLACE INTO claims
@@ -55,14 +55,14 @@ export class Persistence implements PersistenceAdapter {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     this.getRevisionsAsc = this.db.query(`
-      SELECT rev_id, page_id, page_title, timestamp, comment, content, size, minor
+      SELECT rev_id, page_id, page_title, timestamp, comment, content, size, minor, parent_id, content_available
       FROM revisions
       WHERE page_title = ?
       ORDER BY timestamp ASC
       LIMIT ?
     `);
     this.getRevisionsDesc = this.db.query(`
-      SELECT rev_id, page_id, page_title, timestamp, comment, content, size, minor
+      SELECT rev_id, page_id, page_title, timestamp, comment, content, size, minor, parent_id, content_available
       FROM revisions
       WHERE page_title = ?
       ORDER BY timestamp DESC
@@ -91,6 +91,12 @@ export class Persistence implements PersistenceAdapter {
         fetched_at TEXT NOT NULL DEFAULT (datetime('now'))
       )
     `);
+
+    const columns = this.db.query("PRAGMA table_info(revisions)").all() as Array<{ name: string }>;
+    if (!columns.some((column) => column.name === "parent_id"))
+      this.db.run("ALTER TABLE revisions ADD COLUMN parent_id INTEGER");
+    if (!columns.some((column) => column.name === "content_available"))
+      this.db.run("ALTER TABLE revisions ADD COLUMN content_available INTEGER");
 
     this.db.run(`
       CREATE INDEX IF NOT EXISTS idx_revisions_page
@@ -130,22 +136,15 @@ export class Persistence implements PersistenceAdapter {
       rev.content,
       rev.size,
       rev.minor ? 1 : 0,
+      rev.parentId ?? null,
+      rev.contentAvailable === undefined ? null : rev.contentAvailable ? 1 : 0,
     );
   }
 
   insertRevisions(revisions: Revision[]): void {
     this.db.transaction(() => {
       for (const rev of revisions) {
-        this.insertRevStmt.run(
-          rev.revId,
-          rev.pageId,
-          rev.pageTitle,
-          rev.timestamp,
-          rev.comment,
-          rev.content,
-          rev.size,
-          rev.minor ? 1 : 0,
-        );
+        this.insertRevision(rev);
       }
     })();
   }
@@ -162,10 +161,14 @@ export class Persistence implements PersistenceAdapter {
       content: string;
       size: number;
       minor: number;
+      parent_id?: number | null;
+      content_available?: number | null;
     }>;
 
     return rows.map((r) => ({
       revId: r.rev_id,
+      parentId: r.parent_id ?? undefined,
+      contentAvailable: r.content_available == null ? undefined : r.content_available === 1,
       pageId: r.page_id,
       pageTitle: r.page_title,
       timestamp: r.timestamp,

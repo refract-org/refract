@@ -36,7 +36,7 @@ import type { EvidenceEvent } from "@refract-org/evidence-graph";
 ## In shell
 
 ```bash
-refract --version    # 0.5.6
+refract --version    # prints the installed CLI version
 which refract        # points to @refract-org/cli binary
 ```
 

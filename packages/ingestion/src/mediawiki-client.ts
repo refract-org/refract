@@ -77,6 +77,7 @@ interface PageInfo {
 interface RawRevision {
   revid: number;
   parentid: number;
+  texthidden?: boolean;
   timestamp: string;
   comment: string;
   size: number;
@@ -497,6 +498,8 @@ export class MediaWikiClient implements RevisionFetcher, RevisionSource, DiffFet
     const content = raw.slots?.main?.content ?? "";
     return {
       revId: raw.revid,
+      parentId: raw.parentid,
+      contentAvailable: !raw.texthidden && typeof raw.slots?.main?.content === "string",
       pageId: page.pageId,
       pageTitle: page.title,
       timestamp: raw.timestamp,

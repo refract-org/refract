@@ -314,6 +314,8 @@ export async function handleToolCall(
                 revisionId: r.revisionId,
                 timestamp: r.timestamp,
                 section: r.section,
+                text: r.text,
+                match: r.match,
               }));
 
       const response = {
@@ -323,6 +325,9 @@ export async function handleToolCall(
         revisions: trimmedRevisions,
         status: history.status,
         history_summary: history.historySummary,
+        latest_revision_id: history.latestRevisionId,
+        latest_match: history.latestMatch,
+        caveats: history.caveats,
       };
       return { content: [{ type: "text", text: JSON.stringify(response, null, 2) }] };
     }

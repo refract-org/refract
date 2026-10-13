@@ -21,6 +21,7 @@ jobs:
       - run: bun run typecheck
       - run: bun run check:boundaries
       - run: bun run test
+      - run: bun run check:examples
       # What a release of this tree would put on npm: internal ranges that name
       # the versions built here, nothing depending on an unpublished package,
       # and the packed tarballs installing together and starting the CLI. The

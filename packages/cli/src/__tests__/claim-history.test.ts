@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { runClaimHistory } from "../commands/claim.js";
+import { runClaim, runClaimHistory } from "../commands/claim.js";
 
 const API = "https://wiki.example/w/api.php";
 const CLAIM = "The bridge opened to traffic in 2031.";
@@ -33,6 +33,87 @@ function pageHistory(url: URL): Response {
 describe("claim history reads the latest revisions", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("reports absent when the latest revision removes the passage", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              query: {
+                pages: [
+                  {
+                    pageid: 1,
+                    title: "Bridge",
+                    revisions: [
+                      revision(4, "A completely unrelated description of the landscape."),
+                      revision(3, CLAIM),
+                    ],
+                  },
+                ],
+              },
+            }),
+          ),
+      ),
+    );
+    const result = await runClaimHistory("Bridge", CLAIM, false, API);
+    expect(result.status).toBe("absent");
+    expect(result.latestRevisionId).toBe(4);
+    expect(result.latestMatch).toBe("none");
+    expect(result.historySummary).toContain("Last present");
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    await runClaim("Bridge", CLAIM, false, API);
+    expect(log.mock.calls.flat().join("\n")).toContain("Status:      absent");
+  });
+
+  it("marks word overlap as uncertain and retains inspectable candidate text", async () => {
+    const candidate = "The bridge opened to traffic in 2032.";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              query: { pages: [{ pageid: 1, title: "Bridge", revisions: [revision(4, candidate)] }] },
+            }),
+          ),
+      ),
+    );
+    const result = await runClaimHistory("Bridge", CLAIM, false, API);
+    expect(result.latestMatch).toBe("partial");
+    expect(result.revisions[0].match).toBe("partial");
+    expect(result.revisions[0].text).toBe(candidate);
+    expect(result.caveats.join(" ")).toContain("word overlap");
+    expect(result.historySummary).not.toContain("Present continuously");
+  });
+
+  it("does not infer absence from withheld text", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              query: {
+                pages: [
+                  {
+                    pageid: 1,
+                    title: "Bridge",
+                    revisions: [{ ...revision(4, ""), texthidden: true }, revision(3, CLAIM)],
+                  },
+                ],
+              },
+            }),
+          ),
+      ),
+    );
+    const result = await runClaimHistory("Bridge", CLAIM, false, API);
+    expect(result.status).toBe("unknown");
+    expect(result.latestMatch).toBe("unavailable");
+    expect(result.historySummary).not.toContain("then removed");
   });
 
   it("finds a claim present in the current text", async () => {

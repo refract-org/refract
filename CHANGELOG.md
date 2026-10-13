@@ -2,7 +2,14 @@
 
 ## Unreleased
 
+### Added
+- `refract review`: source watchlists, saved fetched/reviewed revision cursors, resumable history fetching, and explicit acknowledgment of an inspected report.
+- Markdown and JSON review reports with source identity, changed text, revision links, mechanical filters, saved inputs, and coverage. `review --sample` demonstrates the complete workflow offline.
+- Optional revision parent and source-text availability metadata. Coverage reports missing inputs and avoids text comparisons across known gaps.
+
 ### Fixed
+- Latest passage disappearance now reports absence from the latest fetched revision. Partial matches expose inspectable candidate text and uncertainty; unavailable latest text returns `unknown` through the CLI and MCP.
+- Bounded analysis no longer mixes unrelated cached revisions into the selected range. Interactive analysis serves its captured inputs; the explorer accepts explicit bounds and shows coverage.
 - **`refract verify --html` marked every event's proof "Merkle Root Match"**, including in a bundle that had failed verification. Each row now shows the verifier's result for that event's hash and for its proof, the page lists the checks that failed, and it states what `verify` checks and what it does not. The receipt and the command's output no longer say "cryptographically verified" or "integrity verified": nothing in a bundle is signed. Revision IDs read from the bundle are HTML-escaped like the other fields.
 - **`refract mcp` answered notifications with "Method not found"**. A message with no `id`, such as the `notifications/initialized` every MCP client sends after `initialize`, got a -32601 error reply, which JSON-RPC 2.0 forbids. Both `refract mcp` and `@refract-org/mcp` now ignore notifications, including unknown ones, without writing anything back. An unknown request, one that has an `id`, still gets -32601; that now includes a request named `initialized`, which used to get no reply at all.
 - **`--bundle` was described as a signed evidence bundle** in `refract export --help` and the CLI README. It carries a SHA-256 `bundleHash` of its own contents, which anyone who edits the bundle can recompute; nothing in Refract signs anything.

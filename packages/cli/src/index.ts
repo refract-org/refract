@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import type { AuthConfig } from "@refract-org/ingestion";
 import { Command } from "commander";
 import { buildConfig, buildObservationReport, runAnalyze } from "./commands/analyze.js";
@@ -11,6 +12,7 @@ import { runExplore } from "./commands/explore.js";
 import { runExport } from "./commands/export.js";
 import { runInit } from "./commands/init.js";
 import { runMcpServer } from "./commands/mcp.js";
+import { acknowledgeReview, filterReviewEntries, observeReview, renderReview } from "./commands/review.js";
 import { runSnapshot } from "./commands/snapshot.js";
 import { runStream } from "./commands/stream.js";
 import { runVerify } from "./commands/verify.js";
@@ -19,10 +21,10 @@ import { runWatch } from "./commands/watch.js";
 import { bold, cyan, dim, formatEvent, gray, green, heading, red, success } from "./render.js";
 import { REFRACT_VERSION } from "./version.js";
 
-function withGlobal(cmd: Command): Command {
+function withGlobal(cmd: Command, includeCacheDir = true): Command {
+  cmd.option("--api <url>", "MediaWiki API base URL");
+  if (includeCacheDir) cmd.option("--cache-dir <path>", "cache directory path");
   return cmd
-    .option("--api <url>", "MediaWiki API base URL")
-    .option("--cache-dir <path>", "cache directory path")
     .option("--api-key <token>", "API key for bearer token auth")
     .option("--api-user <user>", "username for basic auth")
     .option("--api-password <pass>", "password for basic auth");
@@ -98,8 +100,8 @@ analyzeCmd.action(async (page, opts) => {
     const result = await runAnalyze(
       "",
       opts.depth as string,
-      opts.from ? parseInt(opts.from as string, 10) : undefined,
-      opts.to ? parseInt(opts.to as string, 10) : undefined,
+      opts.from ? Number(opts.from) : undefined,
+      opts.to ? Number(opts.to) : undefined,
       opts.since as string | undefined,
       !!opts.cache,
       opts.api as string | undefined,
@@ -118,11 +120,11 @@ analyzeCmd.action(async (page, opts) => {
     process.exit(1);
   }
 
-  const { events, revisions } = await runAnalyze(
+  const analysis = await runAnalyze(
     page,
     opts.depth as string,
-    opts.from ? parseInt(opts.from as string, 10) : undefined,
-    opts.to ? parseInt(opts.to as string, 10) : undefined,
+    opts.from ? Number(opts.from) : undefined,
+    opts.to ? Number(opts.to) : undefined,
     opts.since as string | undefined,
     !!opts.cache,
     opts.api as string | undefined,
@@ -132,10 +134,12 @@ analyzeCmd.action(async (page, opts) => {
     config,
   );
 
+  const { events, revisions, coverage } = analysis;
+
   if (opts.report) {
     const pageId = revisions[0]?.pageId ?? 0;
     const report = buildObservationReport(page, pageId, events, revisions);
-    console.log(JSON.stringify(report, null, 2));
+    console.log(JSON.stringify({ ...report, coverage }, null, 2));
     return;
   }
 
@@ -160,6 +164,7 @@ analyzeCmd.action(async (page, opts) => {
       !!opts.cache,
       opts.depth as string,
       opts.since as string | undefined,
+      { analysis },
     );
     return;
   }
@@ -175,7 +180,13 @@ analyzeCmd.action(async (page, opts) => {
   }
 
   if (events.length === 0) {
-    console.log(gray("  No events detected."));
+    console.log(
+      gray(
+        revisions.length < 2
+          ? "  Insufficient revisions to compare text."
+          : "  No events emitted for the captured range.",
+      ),
+    );
   }
 
   if (events.length > 0) {
@@ -193,6 +204,75 @@ analyzeCmd.action(async (page, opts) => {
     console.log(dim(`  Connect an AI    → refract mcp`));
     console.log(dim(`  Full docs        → https://refract-org.github.io/refract-docs`));
   }
+});
+
+// ── review ──
+const reviewCmd = program
+  .command("review [page]")
+  .option("--sample", "review the bundled fictional history offline")
+  .description("inspect source changes since the last acknowledged review")
+  .option("--pages-file <path>", "watchlist: one page title per line")
+  .option("--state-dir <path>", "review state and saved reports (default ~/.refract/review)")
+  .option("--from <id>", "initial comparison baseline; does not mark it reviewed", Number)
+  .option("--limit <n>", "new revisions per page per run (default 200); repeat to resume", Number)
+  .option("--ack <report-id>", "acknowledge an inspected saved report without fetching")
+  .option("--format <format>", "markdown or json", "markdown")
+  .option("--event-type <types>", "comma-separated mechanical event types")
+  .option("--section <name>", "show only events in this section")
+  .option("--text <text>", "show events containing this text");
+withGlobal(reviewCmd, false);
+reviewCmd.action(async (page, opts) => {
+  if (opts.ack) {
+    if (page || opts.pagesFile || opts.from || opts.eventType || opts.text || opts.section || opts.sample) {
+      throw new Error("Use --ack with --state-dir only; acknowledgment uses the saved unfiltered report.");
+    }
+    await acknowledgeReview(opts.ack, opts.stateDir);
+    console.log(`Acknowledged report ${opts.ack}. Only its captured revision endpoints were marked reviewed.`);
+    return;
+  }
+  if (!["markdown", "json"].includes(opts.format)) throw new Error("--format must be markdown or json.");
+  const titles = opts.pagesFile
+    ? readFileSync(opts.pagesFile, "utf8")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line && !line.startsWith("#"))
+    : [];
+  if (page) titles.push(page);
+  const report = await observeReview(titles, {
+    stateDir: opts.stateDir,
+    sample: !!opts.sample,
+    apiUrl: opts.api,
+    auth: extractAuth(opts),
+    from: opts.from,
+    limit: opts.limit,
+  });
+  const filters = {
+    eventTypes: opts.eventType
+      ?.split(",")
+      .map((type: string) => type.trim())
+      .filter(Boolean),
+    section: opts.section,
+    text: opts.text,
+  };
+  if (opts.format === "json") {
+    console.log(
+      JSON.stringify(
+        {
+          ...report,
+          view: {
+            filters,
+            pages: report.pages.map((p) => ({
+              sourceKey: p.source.key,
+              entries: filterReviewEntries(p.entries, filters),
+            })),
+          },
+        },
+        null,
+        2,
+      ),
+    );
+  } else console.log(renderReview(report, filters, opts.stateDir));
+  if (report.pages.some((p) => p.status === "error" || p.status === "incomplete")) process.exitCode = 2;
 });
 
 // ── claim ──
@@ -389,12 +469,28 @@ const exploreCmd = program
   .command("explore <page>")
   .description("start local web explorer with timeline, evidence table, and diff viewer")
   .option("-p, --port <n>", "server port (default: 8899)", parseInt)
-  .option("--no-open", "don't open browser automatically");
+  .option("--no-open", "don't open browser automatically")
+  .option("--from <revId>", "start revision ID", Number)
+  .option("--to <revId>", "end revision ID", Number)
+  .option("--since <timestamp>", "start timestamp")
+  .option("--depth <depth>", "brief, detailed, forensic", "detailed")
+  .option("-c, --cache", "reuse a continuous fixed range from the local cache");
 withGlobal(exploreCmd);
 withAnalyzerConfig(exploreCmd);
 exploreCmd.action(async (page, opts) => {
   const config = buildConfig(opts);
-  await runExplore(page, opts.port ?? 8899, !!opts.noOpen, opts.api as string | undefined, extractAuth(opts), config);
+  await runExplore(
+    page,
+    opts.port ?? 8899,
+    opts.open === false,
+    opts.api as string | undefined,
+    extractAuth(opts),
+    config,
+    !!opts.cache,
+    opts.depth,
+    opts.since,
+    { fromRevId: opts.from, toRevId: opts.to, cacheDir: opts.cacheDir },
+  );
 });
 
 // ── diff ──

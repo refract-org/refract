@@ -5,6 +5,9 @@ import type {
   VerificationBundleResult,
 } from "@refract-org/evidence-graph";
 
+import type { HistoryCoverage } from "./coverage.js";
+import { formatCoverage } from "./coverage.js";
+
 const EVENT_COLORS: Record<string, string> = {
   sentence_first_seen: "#4caf50",
   sentence_reintroduced: "#8bc34a",
@@ -113,6 +116,7 @@ export function renderHtmlReport(
   events: EvidenceEvent[],
   revisions: Revision[],
   showJsonDownload?: boolean,
+  coverage?: HistoryCoverage,
 ): string {
   const sortedRevs = [...revisions].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   const eventCounts = countBy(events, (e) => e.eventType);
@@ -200,6 +204,7 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
   <h1>${escapeHtml(pageTitle)}</h1>
   <span class="meta">${revisions.length} revisions · ${events.length} events · ${sortedRevs.length > 0 ? new Date(sortedRevs[sortedRevs.length - 1].timestamp).toLocaleDateString() : ""}</span>
 </header>
+${coverage ? `<p style="padding: 12px 24px; margin: 0; overflow-wrap: anywhere">${escapeHtml(formatCoverage(coverage))}</p>` : ""}
 <nav>
   <button onclick="showTab('events')" class="active" id="nav-events">Events (${events.length})</button>
   <button onclick="showTab('timeline')" id="nav-timeline">Timeline</button>

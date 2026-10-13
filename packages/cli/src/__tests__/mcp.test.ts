@@ -10,6 +10,31 @@ import { runClaimHistory } from "../commands/claim.js";
 import { handleToolCall, runMcpServer, TOOLS } from "../commands/mcp.js";
 
 describe("mcp server", () => {
+  it("exposes latest presence and matching uncertainty to agent consumers", async () => {
+    vi.mocked(runClaimHistory).mockResolvedValue({
+      statement: "A passage",
+      page: "Page",
+      status: "present",
+      historySummary: "Matched candidate.",
+      latestRevisionId: 7,
+      latestMatch: "partial",
+      caveats: ["Sentence word overlap only"],
+      revisions: [
+        { revisionId: 7, timestamp: "2025-01-01T00:00:00Z", text: "Candidate text", section: "Lead", match: "partial" },
+      ],
+    });
+    const result = await handleToolCall("get_statement_history", {
+      statement: "A passage",
+      page: "Page",
+      depth: "detailed",
+    });
+    const response = JSON.parse(result.content[0].text);
+    expect(response.latest_match).toBe("partial");
+    expect(response.latest_revision_id).toBe(7);
+    expect(response.caveats).toEqual(["Sentence word overlap only"]);
+    expect(response.revisions[0]).toMatchObject({ text: "Candidate text", match: "partial" });
+  });
+
   it("registers get_statement_history in tools list", () => {
     const tool = TOOLS.find((t) => t.name === "get_statement_history");
     expect(tool).toBeDefined();

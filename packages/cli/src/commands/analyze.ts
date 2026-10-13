@@ -18,6 +18,8 @@ import {
 } from "@refract-org/evidence-graph";
 import type { AuthConfig } from "@refract-org/ingestion";
 
+import type { HistoryCoverage } from "../coverage.js";
+import { contiguousRevisionGroups } from "../coverage.js";
 import { REFRACT_VERSION } from "../version.js";
 import { correlateTalkPages, fetchRevisionsWithCache, finalizeEvents } from "./analyze-helpers.js";
 
@@ -171,12 +173,16 @@ export async function runAnalyze(
   auth?: AuthConfig,
   config?: AnalyzerConfig,
   { recordObservation = true }: { recordObservation?: boolean } = {},
-): Promise<{ events: EvidenceEvent[]; revisions: Revision[] }> {
+): Promise<{ events: EvidenceEvent[]; revisions: Revision[]; coverage?: HistoryCoverage }> {
   if (pagesFile) {
     return runBatch(pagesFile, depth, fromRevId, toRevId, fromTimestamp, useCache, apiUrl, cacheDir, auth, config);
   }
 
-  const { client, revisions: sortedRevs } = await fetchRevisionsWithCache(
+  const {
+    client,
+    revisions: sortedRevs,
+    coverage,
+  } = await fetchRevisionsWithCache(
     pageTitle,
     depth,
     fromRevId,
@@ -188,7 +194,7 @@ export async function runAnalyze(
     auth,
     config?.briefRevisionLimit,
   );
-  if (sortedRevs.length === 0) return { events: [], revisions: [] };
+  if (sortedRevs.length < 2) return { events: [], revisions: sortedRevs, coverage };
 
   const events: EvidenceEvent[] = [];
 
@@ -216,17 +222,19 @@ export async function runAnalyze(
   // Any other --depth value has always run as detailed.
   const eventDepth: RevisionEventDepth = depth === "brief" || depth === "forensic" ? depth : "detailed";
   events.push(
-    ...buildRevisionEvents(sortedRevs, {
-      depth: eventDepth,
-      similarityThreshold: config?.section?.similarityThreshold ?? 0.8,
-      protectionLogs,
-    }),
+    ...contiguousRevisionGroups(sortedRevs).flatMap((group) =>
+      buildRevisionEvents(group, {
+        depth: eventDepth,
+        similarityThreshold: config?.section?.similarityThreshold ?? 0.8,
+        protectionLogs,
+      }),
+    ),
   );
 
   events.push(...correlateTalkPages(sortedRevs, talkRevs));
   finalizeEvents(pageTitle, events, sortedRevs, fromTimestamp, cacheDir, recordObservation);
 
-  return { events, revisions: sortedRevs };
+  return { events, revisions: sortedRevs, coverage };
 }
 
 async function runBatch(

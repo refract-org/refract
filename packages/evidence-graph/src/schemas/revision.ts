@@ -2,6 +2,8 @@
 
 export interface Revision {
   revId: number;
+  parentId?: number; // Source parent when available
+  contentAvailable?: boolean; // false when source text was withheld
   pageId: number;
   pageTitle: string;
   timestamp: string; // ISO 8601
