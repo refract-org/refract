@@ -7,6 +7,7 @@ import type { AuthConfig } from "@refract-org/ingestion";
 import type { NotifyConfig } from "../notify.js";
 import { sendNotifications } from "../notify.js";
 import { buildObservationReport, runAnalyze } from "./analyze.js";
+import { readPriorJson } from "./analyze-helpers.js";
 
 export interface CronReport {
   pageTitle: string;
@@ -54,16 +55,6 @@ function mergeObservationReports(prior: ObservationReport | null, current: Obser
   };
 }
 
-function readPriorObservation(obsFile: string): EvidenceEvent[] {
-  if (!existsSync(obsFile)) return [];
-  try {
-    return JSON.parse(readFileSync(obsFile, "utf-8")) as EvidenceEvent[];
-  } catch (err) {
-    console.error("refract: cron: failed to read prior observation file", err);
-    return [];
-  }
-}
-
 /**
  * Prior events this run could have seen again. Strictly after the window's
  * start: an event at the start itself is the edit into the first revision of
@@ -106,14 +97,14 @@ export async function runCron(
     const safeName = title.replace(/[^a-zA-Z0-9_-]/g, "_");
     const obsFile = join(obsDir, `${safeName}.json`);
 
-    // The prior observation is read before analysis runs, and cron writes its
-    // own afterwards. It used to be read after runAnalyze, whose --since path
-    // overwrites ~/.wikihistory/observations/<page>.json with the events it
-    // just produced: with the default directory cron diffed the current run
-    // against itself and never found a new event, and with --cache-dir it read
-    // a directory nothing wrote, so every run was "baseline established".
+    // Cron keeps its own observation under baseDir and asks analysis not to
+    // record one. Analysis's --since path otherwise reads and overwrites
+    // ~/.wikihistory/observations/<page>.json whatever --cache-dir says, and
+    // prints a delta against it that counts prior events outside this window
+    // as resolved. The prior is still read before analysis runs, so a write
+    // there can never make cron diff a run against itself.
     const hadPrior = existsSync(obsFile);
-    const priorEvents = readPriorObservation(obsFile);
+    const priorEvents = readPriorJson<EvidenceEvent[]>(obsFile, "cron: failed to read prior observation file") ?? [];
     let priorObservationAt: string | null = null;
     let fromTimestamp: string | undefined;
 
@@ -140,8 +131,10 @@ export async function runCron(
       false,
       apiUrl,
       undefined,
-      undefined,
+      cacheDir,
       auth,
+      undefined,
+      { recordObservation: false },
     );
 
     const isFirstObservation = !hadPrior;
@@ -177,14 +170,9 @@ export async function runCron(
     const pageId = revisions[0]?.pageId ?? 0;
     const currentReport = buildObservationReport(title, pageId, events, revisions);
 
-    let priorObservationReport: ObservationReport | null = null;
     const observationReportFile = join(reportsDir, `${safeName}.json`);
-    try {
-      const raw = readFileSync(observationReportFile, "utf-8");
-      priorObservationReport = JSON.parse(raw) as ObservationReport;
-    } catch (err) {
-      console.error("refract: cron: failed to read prior observation report", err);
-    }
+    const priorObservationReport =
+      readPriorJson<ObservationReport>(observationReportFile, "cron: failed to read prior observation report") ?? null;
 
     const mergedReport = mergeObservationReports(priorObservationReport, currentReport);
     writeFileSync(observationReportFile, JSON.stringify(mergedReport, null, 2), "utf-8");

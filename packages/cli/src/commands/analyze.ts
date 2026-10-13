@@ -170,6 +170,7 @@ export async function runAnalyze(
   cacheDir?: string,
   auth?: AuthConfig,
   config?: AnalyzerConfig,
+  { recordObservation = true }: { recordObservation?: boolean } = {},
 ): Promise<{ events: EvidenceEvent[]; revisions: Revision[] }> {
   if (pagesFile) {
     return runBatch(pagesFile, depth, fromRevId, toRevId, fromTimestamp, useCache, apiUrl, cacheDir, auth, config);
@@ -223,7 +224,7 @@ export async function runAnalyze(
   );
 
   events.push(...correlateTalkPages(sortedRevs, talkRevs));
-  finalizeEvents(pageTitle, events, sortedRevs, fromTimestamp, cacheDir);
+  finalizeEvents(pageTitle, events, sortedRevs, fromTimestamp, cacheDir, recordObservation);
 
   return { events, revisions: sortedRevs };
 }

@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
@@ -130,8 +130,10 @@ describe("cron command", () => {
       false,
       undefined,
       undefined,
+      tmpDir,
       undefined,
       undefined,
+      { recordObservation: false },
     );
 
     rmSync(tmpDir, { recursive: true, force: true });
@@ -153,9 +155,11 @@ describe("cron command", () => {
   });
 
   it("finds a new event even when analysis rewrites the observation file first", async () => {
-    // runAnalyze's --since path writes the events it just produced to the same
-    // observations/<page>.json cron reads. Cron used to read it afterwards and
-    // diff the run against itself, so it never reported a new event.
+    // Cron now asks analysis not to record an observation, but when analysis
+    // did, it wrote the events it just produced to the same
+    // observations/<page>.json. Cron read the file afterwards and diffed the
+    // run against itself, so it never reported a new event. Reading the prior
+    // first keeps that from coming back.
     const tmpDir = mkdtempSync(join(tmpdir(), "cron-test-"));
     const pagesFile = join(tmpDir, "pages.txt");
     writeFileSync(pagesFile, "Earth\n", "utf-8");
@@ -239,13 +243,11 @@ describe("cron command", () => {
     vi.mocked(runAnalyze).mockResolvedValueOnce({ events: [seen], revisions: [] });
     await runCron(pagesFile, undefined, undefined, tmpDir);
 
-    // A day with no edits. Analysis may still write an empty observation file.
-    vi.mocked(runAnalyze).mockImplementationOnce(async () => {
-      writeFileSync(obsFile, "[]");
-      return { events: [], revisions: [] };
-    });
+    // A day with no edits.
+    vi.mocked(runAnalyze).mockResolvedValueOnce({ events: [], revisions: [] });
     const quiet = await runCron(pagesFile, undefined, undefined, tmpDir);
     expect(quiet.reports[0].deltaSummary).toBe("no changes");
+    expect(JSON.parse(readFileSync(obsFile, "utf-8"))).toEqual([seen]);
 
     const fresh = makeEvent({
       eventType: "citation_removed",
@@ -260,5 +262,47 @@ describe("cron command", () => {
     expect(next.totalNewEvents).toBe(1);
 
     rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("writes nothing to stderr on a page's first run", async () => {
+    // No prior observation or report exists yet, which is what a first run is.
+    // The missing report was logged with its ENOENT and full stack.
+    const tmpDir = mkdtempSync(join(tmpdir(), "cron-test-"));
+    const pagesFile = join(tmpDir, "pages.txt");
+    writeFileSync(pagesFile, "Earth\n", "utf-8");
+    vi.mocked(runAnalyze).mockResolvedValueOnce({ events: [makeEvent()], revisions: [] });
+    const stderr = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      const result = await runCron(pagesFile, undefined, undefined, tmpDir);
+      expect(result.reports[0].deltaSummary).toBe("baseline established");
+      expect(stderr).not.toHaveBeenCalled();
+    } finally {
+      stderr.mockRestore();
+      rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("reports an unreadable prior report in one line, without a stack", async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), "cron-test-"));
+    const pagesFile = join(tmpDir, "pages.txt");
+    writeFileSync(pagesFile, "Earth\n", "utf-8");
+    const reportFile = join(tmpDir, "reports", "Earth.json");
+    mkdirSync(join(tmpDir, "reports"), { recursive: true });
+    writeFileSync(reportFile, "{ truncated");
+    vi.mocked(runAnalyze).mockResolvedValueOnce({ events: [makeEvent()], revisions: [] });
+    const stderr = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      await runCron(pagesFile, undefined, undefined, tmpDir);
+      expect(stderr).toHaveBeenCalledTimes(1);
+      const args = stderr.mock.calls[0];
+      expect(args).toHaveLength(1);
+      expect(args[0]).toContain(`failed to read prior observation report ${reportFile}: `);
+      expect(args[0]).not.toContain("\n");
+    } finally {
+      stderr.mockRestore();
+      rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 });
