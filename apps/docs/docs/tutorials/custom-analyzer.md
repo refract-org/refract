@@ -190,9 +190,10 @@ If your analyzer introduces exports that cross package boundaries incorrectly,
 
 ## Step 7: Update documentation
 
-- Add the new event type to `refract-docs/docs/schema.md`
-- Add it to `refract-docs/docs/events.md` event taxonomy
-- If the CLI flag changed, update `refract-docs/docs/cli.md`
+- Add the new event type to `apps/docs/docs/schema.md`
+- Add it to `apps/docs/docs/events.md` event taxonomy
+- Add it to `EVENT_TYPE_RECORD` in `apps/ui/src/types.ts`; the viewer's build fails until you do
+- If the CLI flag changed, update `apps/docs/docs/cli.md`
 
 ## Conventions checklist
 

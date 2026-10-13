@@ -7,25 +7,23 @@
 	"license": "CC-BY-4.0",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/refract-org/refract-docs.git"
+		"url": "git+https://github.com/refract-org/refract.git",
+		"directory": "apps/docs"
 	},
 	"homepage": "https://refract-org.github.io/refract-docs/",
 	"bugs": {
-		"url": "https://github.com/refract-org/refract-docs/issues"
+		"url": "https://github.com/refract-org/refract/issues"
 	},
 	"scripts": {
 		"build": "node build.mjs",
 		"test": "vitest run",
 		"lint": "biome check .",
-		"format": "biome format --write .",
-		"prepare": "husky"
+		"format": "biome format --write ."
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.15",
 		"@expo-google-fonts/roboto": "^0.4.3",
 		"@resvg/resvg-js": "^2.6.2",
-		"husky": "^9.1.7",
-		"lint-staged": "^17.6.0",
 		"marked": "^15.0.12",
 		"vitest": "^4.1.11"
 	}

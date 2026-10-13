@@ -6,12 +6,19 @@ Load a JSONL file of Refract events to see them as a timeline with word-level di
 
 ## Quick start
 
+The viewer lives in `apps/ui` of the Refract repository:
+
 ```bash
+git clone https://github.com/refract-org/refract.git
+cd refract
 bun install
+cd apps/ui
 bun run dev
 ```
 
 Open `http://localhost:5173`. Sample data loads automatically. Drag a JSONL file onto the upload zone to inspect your own data.
+
+Event types come from `@refract-org/evidence-graph` as types only, so `bun run build` here type-checks against the engine. Run `bun run build` at the repository root first, which emits those declarations.
 
 ### Using your own Refract data
 

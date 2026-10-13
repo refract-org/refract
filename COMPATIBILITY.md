@@ -1,6 +1,6 @@
-# Cross-Repo Compatibility Matrix
+# Compatibility Matrix
 
-When updating `@refract-org/*` packages, downstream repos must be checked for compatibility. This document defines the dependency chain and what breaks where.
+When updating `@refract-org/*` packages, downstream consumers — the apps in this repository and the projects outside it — must be checked for compatibility. This document defines the dependency chain and what breaks where.
 
 ## Dependency Order
 
@@ -25,7 +25,7 @@ as this tree. `publish.yml` publishes in the order the script prints.
 
 | Package | In this tree | On npm (2026-09-29) | Downstream consumers |
 |---|---|---|---|
-| `@refract-org/evidence-graph` | 0.5.3 | 0.5.2 | every package; NextConsensus; refract-ui (mirrored types) |
+| `@refract-org/evidence-graph` | 0.5.3 | 0.5.2 | every package; NextConsensus; `apps/ui` (types only, from this tree) |
 | `@refract-org/ingestion` | 0.3.3 | 0.3.3 | mcp, cli; NextConsensus |
 | `@refract-org/analyzers` | 0.5.2 | 0.5.2 | mcp, cli; NextConsensus |
 | `@refract-org/mcp` | 0.1.0 | 0.1.0 | cli |
@@ -44,29 +44,29 @@ that only analyzers 0.5.0 has.
 |---|---|---|---|
 | NextConsensus (`nextconsensus`, `nextconsensus-app`) | `@refract-org/analyzers@^0.5.0`, `@refract-org/evidence-graph@^0.5.0`, `@refract-org/ingestion@^0.3.1`, each through one adapter file per repo | 0.5.0 / 0.5.0 / 0.3.1 | any library release; see [docs/refract-and-nextconsensus.md](./docs/refract-and-nextconsensus.md) |
 | `demo-data/` (monorepo) | JSONL format matching evidence-graph types | — | EvidenceEvent schema change |
-| refract-ui | Types mirrored locally from evidence-graph | — | EventType or EvidenceEvent schema change |
+| `apps/ui` (monorepo) | `EventType` and `EvidenceEvent` imported from `packages/evidence-graph` as types only | this tree | checked on every evidence-graph change by `viewer.yml` |
 | refract-py | Wraps `@refract-org/cli` via subprocess | — | CLI flag additions/removals |
-| refract-docs | References CLI examples and schema | — | CLI flag changes or schema version bumps |
+| `apps/docs` (monorepo) | References CLI examples and schema | — | CLI flag changes or schema version bumps |
 
 ## What Breaks When
 
 ### evidence-graph EventType changes
 
 **If you add a new event type:**
-- refract-ui: add to local type definitions in `src/types.ts`
-- refract-docs: update schema.md and events.md
+- `apps/ui`: the build fails until the type is added to `EVENT_TYPE_RECORD` in `src/types.ts`
+- `apps/docs`: update schema.md and events.md
 - refract-py: no change (dataclasses are generic)
 - `demo-data/`: update JSONL files if they should include the new type
 
 **If you rename an event type:**
 - BREAKING for all consumers. Create a migration guide.
-- refract-ui type mirrors must be updated
-- refract-docs schema reference must be updated
+- `apps/ui`: the build fails until `EVENT_TYPE_RECORD` and any CSS keyed to the old name are updated
+- `apps/docs` schema reference must be updated
 
 ### CLI flag changes
 
 - refract-py `_run()` method calls CLI with flags — any flag rename breaks the SDK
-- refract-docs CLI reference page must be updated
+- `apps/docs` CLI reference page must be updated
 
 ### AnalyzerConfig changes
 

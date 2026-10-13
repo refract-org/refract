@@ -1,0 +1,48 @@
+name: Viewer
+
+# apps/ui, the browser-only file viewer. It imports the engine's event types
+# from packages/evidence-graph (types only, nothing bundled) and its contract
+# test reads the engine output captured under docs/examples, so a change to
+# either runs this too: that is where the viewer and the engine can drift.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - apps/ui/**
+      - packages/evidence-graph/**
+      - docs/examples/**
+      - package.json
+      - bun.lock
+      - .github/workflows/viewer.yml
+  push:
+    branches: [main]
+    paths:
+      - apps/ui/**
+      - packages/evidence-graph/**
+      - docs/examples/**
+      - package.json
+      - bun.lock
+      - .github/workflows/viewer.yml
+
+permissions:
+  contents: read
+
+jobs:
+  viewer:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/ui
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+      - run: bun install --frozen-lockfile
+        working-directory: .
+      # The viewer type-checks against evidence-graph's emitted declarations.
+      - run: bun x tsc -b packages/evidence-graph
+        working-directory: .
+      - run: bun run lint
+      - run: bun run test
+      - run: bun run build
