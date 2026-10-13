@@ -1,0 +1,547 @@
+{
+  "format": "refract-review/v1",
+  "analyzerVersion": "0.5.17",
+  "depth": "detailed",
+  "scope": "article_revisions",
+  "pages": [
+    {
+      "source": {
+        "kind": "fictional_sample",
+        "key": "9f3e6db9080df0422d20f9e2dc269d082aa2bc9a22aa8fa56067ed6e015bd943",
+        "apiUrl": "https://example.org/w/api.php",
+        "pageTitle": "Rivergate Library (fictional)",
+        "pageId": 1
+      },
+      "reviewedRevisionId": null,
+      "baselineRevisionId": 1,
+      "fetchedRevisionId": 5,
+      "latestRevisionId": 5,
+      "status": "pending",
+      "coverage": {
+        "requested": {
+          "fromRevisionId": 1,
+          "toRevisionId": 5
+        },
+        "observed": {
+          "fromRevisionId": 1,
+          "toRevisionId": 5,
+          "revisionCount": 5
+        },
+        "status": "complete",
+        "missingRevisionIds": [],
+        "unavailableRevisionIds": [],
+        "truncated": false,
+        "notes": []
+      },
+      "inputRevisions": [
+        {
+          "revId": 1,
+          "pageId": 1,
+          "pageTitle": "Rivergate Library (fictional)",
+          "timestamp": "2025-01-01T12:00:00Z",
+          "comment": "Fictional onboarding revision",
+          "content": "Rivergate Library is open until six every weekday throughout the year.<ref>{{cite web|url=https://example.org/rivergate/hours|title=Rivergate opening hours}}</ref>\n\nThe library provides free printing for all registered members.\n\nThe reading room has space for thirty seated visitors.",
+          "size": 283,
+          "minor": false,
+          "parentId": 0,
+          "contentAvailable": true
+        },
+        {
+          "revId": 2,
+          "pageId": 1,
+          "pageTitle": "Rivergate Library (fictional)",
+          "timestamp": "2025-01-02T12:00:00Z",
+          "comment": "Fictional onboarding revision",
+          "content": "Rivergate Library is open until eight every weekday throughout the year.<ref>{{cite web|url=https://example.org/rivergate/hours|title=Rivergate opening hours}}</ref>\n\nThe library provides free printing for all registered members.\n\nThe reading room has space for thirty seated visitors.",
+          "size": 285,
+          "minor": false,
+          "parentId": 1,
+          "contentAvailable": true
+        },
+        {
+          "revId": 3,
+          "pageId": 1,
+          "pageTitle": "Rivergate Library (fictional)",
+          "timestamp": "2025-01-03T12:00:00Z",
+          "comment": "Fictional onboarding revision",
+          "content": "Rivergate Library is open until eight every weekday throughout the year.\n\nThe library provides free printing for all registered members.\n\nThe reading room has space for thirty seated visitors.",
+          "size": 192,
+          "minor": false,
+          "parentId": 2,
+          "contentAvailable": true
+        },
+        {
+          "revId": 4,
+          "pageId": 1,
+          "pageTitle": "Rivergate Library (fictional)",
+          "timestamp": "2025-01-04T12:00:00Z",
+          "comment": "Fictional onboarding revision",
+          "content": "Rivergate Library is open until eight every weekday throughout the year.\n\nThe reading room has space for thirty seated visitors.",
+          "size": 128,
+          "minor": false,
+          "parentId": 3,
+          "contentAvailable": true
+        },
+        {
+          "revId": 5,
+          "pageId": 1,
+          "pageTitle": "Rivergate Library (fictional)",
+          "timestamp": "2025-01-05T12:00:00Z",
+          "comment": "Fictional onboarding revision",
+          "content": "Rivergate Library is open until eight every weekday throughout the year.\n\nThe library provides free printing for all registered members.\n\nThe reading room has space for thirty seated visitors.",
+          "size": 192,
+          "minor": false,
+          "parentId": 4,
+          "contentAvailable": true
+        }
+      ],
+      "entries": [
+        {
+          "eventType": "section_reorganized",
+          "fromRevisionId": 1,
+          "toRevisionId": 2,
+          "section": "(lead)",
+          "before": "Rivergate Library is open until six every weekday throughout the year.<ref>{{cite web|url=https://example.org/rivergate/hours|title=Rivergate opening hours}}</ref>\n\nThe library provides free printing for all registered members.\n\nThe reading room has space for thirty seated visitors.",
+          "after": "Rivergate Library is open until eight every weekday throughout the year.<ref>{{cite web|url=https://example.org/rivergate/hours|title=Rivergate opening hours}}</ref>\n\nThe library provides free printing for all registered members.\n\nThe reading room has space for thirty seated visitors.",
+          "deterministicFacts": [
+            {
+              "fact": "section_changed",
+              "detail": "change=modified"
+            }
+          ],
+          "layer": "observed",
+          "timestamp": "2025-01-02T12:00:00Z",
+          "schemaVersion": "0.5.0",
+          "editMagnitude": "major",
+          "contentChange": "refinement",
+          "keyTerms": [
+            "rivergate",
+            "library",
+            "weekday",
+            "example",
+            "opening",
+            "provides",
+            "printing",
+            "registered",
+            "members",
+            "reading",
+            "thirty",
+            "seated",
+            "visitors"
+          ],
+          "certaintyProfile": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "hedging": 0
+          },
+          "directionSignal": "neutral",
+          "quantitativeFindings": [],
+          "eventId": "82e47fbe8522f61f",
+          "entryId": "d90e323424e651d344be30fa13d4d1f74b353580acd8bd693566b5755edc8182",
+          "source": {
+            "kind": "fictional_sample",
+            "key": "9f3e6db9080df0422d20f9e2dc269d082aa2bc9a22aa8fa56067ed6e015bd943",
+            "apiUrl": "https://example.org/w/api.php",
+            "pageTitle": "Rivergate Library (fictional)",
+            "pageId": 1
+          },
+          "revisionLinks": {
+            "before": "https://example.org/w/index.php?oldid=1",
+            "after": "https://example.org/w/index.php?oldid=2",
+            "diff": "https://example.org/w/index.php?oldid=1&diff=2"
+          }
+        },
+        {
+          "eventType": "sentence_modified",
+          "fromRevisionId": 1,
+          "toRevisionId": 2,
+          "section": "(lead)",
+          "before": "Rivergate Library is open until six every weekday throughout the year",
+          "after": "Rivergate Library is open until eight every weekday throughout the year",
+          "deterministicFacts": [
+            {
+              "fact": "sentence_modified",
+              "detail": "sentence_length=71"
+            }
+          ],
+          "layer": "observed",
+          "timestamp": "2025-01-02T12:00:00Z",
+          "schemaVersion": "0.5.0",
+          "editMagnitude": "minor",
+          "contentChange": "refinement",
+          "keyTerms": [
+            "rivergate",
+            "library",
+            "weekday"
+          ],
+          "certaintyProfile": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "hedging": 0
+          },
+          "directionSignal": "neutral",
+          "quantitativeFindings": [],
+          "eventId": "313b9599834017ea",
+          "entryId": "55c8838f5eeda1d523983eaeacf35db5f54d81ae83685935ecc5c9495123f7a3",
+          "source": {
+            "kind": "fictional_sample",
+            "key": "9f3e6db9080df0422d20f9e2dc269d082aa2bc9a22aa8fa56067ed6e015bd943",
+            "apiUrl": "https://example.org/w/api.php",
+            "pageTitle": "Rivergate Library (fictional)",
+            "pageId": 1
+          },
+          "revisionLinks": {
+            "before": "https://example.org/w/index.php?oldid=1",
+            "after": "https://example.org/w/index.php?oldid=2",
+            "diff": "https://example.org/w/index.php?oldid=1&diff=2"
+          }
+        },
+        {
+          "eventType": "citation_removed",
+          "fromRevisionId": 2,
+          "toRevisionId": 3,
+          "section": "body",
+          "before": "<ref>{{cite web|url=https://example.org/rivergate/hours|title=Rivergate opening hours}}</ref>",
+          "after": "",
+          "deterministicFacts": [
+            {
+              "fact": "citation_changed",
+              "detail": "type=removed"
+            }
+          ],
+          "layer": "observed",
+          "timestamp": "2025-01-03T12:00:00Z",
+          "schemaVersion": "0.5.0",
+          "editMagnitude": "moderate",
+          "contentChange": "compression",
+          "keyTerms": [
+            "example",
+            "rivergate",
+            "opening"
+          ],
+          "certaintyProfile": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "hedging": 0
+          },
+          "directionSignal": "neutral",
+          "quantitativeFindings": [],
+          "eventId": "79512edc32a862cf",
+          "entryId": "17a87de09276cce09f35c095b3f52f77c8ffcf46a1e2842ee23612def8b0c48f",
+          "source": {
+            "kind": "fictional_sample",
+            "key": "9f3e6db9080df0422d20f9e2dc269d082aa2bc9a22aa8fa56067ed6e015bd943",
+            "apiUrl": "https://example.org/w/api.php",
+            "pageTitle": "Rivergate Library (fictional)",
+            "pageId": 1
+          },
+          "revisionLinks": {
+            "before": "https://example.org/w/index.php?oldid=2",
+            "after": "https://example.org/w/index.php?oldid=3",
+            "diff": "https://example.org/w/index.php?oldid=2&diff=3"
+          }
+        },
+        {
+          "eventType": "section_reorganized",
+          "fromRevisionId": 2,
+          "toRevisionId": 3,
+          "section": "(lead)",
+          "before": "Rivergate Library is open until eight every weekday throughout the year.<ref>{{cite web|url=https://example.org/rivergate/hours|title=Rivergate opening hours}}</ref>\n\nThe library provides free printing for all registered members.\n\nThe reading room has space for thirty seated visitors.",
+          "after": "Rivergate Library is open until eight every weekday throughout the year.\n\nThe library provides free printing for all registered members.\n\nThe reading room has space for thirty seated visitors.",
+          "deterministicFacts": [
+            {
+              "fact": "section_changed",
+              "detail": "change=modified"
+            }
+          ],
+          "layer": "observed",
+          "timestamp": "2025-01-03T12:00:00Z",
+          "schemaVersion": "0.5.0",
+          "editMagnitude": "major",
+          "contentChange": "refinement",
+          "keyTerms": [
+            "rivergate",
+            "library",
+            "weekday",
+            "provides",
+            "printing",
+            "registered",
+            "members",
+            "reading",
+            "thirty",
+            "seated",
+            "visitors"
+          ],
+          "certaintyProfile": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "hedging": 0
+          },
+          "directionSignal": "neutral",
+          "quantitativeFindings": [],
+          "eventId": "6d9139167662df1b",
+          "entryId": "070f582db01121978639795f5ba53448a30d4c4f443cda16e4447dc1e0586375",
+          "source": {
+            "kind": "fictional_sample",
+            "key": "9f3e6db9080df0422d20f9e2dc269d082aa2bc9a22aa8fa56067ed6e015bd943",
+            "apiUrl": "https://example.org/w/api.php",
+            "pageTitle": "Rivergate Library (fictional)",
+            "pageId": 1
+          },
+          "revisionLinks": {
+            "before": "https://example.org/w/index.php?oldid=2",
+            "after": "https://example.org/w/index.php?oldid=3",
+            "diff": "https://example.org/w/index.php?oldid=2&diff=3"
+          }
+        },
+        {
+          "eventType": "template_removed",
+          "fromRevisionId": 2,
+          "toRevisionId": 3,
+          "section": "body",
+          "before": "",
+          "after": "cite web",
+          "deterministicFacts": [
+            {
+              "fact": "template_changed",
+              "detail": "name=cite web type=removed"
+            }
+          ],
+          "layer": "observed",
+          "timestamp": "2025-01-03T12:00:00Z",
+          "schemaVersion": "0.5.0",
+          "editMagnitude": "minor",
+          "contentChange": "expansion",
+          "keyTerms": [],
+          "certaintyProfile": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "hedging": 0
+          },
+          "directionSignal": "neutral",
+          "quantitativeFindings": [],
+          "eventId": "ef3d1f14aafa414e",
+          "entryId": "664ce949a35a465f0b8d9d830195734ef2da3051f58fb4ff28519a509f141595",
+          "source": {
+            "kind": "fictional_sample",
+            "key": "9f3e6db9080df0422d20f9e2dc269d082aa2bc9a22aa8fa56067ed6e015bd943",
+            "apiUrl": "https://example.org/w/api.php",
+            "pageTitle": "Rivergate Library (fictional)",
+            "pageId": 1
+          },
+          "revisionLinks": {
+            "before": "https://example.org/w/index.php?oldid=2",
+            "after": "https://example.org/w/index.php?oldid=3",
+            "diff": "https://example.org/w/index.php?oldid=2&diff=3"
+          }
+        },
+        {
+          "eventType": "section_reorganized",
+          "fromRevisionId": 3,
+          "toRevisionId": 4,
+          "section": "(lead)",
+          "before": "Rivergate Library is open until eight every weekday throughout the year.\n\nThe library provides free printing for all registered members.\n\nThe reading room has space for thirty seated visitors.",
+          "after": "Rivergate Library is open until eight every weekday throughout the year.\n\nThe reading room has space for thirty seated visitors.",
+          "deterministicFacts": [
+            {
+              "fact": "section_changed",
+              "detail": "change=modified"
+            }
+          ],
+          "layer": "observed",
+          "timestamp": "2025-01-04T12:00:00Z",
+          "schemaVersion": "0.5.0",
+          "editMagnitude": "moderate",
+          "contentChange": "refinement",
+          "keyTerms": [
+            "rivergate",
+            "library",
+            "weekday",
+            "reading",
+            "thirty",
+            "seated",
+            "visitors"
+          ],
+          "certaintyProfile": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "hedging": 0
+          },
+          "directionSignal": "neutral",
+          "quantitativeFindings": [],
+          "eventId": "4e639d38b9156103",
+          "entryId": "ce0432bb0b65079065c21a4dfc0cdda22af86539338ae57faa818d0f5440233e",
+          "source": {
+            "kind": "fictional_sample",
+            "key": "9f3e6db9080df0422d20f9e2dc269d082aa2bc9a22aa8fa56067ed6e015bd943",
+            "apiUrl": "https://example.org/w/api.php",
+            "pageTitle": "Rivergate Library (fictional)",
+            "pageId": 1
+          },
+          "revisionLinks": {
+            "before": "https://example.org/w/index.php?oldid=3",
+            "after": "https://example.org/w/index.php?oldid=4",
+            "diff": "https://example.org/w/index.php?oldid=3&diff=4"
+          }
+        },
+        {
+          "eventType": "sentence_removed",
+          "fromRevisionId": 3,
+          "toRevisionId": 4,
+          "section": "(lead)",
+          "before": "The library provides free printing for all registered members",
+          "after": "",
+          "deterministicFacts": [
+            {
+              "fact": "sentence_removed",
+              "detail": "sentence_length=61"
+            }
+          ],
+          "layer": "observed",
+          "timestamp": "2025-01-04T12:00:00Z",
+          "schemaVersion": "0.5.0",
+          "editMagnitude": "minor",
+          "contentChange": "removal",
+          "keyTerms": [
+            "library",
+            "provides",
+            "printing",
+            "registered",
+            "members"
+          ],
+          "certaintyProfile": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "hedging": 0
+          },
+          "directionSignal": "neutral",
+          "quantitativeFindings": [],
+          "eventId": "108f0e28a68f8e7d",
+          "entryId": "da5866766a22c036d801479c1dc3858af60eb9f02a556e1c618296cdc6d719ce",
+          "source": {
+            "kind": "fictional_sample",
+            "key": "9f3e6db9080df0422d20f9e2dc269d082aa2bc9a22aa8fa56067ed6e015bd943",
+            "apiUrl": "https://example.org/w/api.php",
+            "pageTitle": "Rivergate Library (fictional)",
+            "pageId": 1
+          },
+          "revisionLinks": {
+            "before": "https://example.org/w/index.php?oldid=3",
+            "after": "https://example.org/w/index.php?oldid=4",
+            "diff": "https://example.org/w/index.php?oldid=3&diff=4"
+          }
+        },
+        {
+          "eventType": "section_reorganized",
+          "fromRevisionId": 4,
+          "toRevisionId": 5,
+          "section": "(lead)",
+          "before": "Rivergate Library is open until eight every weekday throughout the year.\n\nThe reading room has space for thirty seated visitors.",
+          "after": "Rivergate Library is open until eight every weekday throughout the year.\n\nThe library provides free printing for all registered members.\n\nThe reading room has space for thirty seated visitors.",
+          "deterministicFacts": [
+            {
+              "fact": "section_changed",
+              "detail": "change=modified"
+            }
+          ],
+          "layer": "observed",
+          "timestamp": "2025-01-05T12:00:00Z",
+          "schemaVersion": "0.5.0",
+          "editMagnitude": "moderate",
+          "contentChange": "refinement",
+          "keyTerms": [
+            "rivergate",
+            "library",
+            "weekday",
+            "provides",
+            "printing",
+            "registered",
+            "members",
+            "reading",
+            "thirty",
+            "seated",
+            "visitors"
+          ],
+          "certaintyProfile": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "hedging": 0
+          },
+          "directionSignal": "neutral",
+          "quantitativeFindings": [],
+          "eventId": "5097c38395b5cc95",
+          "entryId": "f8918cfe850ecd84e553d7fc06310fe66b5c463670f1ccfdc3a6459221a95639",
+          "source": {
+            "kind": "fictional_sample",
+            "key": "9f3e6db9080df0422d20f9e2dc269d082aa2bc9a22aa8fa56067ed6e015bd943",
+            "apiUrl": "https://example.org/w/api.php",
+            "pageTitle": "Rivergate Library (fictional)",
+            "pageId": 1
+          },
+          "revisionLinks": {
+            "before": "https://example.org/w/index.php?oldid=4",
+            "after": "https://example.org/w/index.php?oldid=5",
+            "diff": "https://example.org/w/index.php?oldid=4&diff=5"
+          }
+        },
+        {
+          "eventType": "sentence_reintroduced",
+          "fromRevisionId": 4,
+          "toRevisionId": 5,
+          "section": "(lead)",
+          "before": "",
+          "after": "The library provides free printing for all registered members",
+          "deterministicFacts": [
+            {
+              "fact": "claim_detected",
+              "detail": "sentence_length=61"
+            }
+          ],
+          "layer": "observed",
+          "timestamp": "2025-01-05T12:00:00Z",
+          "schemaVersion": "0.5.0",
+          "editMagnitude": "minor",
+          "contentChange": "expansion",
+          "keyTerms": [
+            "library",
+            "provides",
+            "printing",
+            "registered",
+            "members"
+          ],
+          "certaintyProfile": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "hedging": 0
+          },
+          "directionSignal": "neutral",
+          "quantitativeFindings": [],
+          "eventId": "053be8b56f89a860",
+          "entryId": "f10861c8a80a30fdc40c3eb8744481177b0802240c60a9002a4f5daf277e2154",
+          "source": {
+            "kind": "fictional_sample",
+            "key": "9f3e6db9080df0422d20f9e2dc269d082aa2bc9a22aa8fa56067ed6e015bd943",
+            "apiUrl": "https://example.org/w/api.php",
+            "pageTitle": "Rivergate Library (fictional)",
+            "pageId": 1
+          },
+          "revisionLinks": {
+            "before": "https://example.org/w/index.php?oldid=4",
+            "after": "https://example.org/w/index.php?oldid=5",
+            "diff": "https://example.org/w/index.php?oldid=4&diff=5"
+          }
+        }
+      ]
+    }
+  ],
+  "reportId": "f4c82e34c4e0f44a8810b059563e209c0af045a9c0a63204fc4ea358ffda382b"
+}

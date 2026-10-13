@@ -1,6 +1,19 @@
 # Roadmap
 
-Refract v0.2.1 — all 20 Phase 1 workqueue items shipped. Maintenance mode: bug fixes and polish.
+Core revision analyzers are available. Current product work focuses on repeatable source review with inspectable observations.
+
+## Source review workflow
+
+Implemented in the source checkout; awaiting release:
+
+- `review`: watchlists, separate fetched/reviewed cursors, resumable inputs, and acknowledgment of saved reports.
+- Markdown and JSON reports with full changed text, source links, filters, and coverage.
+- Shared captured analysis in the explorer and consistent bounded cache selection.
+- Latest-revision passage status, candidate text, and explicit matching uncertainty through CLI and MCP.
+
+[Workflow and fit assessment](./docs/review.md) · [Acceptance record](./.github/workqueue/CLI-REVIEW-01.md)
+
+Real-user fit remains to be assessed with repeated reviews of sources people already depend on. The offline fixture and automated checks demonstrate implementation behavior.
 
 ## Agent Workstream Mapping
 
@@ -9,7 +22,7 @@ Refract v0.2.1 — all 20 Phase 1 workqueue items shipped. Maintenance mode: bug
 | `evidence-graph` | Agent F | Event schema, 29 event types, deterministic hashing, replay manifests |
 | `ingestion` | Agent A | MediaWiki REST client, rate limiter, XML dumps, Wikidata entity mapping |
 | `analyzers` | Agents B/C/D/E | Section differ, citation tracker, revert detector, template tracker, claim differ, wikilink/category extractors, talk correlator, talk thread parser, edit cluster detector, talk activity spike detector, protection tracker, page move detector, heuristic classifier, observation differ |
-| `cli` | Agent G | 10 commands: analyze, claim, cron, diff, eval, explore, export, mcp, visualize, watch |
+| `cli` | Agent G | Commands for source review, analysis, comparison, export, and agent access |
 | `persistence` | Agent G | SQLite storage (bun:sqlite) |
 | `eval` | — | Evaluation harness: L3 ground truth validation (public) |
 | `observable` | — | Observable Framework data loader (internal use) |

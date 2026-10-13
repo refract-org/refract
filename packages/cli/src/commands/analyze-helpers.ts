@@ -5,12 +5,14 @@ import { annotateEvents, correlateTalkRevisions, diffObservations } from "@refra
 import type { EvidenceEvent, Revision } from "@refract-org/evidence-graph";
 import type { AuthConfig, RevisionOptions } from "@refract-org/ingestion";
 import { MediaWikiClient } from "@refract-org/ingestion";
-
-import { loadCachedRevisions, loadLatestCachedTimestamp, saveRevisions } from "./cache.js";
+import type { HistoryCoverage } from "../coverage.js";
+import { describeCoverage, formatCoverage } from "../coverage.js";
+import { loadCachedRevisions, saveRevisions } from "./cache.js";
 
 export interface FetchResult {
   client: MediaWikiClient;
   revisions: Revision[];
+  coverage: HistoryCoverage;
 }
 
 /** Create a MediaWikiClient and fetch revisions with delta-update caching. */
@@ -26,70 +28,47 @@ export async function fetchRevisionsWithCache(
   auth: AuthConfig | undefined,
   briefRevisionLimit?: number,
 ): Promise<FetchResult> {
+  for (const id of [fromRevId, toRevId]) {
+    if (id !== undefined && (!Number.isSafeInteger(id) || id < 1))
+      throw new Error("Revision bounds must be positive integer IDs.");
+  }
+  if (fromRevId !== undefined && toRevId !== undefined && fromRevId > toRevId)
+    throw new Error("The start revision must be before the end revision.");
+  if (fromTimestamp && !Number.isFinite(new Date(fromTimestamp).getTime()))
+    throw new Error("Use a valid ISO timestamp for --since.");
+  if (briefRevisionLimit !== undefined && (!Number.isSafeInteger(briefRevisionLimit) || briefRevisionLimit < 1))
+    throw new Error("--brief-limit must be a positive integer.");
   const client = new MediaWikiClient(apiUrl ? { apiUrl, auth } : auth ? { auth } : undefined);
   console.error(`Analyzing "${pageTitle}" at depth: ${depth}...`);
 
   let revisions: Revision[] = [];
 
-  if (useCache) {
-    const cached = await loadCachedRevisions(pageTitle, 500, cacheDir);
-    if (cached.length > 0) {
-      console.error(`Loaded ${cached.length} revisions from cache.`);
-      revisions = cached;
-
-      const latestTs = await loadLatestCachedTimestamp(pageTitle, cacheDir);
-      if (latestTs && !fromTimestamp && revisions.length < 500) {
-        const deltaOpts: RevisionOptions = { direction: "newer", start: new Date(latestTs) };
-        if (toRevId) deltaOpts.endRevId = toRevId;
-        const newRevisions = await client.fetchRevisions(pageTitle, deltaOpts);
-        const uniqueNew = newRevisions.filter((r) => !revisions.some((cr) => cr.revId === r.revId));
-        if (uniqueNew.length > 0) {
-          console.error(`Fetched ${uniqueNew.length} new revisions since ${latestTs}.`);
-          revisions = [...revisions, ...uniqueNew];
-          await saveRevisions(uniqueNew, cacheDir);
-        } else {
-          console.error("Cache is up to date.");
-        }
-      }
-    }
+  const options: RevisionOptions = { direction: "newer" };
+  if (fromTimestamp) options.start = new Date(fromTimestamp);
+  else if (fromRevId) options.startRevId = fromRevId;
+  if (toRevId) options.endRevId = toRevId;
+  if (depth === "brief" && !fromTimestamp && !fromRevId && !toRevId) {
+    options.direction = "older";
+    options.limit = briefRevisionLimit ?? 20;
   }
-
-  if (revisions.length === 0) {
-    console.error(`Fetching revisions from Wikipedia...`);
-    const options: RevisionOptions = { direction: "newer" };
-    if (fromTimestamp) {
-      options.start = new Date(fromTimestamp);
-      console.error(`Fetching revisions since ${fromTimestamp}...`);
-    } else if (fromRevId) {
-      options.startRevId = fromRevId;
-    }
-    if (toRevId) {
-      options.endRevId = toRevId;
-    }
-    if (depth === "brief" && !fromTimestamp && !fromRevId && !toRevId) {
-      // The latest N, newest first (sorted oldest-first below). With "newer"
-      // this read the page's first N edits, so a brief look at a live page
-      // reported its history from the year it was created.
-      options.direction = "older";
-      options.limit = briefRevisionLimit ?? 20;
-    }
+  const request = { fromRevisionId: fromRevId, toRevisionId: toRevId, since: fromTimestamp, limit: options.limit };
+  // A fixed, continuous range can be reused. Open ranges always check the source.
+  if (useCache && !apiUrl && fromRevId && toRevId && !fromTimestamp) {
+    const cached = (await loadCachedRevisions(pageTitle, 500, cacheDir))
+      .filter((r) => r.revId >= fromRevId && r.revId <= toRevId)
+      .sort((a, b) => a.revId - b.revId);
+    if (describeCoverage(cached, request).status === "complete") revisions = cached;
+  }
+  if (!revisions.length) {
     revisions = await client.fetchRevisions(pageTitle, options);
-    console.error(`Fetched ${revisions.length} revisions.`);
-
-    if (useCache && revisions.length > 0) {
-      await saveRevisions(revisions, cacheDir);
-      console.error(`Cached ${revisions.length} revisions.`);
-    }
+    if (useCache && !apiUrl && revisions.length) await saveRevisions(revisions, cacheDir);
   }
-
-  if (revisions.length < 2) {
-    console.error("Need at least 2 revisions to analyze.");
-    return { client, revisions: [] };
-  }
-
   const withTs = revisions.map((r) => ({ r, ts: new Date(r.timestamp).getTime() }));
   withTs.sort((a, b) => a.ts - b.ts);
-  return { client, revisions: withTs.map((x) => x.r) };
+  const sorted = withTs.map((x) => x.r);
+  const coverage = describeCoverage(sorted, request);
+  console.error(formatCoverage(coverage));
+  return { client, revisions: sorted, coverage };
 }
 /** Correlate talk page revisions with article revisions. */
 export function correlateTalkPages(sortedRevs: Revision[], talkRevs: Revision[]): EvidenceEvent[] {
