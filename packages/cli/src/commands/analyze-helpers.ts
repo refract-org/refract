@@ -81,26 +81,41 @@ export function correlateTalkPages(sortedRevs: Revision[], talkRevs: Revision[])
   return talkEvents;
 }
 
-/** Observation diffing, schema version stamping, and semantic enrichment. */
+/**
+ * Reads JSON an earlier run wrote. A missing file is the first run, not an
+ * error, so it returns undefined silently; anything else it could not read or
+ * parse is reported in one line, path and reason, and also returns undefined.
+ */
+export function readPriorJson<T>(file: string, failure: string): T | undefined {
+  try {
+    return JSON.parse(readFileSync(file, "utf-8")) as T;
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
+      console.error(`refract: ${failure} ${file}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    return undefined;
+  }
+}
+
+/**
+ * Observation diffing, schema version stamping, and semantic enrichment.
+ * `recordObservation: false` is for a caller that keeps its own observation
+ * state, as cron does: the delta is neither printed nor written.
+ */
 export function finalizeEvents(
   pageTitle: string,
   events: EvidenceEvent[],
   _sortedRevs: Revision[],
   fromTimestamp: string | undefined,
   cacheDir: string | undefined,
+  recordObservation = true,
 ): EvidenceEvent[] {
-  if (fromTimestamp) {
+  if (fromTimestamp && recordObservation) {
     const obsDir = cacheDir ?? join(homedir(), ".wikihistory", "observations");
     if (!existsSync(obsDir)) mkdirSync(obsDir, { recursive: true });
     const obsFile = join(obsDir, `${pageTitle.replace(/[^a-zA-Z0-9_-]/g, "_")}.json`);
 
-    let priorEvents: EvidenceEvent[] = [];
-    try {
-      const raw = readFileSync(obsFile, "utf-8");
-      priorEvents = JSON.parse(raw) as EvidenceEvent[];
-    } catch (err) {
-      console.error("refract: analyze: failed to read prior observation file", err);
-    }
+    const priorEvents = readPriorJson<EvidenceEvent[]>(obsFile, "analyze: failed to read prior observation file") ?? [];
 
     const obsDiff = diffObservations(priorEvents, events);
     if (priorEvents.length > 0) {

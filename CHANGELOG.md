@@ -3,22 +3,18 @@
 ## Unreleased
 
 ### Added
-
 - `refract review`: source watchlists, saved fetched/reviewed revision cursors, resumable history fetching, and explicit acknowledgment of an inspected report.
 - Markdown and JSON review reports with source identity, changed text, revision links, mechanical filters, saved inputs, and coverage. `review --sample` demonstrates the complete workflow offline.
 - Optional revision parent and source-text availability metadata. Coverage reports missing inputs and avoids text comparisons across known gaps.
 
 ### Fixed
-
 - Latest passage disappearance now reports absence from the latest fetched revision. Partial matches expose inspectable candidate text and uncertainty; unavailable latest text returns `unknown` through the CLI and MCP.
 - Bounded analysis no longer mixes unrelated cached revisions into the selected range. Interactive analysis serves its captured inputs; the explorer accepts explicit bounds and shows coverage.
-
-## Unreleased
-
-### Fixed
 - **`refract verify --html` marked every event's proof "Merkle Root Match"**, including in a bundle that had failed verification. Each row now shows the verifier's result for that event's hash and for its proof, the page lists the checks that failed, and it states what `verify` checks and what it does not. The receipt and the command's output no longer say "cryptographically verified" or "integrity verified": nothing in a bundle is signed. Revision IDs read from the bundle are HTML-escaped like the other fields.
 - **`refract mcp` answered notifications with "Method not found"**. A message with no `id`, such as the `notifications/initialized` every MCP client sends after `initialize`, got a -32601 error reply, which JSON-RPC 2.0 forbids. Both `refract mcp` and `@refract-org/mcp` now ignore notifications, including unknown ones, without writing anything back. An unknown request, one that has an `id`, still gets -32601; that now includes a request named `initialized`, which used to get no reply at all.
 - **`--bundle` was described as a signed evidence bundle** in `refract export --help` and the CLI README. It carries a SHA-256 `bundleHash` of its own contents, which anyone who edits the bundle can recompute; nothing in Refract signs anything.
+- **`refract cron --cache-dir` read and wrote outside the cache directory.** The analysis cron runs for each page recorded its own observation in `~/.wikihistory/observations/<page>.json` whatever `--cache-dir` said, and printed a "Re-observation delta" against that file: on a first run into an empty cache directory it could report dozens of new and resolved events from an unrelated earlier run, and it counted prior events outside the lookback window as resolved, which cron's own count does not. Cron now keeps the only observation, under its cache directory, and passes that directory to the analysis.
+- **A page's first `refract cron` run printed a stack trace.** The report file that does not exist until the first run finishes was logged as a read failure, with the ENOENT and its full stack. `refract analyze --since` did the same for the observation file on its first run. A missing file is now silent; a file that exists but cannot be read or parsed is reported in one line naming the path and the reason.
 
 ### Security
 - **`refract verify` passed bundles whose events or proofs had been changed.** `verifyVerificationBundle` checked only that a bundle agreed with itself: it never rehashed the events, never compared a proof's root with the manifest's, and did not require a proof per event hash. On a `refract export "Merkle tree" --proof` bundle, editing an event's text, its type or its `eventId`, reversing the events, deleting every proof, or replacing a proof with one that hashes to its own root all verified. An edited event also left the Merkle root unchanged, so comparing the root with one received separately did not catch it. `verifyVerificationBundle` (`@refract-org/evidence-graph` 0.5.3) now rehashes each event as `createReplayManifest` does and compares it with the hash listed at its index, requires an event that carries an `eventId` to hash to it, and requires one proof per listed hash, for that hash and index, ending at the manifest's root. Each failure names its index. Its result adds `events`, the hash and proof outcome per event, which the receipt's rows show. A bundle without an `events` or `proofs` array is reported instead of throwing. The event hash leaves out `layer`, `claimId`, `schemaVersion`, the semantic enrichment fields, fact provenance and source spans, and `modelInterpretation`, so edits to those still pass, and nothing in a bundle is signed. evidence-graph → 0.5.3, internal ranges moved to match.
