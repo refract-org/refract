@@ -9,6 +9,7 @@
 - **The docs site and the viewer are checked in CI.** Since #37 imported them into `apps/docs` and `apps/ui`, nothing ran their lint, tests or builds: their workflows sat under `apps/*/.github`, which GitHub does not read, and the root suite excludes `apps/`. `docs-site.yml` and `viewer.yml` now run each app's checks, path-filtered and separate from the engine gate. The viewer's also runs when `packages/evidence-graph` or `docs/examples` change.
 
 ### Changed
+- **The docs site moved to https://refract-org.github.io/refract/.** It is built and published from `apps/docs` by `docs-deploy.yml`, so a change to the engine and to its documentation can land in one PR. Every page under the old address, https://refract-org.github.io/refract-docs/, redirects to the same page at the new one, and the old images stay where they were. Canonical URLs, Open Graph tags and the sitemap use the new address, as do the "Next steps" that `refract analyze` prints and the package READMEs.
 - **The apps use the monorepo's tooling.** Their own lockfiles (two `bun.lock`, one `package-lock.json`), `.husky` hooks, `mise.toml` and `prepare: husky` scripts are removed; the root lockfile, hook and toolchain cover them, and each app's `.lintstagedrc.json` still applies to its files. Their `package.json` repository and issue links point at this repository.
 
 ### Fixed

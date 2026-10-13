@@ -10,11 +10,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS_DIR = join(__dirname, "docs");
 const DIST_DIR = join(__dirname, "dist");
 const ASSETS_DIR = join(__dirname, "assets");
-const BASE = process.env.BASE || "/refract-docs/";
+const BASE = process.env.BASE || "/refract/";
 // Absolute address of the published site. Canonical URLs, og:url, JSON-LD
 // and the sitemap point here even when BASE is overridden for a local build.
 const SITE_URL = (
-	process.env.SITE_URL || "https://refract-org.github.io/refract-docs/"
+	process.env.SITE_URL || "https://refract-org.github.io/refract/"
 ).replace(/\/?$/, "/");
 const SITE_NAME = "Refract";
 const SITE_DESCRIPTION =

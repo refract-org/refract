@@ -13,10 +13,12 @@ adapter provide optional ways to consume its output.
 | `refract` `apps/ui/` | Browser-only file viewer | NDJSON events; event types imported from `@refract-org/evidence-graph` | `viewer.yml`: `bun run lint`, `bun run test` (with the engine contract), `bun run build` |
 | [refract-py](https://github.com/refract-org/refract-py) | Python subprocess adapter and notebook integrations | CLI flags and NDJSON output | `hatch test`, `hatch build` |
 
-The docs site still deploys from the [refract-docs](https://github.com/refract-org/refract-docs)
-repository, whose source was imported into `apps/docs/` with its history; the
-[refract-ui](https://github.com/refract-org/refract-ui) source was imported into
-`apps/ui/` the same way. Neither old repository has changed since the import.
+The docs site deploys from this repository (`docs-deploy.yml`) to
+<https://refract-org.github.io/refract/>. The [refract-docs](https://github.com/refract-org/refract-docs)
+and [refract-ui](https://github.com/refract-org/refract-ui) sources were imported
+into `apps/docs/` and `apps/ui/` with their history. refract-docs now publishes
+only a redirect site, which sends each `/refract-docs/` page to the same page
+under `/refract/`.
 
 This inventory was checked on 2026-10-12. The organization has no current
 `refract-labs` or `refract-demo-data` repository. Datasets live in `demo-data/`;
@@ -78,8 +80,10 @@ tested; repository consolidation does not require a simultaneous toolchain move.
    tutorial and asset paths. Build and preview the complete site before changing
    deployment. Preserve `/refract-docs/` URLs through an explicit redirect or
    deployment arrangement, including deep links, search, sitemap, and images.
-   *Status:* history imported (#37); lint, tests and build run in `docs-site.yml`.
-   Deployment has not moved, and reference pages are not yet mapped to `docs/`.
+   *Status:* history imported (#37); lint, tests and build run in `docs-site.yml`;
+   `docs-deploy.yml` publishes to `/refract/`, and refract-docs serves a page at
+   every old path that redirects to the new one, plus copies of the old images
+   and a catch-all for anything else. Reference pages are not yet mapped to `docs/`.
 2. **Move the viewer.** Import its history under `apps/ui/`, preserve its
    license, and keep its browser-only operation. Replace independently
    maintained event lists with a checked schema fixture or type-only adapter;

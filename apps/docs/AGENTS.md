@@ -17,7 +17,7 @@ bun run test         # Vitest (verifies docs compile)
 - **Linter/Formatter:** Biome
 - **Tests:** Vitest
 - **Pre-commit:** the repository root's Husky hook runs lint-staged, which uses this directory's `.lintstagedrc.json`
-- **CI:** `.github/workflows/docs-site.yml` at the repository root
+- **CI:** `.github/workflows/docs-site.yml` at the repository root; `docs-deploy.yml` publishes `main` to https://refract-org.github.io/refract/
 - **Commit style:** Conventional Commits
 
 ## Verification

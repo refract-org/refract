@@ -4,7 +4,7 @@ Public documentation for [Refract](https://github.com/refract-org/refract), a de
 
 ---
 
-**Live at:** [refract-org.github.io/refract-docs](https://refract-org.github.io/refract-docs/)
+**Live at:** [refract-org.github.io/refract](https://refract-org.github.io/refract/)
 
 ## Quick start
 
@@ -12,7 +12,7 @@ Public documentation for [Refract](https://github.com/refract-org/refract), a de
 npx @refract-org/cli analyze "Earth" --depth brief
 ```
 
-See [quickstart](https://refract-org.github.io/refract-docs/quickstart/) for a full walkthrough.
+See [quickstart](https://refract-org.github.io/refract/quickstart/) for a full walkthrough.
 
 ## Packages
 

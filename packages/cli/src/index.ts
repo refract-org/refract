@@ -202,7 +202,7 @@ analyzeCmd.action(async (page, opts) => {
     );
     console.log(dim(`  Monitor for changes → refract cron pages.txt --interval 24 --notify-slack`));
     console.log(dim(`  Connect an AI    → refract mcp`));
-    console.log(dim(`  Full docs        → https://refract-org.github.io/refract-docs`));
+    console.log(dim(`  Full docs        → https://refract-org.github.io/refract/`));
   }
 });
 

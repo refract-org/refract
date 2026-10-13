@@ -45,7 +45,7 @@ bun run lint       # biome lint packages/
 - **packages/cli**: CLI tool (`refract` command)
 - **packages/persistence**: SQLite storage (bun:sqlite)
 - **packages/eval**: Evaluation harness
-- **apps/docs**: Public documentation site (CC-BY-4.0). Private workspace; `bun run lint|test|build` from its directory; CI is `docs-site.yml`.
+- **apps/docs**: Public documentation site (CC-BY-4.0), published to https://refract-org.github.io/refract/ by `docs-deploy.yml`. Private workspace; `bun run lint|test|build` from its directory; CI is `docs-site.yml`.
 - **apps/ui**: Browser-only file viewer. Private workspace that imports evidence-graph's event types as types only; CI is `viewer.yml`, which also runs on evidence-graph and `docs/examples` changes.
 
 The root `bun run test` and `bun run lint` cover `packages/` only; each app has its own `AGENTS.md`.
