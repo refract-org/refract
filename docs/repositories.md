@@ -11,14 +11,15 @@ adapter provide optional ways to consume its output.
 | `refract` (`packages/`, `docs/`) | Event schemas, analyzers, ingestion, CLI, explorer, review state, captured examples | Source revision histories | `ci.yml`: `bun run ci` and `bun run check:examples` |
 | `refract` `apps/docs/` | Public site, navigation, tutorials | Documented CLI and schema contracts | `docs-site.yml`: `bun run lint`, `bun run test`, `bun run build` |
 | `refract` `apps/ui/` | Browser-only file viewer | NDJSON events; event types imported from `@refract-org/evidence-graph` | `viewer.yml`: `bun run lint`, `bun run test` (with the engine contract), `bun run build` |
-| [refract-py](https://github.com/refract-org/refract-py) | Python subprocess adapter and notebook integrations | CLI flags and NDJSON output | `hatch test`, `hatch build` |
+| `refract` `clients/python/` | Python subprocess adapter and notebook integrations | CLI flags and NDJSON output | `python.yml`: wheel build and install, `pytest` against the CLI built from the same commit, Python 3.10 and 3.12 |
 
 The docs site deploys from this repository (`docs-deploy.yml`) to
-<https://refract-org.github.io/refract/>. The [refract-docs](https://github.com/refract-org/refract-docs)
-and [refract-ui](https://github.com/refract-org/refract-ui) sources were imported
-into `apps/docs/` and `apps/ui/` with their history. refract-docs now publishes
-only a redirect site, which sends each `/refract-docs/` page to the same page
-under `/refract/`.
+<https://refract-org.github.io/refract/>. The [refract-docs](https://github.com/refract-org/refract-docs),
+[refract-ui](https://github.com/refract-org/refract-ui) and
+[refract-py](https://github.com/refract-org/refract-py) sources were imported
+into `apps/docs/`, `apps/ui/` and `clients/python/` with their history.
+refract-docs now publishes only a redirect site, which sends each
+`/refract-docs/` page to the same page under `/refract/`.
 
 This inventory was checked on 2026-10-12. The organization has no current
 `refract-labs` or `refract-demo-data` repository. Datasets live in `demo-data/`;
@@ -98,6 +99,15 @@ tested; repository consolidation does not require a simultaneous toolchain move.
    preserve its AGPL-3.0 license, and build/install the wheel in a fresh
    environment. Verify Python 3.10 and the CI runtime. Document a working install
    target before retiring the current Git-based installation URL.
+   *Status:* done. History imported with `git subtree`. The install target is
+   `pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"`;
+   the old `refract-py.git` URL still installs its last version. Building the
+   wheel showed it held only the `refract` package: `refract_eval` and
+   `refract_langchain`, which the docs import, were left out, and are now
+   included. `python.yml` installs that wheel on Python 3.10 and 3.12 and runs
+   `tests/test_engine_contract.py`, which parses the engine output in
+   `docs/examples/` and checks every flag the adapter passes against the built
+   CLI's help.
 4. **Retire old repos after the cutovers.** Add relocation notices with exact
    destinations, preserve tags and history, and transfer open issues. Archive
    only after installs, deployments, and links have been verified. Preserve any

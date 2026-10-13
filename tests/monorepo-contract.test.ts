@@ -18,6 +18,12 @@ describe("Refract Monorepo App Consolidation Contract (TDD Harness)", () => {
     expect(pkg.scripts?.build).toBeDefined();
   });
 
+  it("verifies clients/python is the refract-py project", () => {
+    const pyprojectPath = join(ROOT, "clients", "python", "pyproject.toml");
+    expect(existsSync(pyprojectPath)).toBe(true);
+    expect(readFileSync(pyprojectPath, "utf-8")).toMatch(/^name = "refract-py"$/m);
+  });
+
   it("verifies apps/ui has a valid package manifest and build script", () => {
     const pkgPath = join(ROOT, "apps", "ui", "package.json");
     expect(existsSync(pkgPath)).toBe(true);

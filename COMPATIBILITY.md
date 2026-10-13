@@ -11,7 +11,7 @@ When updating `@refract-org/*` packages, downstream consumers — the apps in th
     ├── @refract-org/eval        (evaluation harness)
     ├── @refract-org/mcp         (MCP tool definitions and server — also needs ingestion, analyzers)
     └── @refract-org/cli         (the `refract` command — needs all of the above; eval optional)
-            └── refract-py       (Python SDK — wraps the CLI)
+            └── clients/python   (Python SDK — wraps the CLI)
 
 @refract-org/persistence         (bun:sqlite cache — private, loaded lazily by the CLI's --cache)
 ```
@@ -30,7 +30,7 @@ as this tree. `publish.yml` publishes in the order the script prints.
 | `@refract-org/analyzers` | 0.5.2 | 0.5.2 | mcp, cli; NextConsensus |
 | `@refract-org/mcp` | 0.1.0 | 0.1.0 | cli |
 | `@refract-org/eval` | 0.2.2 | 0.2.2 | cli (optional) |
-| `@refract-org/cli` | 0.5.17 | 0.5.17 | refract-py, Docker image, operators |
+| `@refract-org/cli` | 0.5.17 | 0.5.17 | `clients/python`, Docker image, operators |
 | `@refract-org/persistence` | 0.1.1 | private | cli `--cache` from a source checkout |
 
 `npm install @refract-org/cli@0.5.17` into an empty directory resolves the npm column
@@ -45,7 +45,7 @@ that only analyzers 0.5.0 has.
 | NextConsensus (`nextconsensus`, `nextconsensus-app`) | `@refract-org/analyzers@^0.5.0`, `@refract-org/evidence-graph@^0.5.0`, `@refract-org/ingestion@^0.3.1`, each through one adapter file per repo | 0.5.0 / 0.5.0 / 0.3.1 | any library release; see [docs/refract-and-nextconsensus.md](./docs/refract-and-nextconsensus.md) |
 | `demo-data/` (monorepo) | JSONL format matching evidence-graph types | — | EvidenceEvent schema change |
 | `apps/ui` (monorepo) | `EventType` and `EvidenceEvent` imported from `packages/evidence-graph` as types only | this tree | checked on every evidence-graph change by `viewer.yml` |
-| refract-py | Wraps `@refract-org/cli` via subprocess | — | CLI flag additions/removals |
+| `clients/python` (monorepo) | Wraps `@refract-org/cli` via subprocess | this tree | checked on every CLI, schema or `docs/examples` change by `python.yml` |
 | `apps/docs` (monorepo) | References CLI examples and schema | — | CLI flag changes or schema version bumps |
 
 ## What Breaks When
@@ -55,7 +55,7 @@ that only analyzers 0.5.0 has.
 **If you add a new event type:**
 - `apps/ui`: the build fails until the type is added to `EVENT_TYPE_RECORD` in `src/types.ts`
 - `apps/docs`: update schema.md and events.md
-- refract-py: no change (dataclasses are generic)
+- `clients/python`: no change (dataclasses are generic)
 - `demo-data/`: update JSONL files if they should include the new type
 
 **If you rename an event type:**
@@ -65,7 +65,7 @@ that only analyzers 0.5.0 has.
 
 ### CLI flag changes
 
-- refract-py `_run()` method calls CLI with flags — any flag rename breaks the SDK
+- `clients/python` `_run()` calls the CLI with flags; `tests/test_engine_contract.py` fails when one it passes is renamed
 - `apps/docs` CLI reference page must be updated
 
 ### AnalyzerConfig changes

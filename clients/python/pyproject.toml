@@ -24,8 +24,12 @@ langchain = ["langchain-core"]
 [tool.hatch.metadata]
 allow-direct-references = true
 
+# refract_eval and refract_langchain are top-level modules beside the package,
+# and the docs import them by those names. `packages = ["src/refract"]` left
+# them out of the wheel, so they worked only from a checkout.
 [tool.hatch.build.targets.wheel]
-packages = ["src/refract"]
+only-include = ["src/refract", "src/refract_eval.py", "src/refract_langchain.py"]
+sources = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

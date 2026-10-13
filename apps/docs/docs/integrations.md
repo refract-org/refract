@@ -28,7 +28,7 @@ Refract produces a deterministic event stream — standard NDJSON with typed sch
 
 | Tool | How | Docs |
 |---|---|---|
-| **LangChain** | `refract-py/src/refract_langchain.py` — loads events as `Document` objects with stability metadata for provenance-aware RAG. | [RAG tutorial](tutorials/rag-provenance.md) |
+| **LangChain** | `clients/python/src/refract_langchain.py` — loads events as `Document` objects with stability metadata for provenance-aware RAG. | [RAG tutorial](tutorials/rag-provenance.md) |
 | **LlamaIndex** | Load events as nodes, use stability score as metadata filter. | [RAG tutorial](tutorials/rag-provenance.md) |
 | **Vercel AI SDK** | Use stability signals as reranking features in retrieval chains. | [RAG tutorial](tutorials/rag-provenance.md) |
 | **OpenAI / DeepSeek / Ollama** | Plug any OpenAI-compatible endpoint into `refract classify` at BYO-inference boundaries. | [BYO-inference tutorial](tutorials/byo-inference.md) |
@@ -42,7 +42,7 @@ Refract produces a deterministic event stream — standard NDJSON with typed sch
 | **Retrieval quality scoring** | `refract_eval.score_retrieval_quality()` — score passages by stability | [RAG tutorial](tutorials/rag-provenance.md) |
 | **Provenance hallucination** | `refract_eval.check_provenance()` — verify if a source ever existed | [Model evaluation tutorial](tutorials/model-evaluation.md) |
 | **Benchmark submission** | Standard 10-page benchmark, submission format, reproducibility requirements | [BENCHMARK.md](https://github.com/refract-org/refract/blob/main/BENCHMARK.md) |
-| **Colab notebook** | Ready-to-run notebook — `pip install git+https://github.com/refract-org/refract-py.git` and go | [notebooks/model-evaluation.ipynb](notebooks/model-evaluation.ipynb) |
+| **Colab notebook** | Ready-to-run notebook — `pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"` and go | [notebooks/model-evaluation.ipynb](notebooks/model-evaluation.ipynb) |
 
 ### Notebooks and visualization
 

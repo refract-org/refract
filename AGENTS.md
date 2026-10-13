@@ -48,7 +48,9 @@ bun run lint       # biome lint packages/
 - **apps/docs**: Public documentation site (CC-BY-4.0), published to https://refract-org.github.io/refract/ by `docs-deploy.yml`. Private workspace; `bun run lint|test|build` from its directory; CI is `docs-site.yml`.
 - **apps/ui**: Browser-only file viewer. Private workspace that imports evidence-graph's event types as types only; CI is `viewer.yml`, which also runs on evidence-graph and `docs/examples` changes.
 
-The root `bun run test` and `bun run lint` cover `packages/` only; each app has its own `AGENTS.md`.
+- **clients/python**: Python adapter over the CLI (Hatch, pytest, Python 3.10+). Not a workspace; CI is `python.yml`, which runs it against the CLI built from the same commit.
+
+The root `bun run test` and `bun run lint` cover `packages/` only; each app and client has its own `AGENTS.md`.
 
 ## Semantic Enrichment (v0.5.0+)
 

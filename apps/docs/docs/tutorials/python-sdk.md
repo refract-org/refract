@@ -9,7 +9,7 @@ notebook or Python script.
 ## Prerequisites
 
 ```bash
-pip install git+https://github.com/refract-org/refract-py.git pandas matplotlib  # not on PyPI
+pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python" pandas matplotlib  # not on PyPI
 ```
 
 The Python SDK wraps the Refract CLI via subprocess. Install the CLI:

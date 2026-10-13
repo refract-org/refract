@@ -1,10 +1,14 @@
 # refract-py
 
 Python SDK for [Refract](https://github.com/refract-org/refract) — the open claim-history layer for public knowledge.
+Its source is `clients/python` in the Refract repository.
 
 ```bash
-pip install git+https://github.com/refract-org/refract-py.git  # not on PyPI yet
+pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"  # not on PyPI yet
 ```
+
+`git+https://github.com/refract-org/refract-py.git`, the address before the move,
+still installs, but it stays at the last version published there.
 
 Requires the [Refract CLI](https://github.com/refract-org/refract):
 ```bash
@@ -40,7 +44,7 @@ df = r.export("Bitcoin", format="ndjson", flatten=True, as_frame=True)
 | **LangChain** | `refract_langchain.py` loads events as `Document` objects with stability metadata for provenance-aware RAG |
 | **DuckDB** | Export as NDJSON, query with SQL: `SELECT * FROM 'events.jsonl'` |
 
-See the [Python SDK tutorial](https://refract-org.github.io/refract-docs/tutorials/python-sdk/) and [integrations docs](https://refract-org.github.io/refract-docs/integrations/) for full workflows.
+See the [Python SDK tutorial](https://refract-org.github.io/refract/tutorials/python-sdk/) and [integrations docs](https://refract-org.github.io/refract/integrations/) for full workflows.
 
 ## License
 

@@ -235,7 +235,7 @@ for s in scores:
     print(f"{s['passage'][:50]}... → stability: {s['score']}")
 ```
 
-The adapter source is in `refract-py/src/refract_eval.py`. See the [Python SDK
+The adapter source is in `clients/python/src/refract_eval.py`. See the [Python SDK
 tutorial](python-sdk.md) for the full notebook workflow.
 
 ## Reproducibility

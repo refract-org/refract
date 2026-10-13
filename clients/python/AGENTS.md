@@ -1,14 +1,19 @@
 # Agent Instructions for refract-py
 
-Python SDK for [Refract](https://github.com/refract-org/refract) — wraps the Refract CLI via subprocess.
+Python SDK for [Refract](https://github.com/refract-org/refract) — wraps the Refract CLI via subprocess. Its source is `clients/python` in the Refract monorepo, imported with the history of the former refract-py repository.
 
 ## Quick Start
 
 ```bash
-pip install -e ".[dev]"
+pip install -e .
 hatch build    # Build wheel
 hatch test     # Run pytest
 ```
+
+`tests/test_engine_contract.py` parses the engine output in the repository's
+`docs/examples/` and checks the flags the adapter passes against the CLI
+built from this tree (`bun run build` at the repository root first, or set
+`REFRACT_CLI` to a built `cli.js`).
 
 ## Repository Structure
 
@@ -22,7 +27,7 @@ hatch test     # Run pytest
 - **Runtime:** Python 3.10+
 - **Package manager:** Hatch
 - **Tests:** pytest
-- **CI:** GitHub Actions (ci.yml)
+- **CI:** `.github/workflows/python.yml` at the repository root, on Python 3.10 and 3.12, against the installed wheel and the CLI built from the same commit
 - **Commit style:** Conventional Commits
 
 ## Domain Boundary
