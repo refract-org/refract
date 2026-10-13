@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+dist/
+*.egg-info/
+.DS_Store
+
+# Tooling
+.cmux/
+.opencode/
+.sisyphus/
+.codex/
+.agent/
+.wrangler/

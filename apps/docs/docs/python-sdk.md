@@ -5,7 +5,7 @@ The official Python SDK for Refract — wraps the CLI via subprocess and provide
 ## Install
 
 ```bash
-pip install git+https://github.com/refract-org/refract-py.git  # not on PyPI
+pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"  # not on PyPI
 ```
 
 Requires the Refract CLI (the SDK calls it via subprocess):
@@ -192,4 +192,4 @@ This SDK wraps the Refract CLI. It does not add model logic, interpretation, or 
 
 ## Source
 
-[github.com/refract-org/refract-py](https://github.com/refract-org/refract-py)
+[Source: `clients/python`](https://github.com/refract-org/refract/tree/main/clients/python)

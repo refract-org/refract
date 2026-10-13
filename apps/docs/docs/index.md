@@ -141,7 +141,7 @@ Refract is one tool in a family of three:
 | Tool | What it does | Install |
 |------|-------------|---------|
 | **Refract** | CLI + TypeScript SDK — the deterministic observation engine | `npm install -g @refract-org/cli` |
-| **[Python SDK](python-sdk)** | Typed Python wrapper — pandas DataFrames, notebooks, LangChain | `pip install git+https://github.com/refract-org/refract-py.git` |
+| **[Python SDK](python-sdk)** | Typed Python wrapper — pandas DataFrames, notebooks, LangChain | `pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"` |
 | **[Refract UI](visualizer)** | Browser visualizer — drag-and-drop JSONL, timelines, word-level diffs | `cd apps/ui && bun run dev` in the Refract repository |
 
 A typical workflow: **analyze** with Refract, **export** as NDJSON, then explore in Python or the UI.

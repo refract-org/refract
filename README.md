@@ -150,7 +150,7 @@ Choose the interface that matches your existing workflow:
 | CLI | You want to inspect or export a page's history | `refract export "Bitcoin" --from 369361755 --to 369393212 --format ndjson` |
 | Libraries | You already fetch revisions or own versioned text inputs | `buildRevisionEvents(revisions, { depth: "detailed" })` |
 | MCP | An agent needs to request histories and receive structured observations | `refract mcp` |
-| Python | You work in Python and want events as dataclasses or DataFrames | `pip install git+https://github.com/refract-org/refract-py.git` |
+| Python | You work in Python and want events as dataclasses or DataFrames | `pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"` |
 
 [Library adapter and data integrations](./docs/integrations.md) · [MCP setup](./docs/mcp.md) · [Private wiki access](./docs/usage.md#other-mediawiki-instances)
 
@@ -169,6 +169,8 @@ refract/
 ├── apps/
 │   ├── docs/              # Public documentation site (CC-BY-4.0)
 │   └── ui/                # Browser-only file viewer
+├── clients/
+│   └── python/            # Python adapter over the CLI
 ├── docs/                  # Architecture specs, recipes & boundary definitions
 │   └── examples/          # Captured revision inputs and engine output
 └── demo-data/             # Local datasets
@@ -185,7 +187,7 @@ bun run test
 bun run lint
 ```
 
-The apps are workspaces with their own checks, run from their directories: `bun run lint`, `bun run test` and `bun run build` in `apps/docs` or `apps/ui`. CI runs them in `docs-site.yml` and `viewer.yml`, separately from the engine gate.
+The apps are workspaces with their own checks, run from their directories: `bun run lint`, `bun run test` and `bun run build` in `apps/docs` or `apps/ui`. The Python adapter uses Hatch and pytest in `clients/python`. CI runs them in `docs-site.yml`, `viewer.yml` and `python.yml`, separately from the engine gate.
 
 ## Packages
 
@@ -230,13 +232,12 @@ These build on the core engine:
 | [Docs site](./apps/docs) | Public documentation site — [integrations](https://refract-org.github.io/refract/integrations/), quickstart, CLI, SDK, tutorials |
 | [Viewer](./apps/ui) | Browser-only file viewer — load JSONL, render timelines, diffs, citations |
 | [Demo data](./demo-data) | Local datasets; the [offline walkthrough](./docs/recipes.md#try-the-offline-walkthrough) uses a fictional library history |
-| [refract-py](https://github.com/refract-org/refract-py) | Python adapter — calls the CLI and returns dataclasses or DataFrames |
+| [Python adapter](./clients/python) | Calls the CLI and returns dataclasses or DataFrames |
 
 The core owns event contracts, CLI behavior, and reproducible examples. The docs
-site and the viewer live under `apps/` with their own licenses; the viewer imports
-the engine's event types and is checked against its captured output. The Python
-adapter is still a separate repository. See the [repository map](./docs/repositories.md)
-for ownership and the remaining migration steps.
+site, the viewer and the Python adapter live in this repository with their own
+licenses and CI workflows, and are checked against the engine's captured output.
+See the [repository map](./docs/repositories.md) for ownership.
 
 ### Position in the revisable-delegation loop
 

@@ -179,21 +179,21 @@ contested.to_json("contested-events.jsonl", orient="records", lines=True)
 
 ## Using the Python SDK (`refract-py`)
 
-The [refract-py](https://github.com/refract-org/refract-py) package provides typed
+The [refract-py](https://github.com/refract-org/refract/tree/main/clients/python) package provides typed
 dataclasses and pandas integration for Python workflows:
 
 ```bash
-pip install git+https://github.com/refract-org/refract-py.git  # not on PyPI
+pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"  # not on PyPI
 ```
 
 ### Load events with typed dataclasses
 
 ```python
-from refract import RefractClient, EvidenceEvent
+from refract import Refract, EvidenceEvent
 
-client = RefractClient()
+client = Refract()
 events = client.analyze("Bitcoin", depth="detailed")
-# → list[EvidenceEvent] with typed fields: event_type, timestamp, section, etc.
+# → list[EvidenceEvent] with typed fields: eventType, timestamp, section, etc.
 ```
 
 ### Load into pandas DataFrame
@@ -201,8 +201,8 @@ events = client.analyze("Bitcoin", depth="detailed")
 ```python
 import pandas as pd
 
-events_dict = [e.model_dump() for e in events]
-df = pd.DataFrame(events_dict)
+# One row per event: event_type, timestamp, section, revision IDs, first fact
+df = client.analyze("Bitcoin", depth="detailed", as_frame=True)
 df["timestamp"] = pd.to_datetime(df["timestamp"])
 
 # Quick exploration
@@ -231,14 +231,13 @@ df.to_parquet("bitcoin-events.parquet", index=False)
 ### LangChain document loader
 
 ```python
-from refract_langchain import RefractDocumentLoader
+from refract_langchain import RefractLoader
 
-loader = RefractDocumentLoader(page="Bitcoin")
+loader = RefractLoader(page="Bitcoin")
 docs = loader.load()
 # → list[Document] with page_content = claim text, metadata = stability + provenance
 ```
 
 The Python SDK wraps the `@refract-org/cli` npm package — install both for full
-functionality: `pip install git+https://github.com/refract-org/refract-py.git` plus the Refract CLI. Typed
-exceptions like `RefractConfigError`, `RefractFetchError`, and
-`RefractInterpretationError` provide structured error handling.
+functionality: `pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"` plus the Refract CLI. A
+non-zero exit from the CLI raises `RefractError` with its stderr.
