@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Refract event viewer</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><style>path{fill:%230c0f1a}@media (prefers-color-scheme:dark){path{fill:%23e2e4ed}}</style><path d='M8 2 15 14H1z'/></svg>" />
+  </head>
+  <body>
+    <div id="app">
+      <header id="app-header">
+        <h1>Refract</h1>
+        <p class="subtitle">Event viewer for Refract JSONL exports</p>
+      </header>
+      <div id="toolbar">
+        <div id="import-area"></div>
+        <div id="filter-area"></div>
+        <div id="export-area"></div>
+      </div>
+      <div id="dashboard">
+        <div id="panel-timeline" class="panel"></div>
+        <div id="dashboard-side">
+          <div id="panel-diff" class="panel"></div>
+          <div id="panel-citations" class="panel"></div>
+          <div id="panel-certainty" class="panel"></div>
+        </div>
+      </div>
+      <div id="dashboard-row2">
+        <div id="panel-disputes" class="panel"></div>
+        <div id="panel-wording" class="panel"></div>
+        <div id="panel-source" class="panel"></div>
+        <div id="panel-schema" class="panel"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

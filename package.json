@@ -33,7 +33,9 @@
     "packages/cli",
     "packages/mcp",
     "packages/persistence",
-    "packages/eval"
+    "packages/eval",
+    "apps/docs",
+    "apps/ui"
   ],
   "scripts": {
     "build": "tsc -b",

@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520" width="760" height="520">
+  <title>Refract package dependencies</title>
+  <defs>
+    <marker id="arrowDep" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af"/>
+    </marker>
+    <marker id="arrowOptional" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a78bfa"/>
+    </marker>
+    <filter id="shadow" x="-5%" y="-2%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .title { font-size: 18px; font-weight: 700; fill: #111827; }
+    .subtitle { font-size: 13px; fill: #6b7280; }
+    .pkg-name { font-size: 13px; font-weight: 700; }
+    .pkg-desc { font-size: 10px; fill: #4b5563; }
+    .pkg-pub { font-size: 9px; fill: #6b7280; }
+    .dep-label { font-size: 9px; fill: #9ca3af; }
+  </style>
+
+  <rect width="760" height="520" fill="#fafbfc" rx="8"/>
+
+  <text x="380" y="36" text-anchor="middle" class="title">Package Dependency Graph</text>
+  <text x="380" y="56" text-anchor="middle" class="subtitle">All packages under @refract-org scope. Arrows show runtime dependencies.</text>
+
+  <!-- CLI (top center) -->
+  <rect x="260" y="85" width="240" height="62" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="260" y="85" width="240" height="24" rx="8" fill="#dbeafe"/>
+  <text x="380" y="102" text-anchor="middle" font-size="11" font-weight="700" fill="#1e40af">@refract-org/cli</text>
+  <text x="380" y="122" text-anchor="middle" class="pkg-desc">refract / wikihistory commands</text>
+  <text x="380" y="137" text-anchor="middle" class="pkg-pub">Published · AGPL-3.0</text>
+
+  <!-- Arrows from CLI down -->
+  <line x1="320" y1="147" x2="250" y2="195" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowDep)"/>
+  <line x1="380" y1="147" x2="380" y2="195" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowDep)"/>
+  <line x1="440" y1="147" x2="510" y2="195" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrowDep)"/>
+
+  <!-- Row 2: Analysers, Ingestion, Evidence Graph -->
+  <rect x="100" y="200" width="200" height="62" rx="8" fill="#fff" stroke="#d1d5db" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="100" y="200" width="200" height="24" rx="8" fill="#f3f4f6"/>
+  <text x="200" y="217" text-anchor="middle" font-size="11" font-weight="700" fill="#374151">@refract-org/analyzers</text>
+  <text x="200" y="237" text-anchor="middle" class="pkg-desc">Section diff, citation, revert, template</text>
+  <text x="200" y="252" text-anchor="middle" class="pkg-pub">Published · AGPL-3.0</text>
+
+  <rect x="380" y="200" width="200" height="62" rx="8" fill="#fff" stroke="#d1d5db" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="380" y="200" width="200" height="24" rx="8" fill="#f3f4f6"/>
+  <text x="480" y="217" text-anchor="middle" font-size="11" font-weight="700" fill="#374151">@refract-org/ingestion</text>
+  <text x="480" y="237" text-anchor="middle" class="pkg-desc">MediaWiki API adapters, Wikidata</text>
+  <text x="480" y="252" text-anchor="middle" class="pkg-pub">Published · AGPL-3.0</text>
+
+  <rect x="560" y="200" width="160" height="62" rx="8" fill="#fff" stroke="#d1d5db" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="560" y="200" width="160" height="24" rx="8" fill="#f3f4f6"/>
+  <text x="640" y="217" text-anchor="middle" font-size="11" font-weight="700" fill="#374151">evidence-graph</text>
+  <text x="640" y="237" text-anchor="middle" class="pkg-desc">Core types, schemas</text>
+  <text x="640" y="252" text-anchor="middle" class="pkg-pub">Published · AGPL-3.0</text>
+
+  <!-- Arrows between row 2 -->
+  <line x1="300" y1="231" x2="375" y2="231" stroke="#9ca3af" stroke-width="1" marker-end="url(#arrowDep)"/>
+  <line x1="580" y1="219" x2="565" y2="219" stroke="#9ca3af" stroke-width="1" marker-end="url(#arrowDep)"/>
+
+  <text x="340" y="224" class="dep-label">→</text>
+  <text x="574" y="224" class="dep-label">←</text>
+
+  <!-- Row 3: Persistence, Eval -->
+  <rect x="220" y="310" width="200" height="62" rx="8" fill="#f5f5f5" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="4,3" filter="url(#shadow)"/>
+  <rect x="220" y="310" width="200" height="24" rx="8" fill="#e5e7eb"/>
+  <text x="320" y="327" text-anchor="middle" font-size="11" font-weight="700" fill="#6b7280">@refract-org/persistence</text>
+  <text x="320" y="347" text-anchor="middle" class="pkg-desc">SQLite cache (bun:sqlite)</text>
+  <text x="320" y="362" text-anchor="middle" class="pkg-pub">Not published</text>
+
+  <rect x="460" y="310" width="200" height="62" rx="8" fill="#f5f5f5" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="4,3" filter="url(#shadow)"/>
+  <rect x="460" y="310" width="200" height="24" rx="8" fill="#e5e7eb"/>
+  <text x="560" y="327" text-anchor="middle" font-size="11" font-weight="700" fill="#6b7280">@refract-org/eval</text>
+  <text x="560" y="347" text-anchor="middle" class="pkg-desc">Evaluation harness, benchmarks</text>
+  <text x="560" y="362" text-anchor="middle" class="pkg-pub">Not published</text>
+
+  <!-- Optional arrows -->
+  <line x1="380" y1="262" x2="320" y2="305" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arrowOptional)"/>
+  <text x="340" y="286" font-size="8" fill="#a78bfa">optional</text>
+  <line x1="380" y1="262" x2="560" y2="305" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arrowOptional)"/>
+  <text x="500" y="286" font-size="8" fill="#a78bfa">optional</text>
+
+  <!-- Observable -->
+  <rect x="310" y="420" width="140" height="46" rx="8" fill="#f5f5f5" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,3" filter="url(#shadow)"/>
+  <text x="380" y="441" text-anchor="middle" font-size="11" font-weight="700" fill="#6b7280">@refract-org/observable</text>
+  <text x="380" y="457" text-anchor="middle" class="pkg-pub">Not published</text>
+
+  <!-- Legend -->
+  <rect x="220" y="482" width="16" height="10" rx="2" fill="#fff" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="242" y="491" font-size="10" fill="#6b7280">Published on npm · AGPL-3.0</text>
+  <rect x="400" y="482" width="16" height="10" rx="2" fill="#f5f5f5" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="422" y="491" font-size="10" fill="#6b7280">Internal (not published)</text>
+</svg>

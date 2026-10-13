@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400">
+  <title>Refract observation boundary</title>
+  <defs>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444"/>
+    </marker>
+    <filter id="shadow" x="-5%" y="-2%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .title { font-size: 18px; font-weight: 700; fill: #111827; }
+    .subtitle { font-size: 13px; fill: #6b7280; }
+    .in-scope { font-size: 11px; fill: #065f46; }
+    .out-scope { font-size: 11px; fill: #991b1b; }
+    .label { font-size: 10px; font-weight: 600; }
+  </style>
+
+  <rect width="720" height="400" fill="#fafbfc" rx="8"/>
+
+  <text x="360" y="36" text-anchor="middle" class="title">Refract Boundary</text>
+  <text x="360" y="56" text-anchor="middle" class="subtitle">What's inside the engine, what's outside</text>
+
+  <!-- Inside: Refract Engine -->
+  <rect x="30" y="80" width="400" height="300" rx="12" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="2"/>
+  <text x="230" y="107" text-anchor="middle" class="label" fill="#065f46">INSIDE REFRACT</text>
+
+  <!-- In-scope items -->
+  <rect x="55" y="125" width="350" height="36" rx="6" fill="#fff" stroke="#a7f3d0" stroke-width="1"/>
+  <text x="230" y="140" text-anchor="middle" class="in-scope">MediaWiki revision ingestion, diff computation</text>
+  <text x="230" y="153" text-anchor="middle" class="in-scope">→ deterministic, byte-reproducible events</text>
+
+  <rect x="55" y="170" width="350" height="36" rx="6" fill="#fff" stroke="#a7f3d0" stroke-width="1"/>
+  <text x="230" y="185" text-anchor="middle" class="in-scope">Claim provenance: first seen, removed, modified, reintroduced</text>
+  <text x="230" y="198" text-anchor="middle" class="in-scope">→ structured event stream with 26 event types</text>
+
+  <rect x="55" y="215" width="350" height="36" rx="6" fill="#fff" stroke="#a7f3d0" stroke-width="1"/>
+  <text x="230" y="230" text-anchor="middle" class="in-scope">Source lineage, template tracking, revert detection</text>
+  <text x="230" y="243" text-anchor="middle" class="in-scope">→ auditor: "which analyzer? what version? what inputs?"</text>
+
+  <rect x="55" y="260" width="350" height="36" rx="6" fill="#fff" stroke="#a7f3d0" stroke-width="1"/>
+  <text x="230" y="275" text-anchor="middle" class="in-scope">Ground truth validation: talk page consensus, RFCs, ArbCom</text>
+  <text x="230" y="288" text-anchor="middle" class="in-scope">→ independently sourced, never redefined by pipeline</text>
+
+  <rect x="55" y="305" width="350" height="36" rx="6" fill="#fff" stroke="#a7f3d0" stroke-width="1"/>
+  <text x="230" y="320" text-anchor="middle" class="in-scope">Eval harness: benchmark pages, precision/recall, baseline</text>
+  <text x="230" y="333" text-anchor="middle" class="in-scope">→ verifies analyzer accuracy without feedback loops</text>
+
+  <!-- Outside: Not Refract -->
+  <rect x="460" y="80" width="240" height="300" rx="12" fill="#fef2f2" stroke="#fecaca" stroke-width="2"/>
+  <text x="580" y="107" text-anchor="middle" class="label" fill="#991b1b">OUTSIDE REFRACT</text>
+
+  <rect x="480" y="125" width="200" height="36" rx="6" fill="#fff" stroke="#fca5a5" stroke-width="1"/>
+  <text x="580" y="140" text-anchor="middle" class="out-scope">Truth claims ("this is accurate")</text>
+  <text x="580" y="153" text-anchor="middle" class="out-scope">→ Outside boundary → downstream</text>
+
+  <rect x="480" y="170" width="200" height="36" rx="6" fill="#fff" stroke="#fca5a5" stroke-width="1"/>
+  <text x="580" y="185" text-anchor="middle" class="out-scope">Model interpretation (LLM calls, confidence)</text>
+  <text x="580" y="198" text-anchor="middle" class="out-scope">→ Downstream consumer responsibility</text>
+
+  <rect x="480" y="215" width="200" height="36" rx="6" fill="#fff" stroke="#fca5a5" stroke-width="1"/>
+  <text x="580" y="230" text-anchor="middle" class="out-scope">Sentiment, editor scoring, toxicity</text>
+  <text x="580" y="243" text-anchor="middle" class="out-scope">→ Explicitly excluded by design</text>
+
+  <rect x="480" y="260" width="200" height="36" rx="6" fill="#fff" stroke="#fca5a5" stroke-width="1"/>
+  <text x="580" y="275" text-anchor="middle" class="out-scope">Prediction, forecasting, trend extrapolation</text>
+  <text x="580" y="288" text-anchor="middle" class="out-scope">→ Observation only, not prediction</text>
+
+  <rect x="480" y="305" width="200" height="36" rx="6" fill="#fff" stroke="#fca5a5" stroke-width="1"/>
+  <text x="580" y="320" text-anchor="middle" class="out-scope">Healthcare-specific logic, clinical rules</text>
+  <text x="580" y="333" text-anchor="middle" class="out-scope">→ Private repos, not open-source engine</text>
+
+  <!-- Arrow from inside to outside -->
+  <line x1="350" y1="200" x2="460" y2="180" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowGreen)"/>
+  <text x="405" y="195" font-size="8" fill="#10b981" font-style="italic">deterministic</text>
+  <text x="405" y="208" font-size="8" fill="#10b981" font-style="italic">event stream →</text>
+
+  <!-- Bottom summary -->
+  <text x="360" y="395" text-anchor="middle" class="subtitle">Refract answers "What changed?" Downstream systems answer "What does it mean?"</text>
+</svg>

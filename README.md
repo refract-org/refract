@@ -9,6 +9,7 @@ See what changed in the sources you rely on since your last review, with text an
 [![CI](https://github.com/refract-org/refract/actions/workflows/ci.yml/badge.svg)](https://github.com/refract-org/refract/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/release/refract-org/refract)](https://github.com/refract-org/refract/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-0f172a.svg)](./LICENSE)
+[![Bun](https://img.shields.io/badge/bun-%3E%3D1.3-black?style=flat-square&logo=bun&logoColor=white)](https://bun.sh)
 [![Discussions](https://img.shields.io/badge/discussions-welcome-8b5cf6?style=flat-square)](https://github.com/refract-org/refract/discussions)
 
 </div>
@@ -149,8 +150,35 @@ Choose the interface that matches your existing workflow:
 | CLI | You want to inspect or export a page's history | `refract export "Bitcoin" --from 369361755 --to 369393212 --format ndjson` |
 | Libraries | You already fetch revisions or own versioned text inputs | `buildRevisionEvents(revisions, { depth: "detailed" })` |
 | MCP | An agent needs to request histories and receive structured observations | `refract mcp` |
+| Python | You work in Python and want events as dataclasses or DataFrames | `pip install git+https://github.com/refract-org/refract-py.git` |
 
 [Library adapter and data integrations](./docs/integrations.md) · [MCP setup](./docs/mcp.md) · [Private wiki access](./docs/usage.md#other-mediawiki-instances)
+
+## Monorepo architecture
+
+```
+refract/
+├── packages/
+│   ├── evidence-graph/    # Types, schemas, identity & hash verification
+│   ├── ingestion/         # MediaWiki client, pagination, retries & auth
+│   ├── analyzers/         # Deterministic revision diffing & enrichment
+│   ├── cli/               # CLI commands, output formatters & local browser
+│   ├── mcp/               # Model Context Protocol server implementation
+│   ├── persistence/       # SQLite local caching and revision store
+│   └── eval/              # Evaluation harness & benchmark verification
+└── docs/                  # Architecture specs, recipes & boundary definitions
+```
+
+## Development and testing
+
+```bash
+git clone https://github.com/refract-org/refract.git
+cd refract
+bun install
+bun run build
+bun run test
+bun run lint
+```
 
 ## Packages
 
