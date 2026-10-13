@@ -113,7 +113,7 @@ let selectedIndex = -1;
 let currentResults = [];
 
 // Base path retrieved from global config
-const BASE = window.REFRACT_BASE || "/refract-docs/";
+const BASE = window.REFRACT_BASE || "/refract/";
 
 async function loadSearchIndex() {
 	if (indexLoaded) return;

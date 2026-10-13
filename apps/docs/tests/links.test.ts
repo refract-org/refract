@@ -10,7 +10,7 @@ import { rewriteLink } from "../build.mjs";
 const ROOT_DIR = resolve(__dirname, "..");
 const DOCS_DIR = join(ROOT_DIR, "docs");
 const DIST_DIR = join(ROOT_DIR, "dist");
-const SITE_BASE = "/refract-docs";
+const SITE_BASE = "/refract";
 const SITE_URL = `https://refract-org.github.io${SITE_BASE}/`;
 const execFileAsync = promisify(execFile);
 
@@ -213,7 +213,7 @@ function escapeRegExp(value: string): string {
 	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// The URL path a link in a built page points at ("/refract-docs/cli/"), or
+// The URL path a link in a built page points at ("/refract/cli/"), or
 // null for an external link or a same-page anchor. Absolute links to the
 // published site, such as the canonical URL, count as internal.
 function sitePathOf(sourceFile: string, href: string): string | null {
@@ -364,45 +364,45 @@ describe("Generated site links", async () => {
 
 describe("rewriteLink", () => {
 	it.each([
-		["cli", "", "/refract-docs/cli/"],
-		["./cli", "", "/refract-docs/cli/"],
-		["cli/", "", "/refract-docs/cli/"],
-		["cli.md", "", "/refract-docs/cli/"],
+		["cli", "", "/refract/cli/"],
+		["./cli", "", "/refract/cli/"],
+		["cli/", "", "/refract/cli/"],
+		["cli.md", "", "/refract/cli/"],
 		[
 			"schema#version-compatibility",
 			"",
-			"/refract-docs/schema/#version-compatibility",
+			"/refract/schema/#version-compatibility",
 		],
 		[
 			"schema.md#version-compatibility",
 			"",
-			"/refract-docs/schema/#version-compatibility",
+			"/refract/schema/#version-compatibility",
 		],
-		["tutorials/refract-ui", "", "/refract-docs/tutorials/refract-ui/"],
-		["fandom-canon.md", "tutorials", "/refract-docs/tutorials/fandom-canon/"],
-		["../analytics.md", "tutorials", "/refract-docs/analytics/"],
-		["../index.md", "tutorials", "/refract-docs/"],
-		["index.md", "", "/refract-docs/"],
-		["./", "", "/refract-docs/"],
-		["/quickstart", "tutorials", "/refract-docs/quickstart/"],
-		["cli?x=1", "", "/refract-docs/cli/?x=1"],
+		["tutorials/refract-ui", "", "/refract/tutorials/refract-ui/"],
+		["fandom-canon.md", "tutorials", "/refract/tutorials/fandom-canon/"],
+		["../analytics.md", "tutorials", "/refract/analytics/"],
+		["../index.md", "tutorials", "/refract/"],
+		["index.md", "", "/refract/"],
+		["./", "", "/refract/"],
+		["/quickstart", "tutorials", "/refract/quickstart/"],
+		["cli?x=1", "", "/refract/cli/?x=1"],
 	])("links %s (from docs/%s) to the page URL %s", (href, dir, expected) => {
 		expect(rewriteLink(href, dir)).toBe(expected);
 	});
 
 	it.each([
-		["mcp-sequence.svg", "", "/refract-docs/mcp-sequence.svg"],
+		["mcp-sequence.svg", "", "/refract/mcp-sequence.svg"],
 		[
 			"assets/refract-ui-screenshot.png",
 			"",
-			"/refract-docs/assets/refract-ui-screenshot.png",
+			"/refract/assets/refract-ui-screenshot.png",
 		],
 		[
 			"notebooks/model-evaluation.ipynb",
 			"",
-			"/refract-docs/notebooks/model-evaluation.ipynb",
+			"/refract/notebooks/model-evaluation.ipynb",
 		],
-		["../boundary.svg", "tutorials", "/refract-docs/boundary.svg"],
+		["../boundary.svg", "tutorials", "/refract/boundary.svg"],
 	])(
 		"leaves the asset link %s (from docs/%s) without a slash",
 		(href, dir, expected) => {

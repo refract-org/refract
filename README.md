@@ -227,7 +227,7 @@ These build on the core engine:
 
 | Project | Purpose |
 |---------|---------|
-| [Docs site](./apps/docs) | Public documentation site — [integrations](https://refract-org.github.io/refract-docs/integrations/), quickstart, CLI, SDK, tutorials |
+| [Docs site](./apps/docs) | Public documentation site — [integrations](https://refract-org.github.io/refract/integrations/), quickstart, CLI, SDK, tutorials |
 | [Viewer](./apps/ui) | Browser-only file viewer — load JSONL, render timelines, diffs, citations |
 | [Demo data](./demo-data) | Local datasets; the [offline walkthrough](./docs/recipes.md#try-the-offline-walkthrough) uses a fictional library history |
 | [refract-py](https://github.com/refract-org/refract-py) | Python adapter — calls the CLI and returns dataclasses or DataFrames |

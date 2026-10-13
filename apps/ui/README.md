@@ -53,4 +53,4 @@ Then drag `bitcoin-events.jsonl` onto the Refract UI upload zone.
 
 ---
 
-[Refract Engine](https://github.com/refract-org/refract) · [Docs](https://refract-org.github.io/refract-docs/) · [npm](https://www.npmjs.com/org/refract-org)
+[Refract Engine](https://github.com/refract-org/refract) · [Docs](https://refract-org.github.io/refract/) · [npm](https://www.npmjs.com/org/refract-org)

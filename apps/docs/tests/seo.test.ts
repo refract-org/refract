@@ -15,7 +15,7 @@ import {
 
 const ROOT_DIR = resolve(__dirname, "..");
 const DIST_DIR = join(ROOT_DIR, "dist");
-const SITE_URL = "https://refract-org.github.io/refract-docs/";
+const SITE_URL = "https://refract-org.github.io/refract/";
 const SITE_DESCRIPTION =
 	"A deterministic observation engine for revision histories. It reads a page's edits and emits a typed event for each change.";
 // Pages that use the site description: the home page by design, and pages with
@@ -366,7 +366,7 @@ describe("social card", () => {
 		const png = renderSocialCard({
 			name: "Refract",
 			description,
-			address: "refract-org.github.io/refract-docs",
+			address: "refract-org.github.io/refract",
 		});
 		expect(pngSize(Buffer.from(png))).toEqual({ width: 1200, height: 630 });
 	});

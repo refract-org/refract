@@ -45,4 +45,4 @@ refract diff --wiki-a https://starwars.fandom.com/api.php --wiki-b https://memor
 refract eval
 ```
 
-[Refract](https://github.com/refract-org/refract) · [Docs](https://github.com/refract-org/refract-docs) · [npm](https://www.npmjs.com/package/@refract-org/cli)
+[Refract](https://github.com/refract-org/refract) · [Docs](https://refract-org.github.io/refract/) · [npm](https://www.npmjs.com/package/@refract-org/cli)
