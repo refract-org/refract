@@ -1,6 +1,6 @@
 # Refract Docs
 
-Public documentation for [Refract](https://github.com/refract-org/refract), a deterministic observation engine for public revision histories.
+Public documentation for [Refract](https://github.com/refract-org/refract), a temporal observability layer for knowledge. Its deterministic engine reconstructs changes from available revision histories.
 
 ---
 
@@ -9,10 +9,15 @@ Public documentation for [Refract](https://github.com/refract-org/refract), a de
 ## Quick start
 
 ```bash
-npx @refract-org/cli analyze "Earth" --depth brief
+npx @refract-org/cli@0.5.17 analyze "Bitcoin" --from 369361755 --to 369393212 --depth detailed --json
 ```
 
 See [quickstart](https://refract-org.github.io/refract/quickstart/) for a full walkthrough.
+
+The [source-review workflow](https://refract-org.github.io/refract/review/) is
+unreleased in npm 0.5.17 and requires a core source build. The review and
+history-range pages read `docs/review.md` and `docs/usage.md` at the repository
+root directly. Edit those canonical sources to change the published guides.
 
 ## Packages
 

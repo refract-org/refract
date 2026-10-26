@@ -99,7 +99,7 @@ describe("docs claim audit e2e", () => {
 		const css = await readFile(join(DIST_DIR, "style.css"), "utf-8");
 
 		expect(html.match(/class="feature-card"/g) ?? []).toHaveLength(6);
-		expect(html.match(/class="usecase-card"/g) ?? []).toHaveLength(6);
+		expect(html.match(/class="usecase-card"/g) ?? []).toHaveLength(3);
 		expect(html.match(/class="column-card /g) ?? []).toHaveLength(2);
 		expect(css).toContain(".features-grid");
 		expect(css).toContain("grid-template-columns");

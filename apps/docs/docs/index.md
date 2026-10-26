@@ -1,167 +1,99 @@
-# Refract: deterministic observation engine for revision histories
+# Refract gives mutable knowledge a memory
 
-**Refract reveals how claims change across public revision histories — and gives AI researchers reproducible evidence for model evaluation.**
+Refract records how public knowledge changes across available revision histories. Inspect changed wording, removed citations, and returned text with the source revisions behind each observation.
 
-```bash
-npx @refract-org/cli analyze "Earth" --depth brief
-```
+It is a temporal observability layer for knowledge. Its deterministic engine reconstructs events from revision traces; your review process decides what those changes mean.
 
 <div class="hero-links">
-  <a href="demo/" class="button primary">Demo</a>
-  <a href="quickstart/" class="button secondary">Quick start</a>
+  <a href="demo/" class="button primary">See a captured example</a>
+  <a href="quickstart/" class="button secondary">Analyze a history</a>
+  <a href="review/" class="button secondary">Review a watchlist</a>
 </div>
 
-Node.js 20+ or Bun 1.2+ · Git 2.x · Any MediaWiki instance
+## Start with one change
 
-Refract reads a page's revision history and emits a typed event for each change it finds: sentences first seen, modified, removed or reintroduced; citations added, removed or replaced; template, link, category and section changes; reverts; talk page activity.
+This bounded Wikipedia example compares two Bitcoin revisions from 2010 using the published CLI. It prints one event per line as NDJSON:
 
-## Features
+```bash
+npx @refract-org/cli@0.5.17 analyze "Bitcoin" --from 369361755 --to 369393212 --depth detailed --json
+```
+
+Look for `citation_removed`, then inspect its `before`, `after`, and revision IDs. A removed reference is an observation; whether it changes your use of the source is a separate decision.
+
+For repeated review, [review a watchlist](review.md) from a source build. Refract remembers the last revision you explicitly acknowledged. That command is unreleased in the npm version used above.
+
+## What you receive
 
 <div class="features-grid">
   <div class="feature-card">
-    <h3>Deterministic</h3>
-    <p>The same revisions produce byte-identical events on every run. No model is called.</p>
+    <h3>Changed text</h3>
+    <p>Sentence observations include the wording before and after the transition.</p>
   </div>
   <div class="feature-card">
-    <h3>Provenance-tagged</h3>
-    <p>Every event carries revision, section, timestamp, and analyzer identity.</p>
+    <h3>Source changes</h3>
+    <p>Citation events identify references added, removed, or replaced.</p>
   </div>
   <div class="feature-card">
-    <h3>BYO-inference boundaries</h3>
-    <p>Every threshold is a configurable boundary. Plug a model where you need one; defaults run offline.</p>
+    <h3>Revision context</h3>
+    <p>Events carry revision identifiers, sections, timestamps, and analyzer provenance.</p>
   </div>
   <div class="feature-card">
-    <h3>26 event types</h3>
-    <p>Sentence lifecycles, citations, reverts, talk pages, protection levels, and edit clusters.</p>
+    <h3>Repeatable observations</h3>
+    <p>The same captured inputs, analyzer versions, and configuration produce the same observations. Export metadata can vary.</p>
   </div>
   <div class="feature-card">
-    <h3>Hash-verifiable exports</h3>
-    <p>Evidence bundles carry a SHA-256 hash and replay manifests a Merkle root, so a recipient can check that events were not altered.</p>
+    <h3>Files for your tools</h3>
+    <p>Export NDJSON for a notebook, SQL query, browser viewer, or downstream review process.</p>
   </div>
   <div class="feature-card">
-    <h3>MCP server</h3>
-    <p><code>refract mcp</code> serves six tools — analyze, claim, export, cron, classify and get_statement_history — to any MCP client over stdio.</p>
+    <h3>Inspectable history</h3>
+    <p>Follow the analyzed revision span. Hash verification checks record consistency; it does not establish complete coverage or authenticate a source.</p>
   </div>
 </div>
 
-## Quick start
-
-```bash
-# 1. Analyze a page
-npx @refract-org/cli analyze "Earth" --depth brief
-
-# 2. Explore results in the web UI
-refract explore "Earth"
-
-# 3. Connect an AI agent
-refract mcp
-
-# 4. Export as structured data
-refract export "Earth" --format ndjson > earth-events.jsonl
-
-# 5. Save an evidence bundle (revisions, events and a SHA-256 hash)
-refract export "Earth" --bundle > earth-bundle.json
-
-# 6. Output an ObservationReport with claim lifecycle
-refract analyze "Earth" --report > earth-report.json
-```
-
-<div class="split-columns">
-  <div class="column-card focus">
-    <h4>What Refract is</h4>
-    <ul>
-      <li><strong>Deterministic:</strong> The same input gives the same output.</li>
-      <li><strong>Provenance-tagged:</strong> Identifies source revision, timestamp, and analyzer version.</li>
-      <li><strong>Verifiable:</strong> Replay manifests carry a Merkle root over the event hashes.</li>
-      <li><strong>Open layer:</strong> A raw observation feed designed for downstream processing.</li>
-    </ul>
-  </div>
-  <div class="column-card out-of-scope">
-    <h4>What Refract is not</h4>
-    <ul>
-      <li><strong>No model interpretation:</strong> Does not decide semantic meaning or intent.</li>
-      <li><strong>No truth claims:</strong> Observes <em>what</em> changed, not <em>which</em> version is correct.</li>
-      <li><strong>No editor profiles:</strong> Does not rank, grade, score, or track editors.</li>
-      <li><strong>No policy judgments:</strong> Leaves decision relevance and rules to downstream tools.</li>
-    </ul>
-  </div>
-</div>
-
-## By use case
+## Choose a workflow
 
 <div class="usecase-grid">
   <div class="usecase-card">
-    <h3>Journalist / Researcher</h3>
-    <p>Trace claim evolution and sources across revision history.</p>
-    <div class="usecase-steps">
-      <a href="demo/">Demo</a> → <a href="quickstart/">Quick start</a> → <a href="tutorials/wikipedia-history/">Wikipedia history</a>
-    </div>
+    <h3>Review sources you revisit</h3>
+    <p>Inspect pending changes since your last acknowledgment. Keep fetched progress separate from reviewed progress.</p>
+    <div class="usecase-steps"><a href="review/">Source-build review guide</a></div>
   </div>
   <div class="usecase-card">
-    <h3>Data scientist / OSINT</h3>
-    <p>Extract NDJSON events and run columnar SQL analysis in DuckDB.</p>
-    <div class="usecase-steps">
-      <a href="tutorials/python-sdk/">Python SDK</a> → <a href="python-sdk/">SDK reference</a> → <a href="notebooks/">Notebooks</a>
-    </div>
+    <h3>Inspect an earlier record</h3>
+    <p>Find a revision at or before a date, or compare a bounded span of revisions.</p>
+    <div class="usecase-steps"><a href="quickstart/">Quick start</a> · <a href="cli/#refract-snapshot">Snapshot command</a></div>
   </div>
   <div class="usecase-card">
-    <h3>ML / RAG engineer</h3>
-    <p>Score retrieved texts by stability and provenance quality indicators.</p>
-    <div class="usecase-steps">
-      <a href="tutorials/rag-provenance/">RAG provenance</a> → <a href="tutorials/python-sdk/">Python SDK</a> → <a href="tutorials/byo-inference/">BYO-inference</a>
-    </div>
-  </div>
-  <div class="usecase-card">
-    <h3>Policy / Compliance</h3>
-    <p>Re-check pages on a schedule and send Slack, email or webhook notifications.</p>
-    <div class="usecase-steps">
-      <a href="tutorials/scheduled-monitoring/">Monitoring</a> → <a href="cli/">CLI cron</a> → <a href="tutorials/citation-churn/">Citation churn</a>
-    </div>
-  </div>
-  <div class="usecase-card">
-    <h3>AI agent developer</h3>
-    <p>Give agents Refract's tools through the built-in MCP server.</p>
-    <div class="usecase-steps">
-      <a href="tutorials/mcp-agent/">MCP tutorial</a> → <a href="mcp/">MCP reference</a> → <a href="tutorials/byo-inference/">BYO-inference</a>
-    </div>
-  </div>
-  <div class="usecase-card">
-    <h3>AI model evaluator</h3>
-    <p>Test for temporal leakage and recency cutoffs against revision histories.</p>
-    <div class="usecase-steps">
-      <a href="tutorials/model-evaluation/">Model evaluation</a> → <a href="tutorials/rag-provenance/">RAG provenance</a> → <a href="frontier-use-cases/">Frontier use cases</a>
-    </div>
+    <h3>Use changes as data</h3>
+    <p>Select events such as removed citations and inspect their source context in your own tools.</p>
+    <div class="usecase-steps"><a href="integrations/">Data integrations</a> · <a href="mcp/">MCP access</a></div>
   </div>
 </div>
 
-## Ecosystem
+## Scope
 
-Refract is one tool in a family of three:
+<div class="split-columns">
+  <div class="column-card focus">
+    <h4>Available revision histories</h4>
+    <p>The CLI fetches Wikipedia and compatible MediaWiki histories. Library consumers can supply versioned text through the shared revision model.</p>
+  </div>
+  <div class="column-card out-of-scope">
+    <h4>Observation limits</h4>
+    <p>An arbitrary web URL does not supply a revision history. First observed means first in the analyzed range. Wording changes alone do not establish a dispute or whether a statement is supported.</p>
+  </div>
+</div>
 
-| Tool | What it does | Install |
-|------|-------------|---------|
-| **Refract** | CLI + TypeScript SDK — the deterministic observation engine | `npm install -g @refract-org/cli` |
-| **[Python SDK](python-sdk)** | Typed Python wrapper — pandas DataFrames, notebooks, LangChain | `pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"` |
-| **[Refract UI](visualizer)** | Browser visualizer — drag-and-drop JSONL, timelines, word-level diffs | `cd apps/ui && bun run dev` in the Refract repository |
+## One repository, optional interfaces
 
-A typical workflow: **analyze** with Refract, **export** as NDJSON, then explore in Python or the UI.
+| Interface | Use it for |
+|-----------|------------|
+| [CLI and libraries](sdk.md) | Fetch, compare, review, and export source histories; use the built-in explorer |
+| [Browser viewer](visualizer.md) | Inspect an exported NDJSON event file locally |
+| [Python adapter](python-sdk.md) | Call the CLI from notebooks and read events as dataclasses or DataFrames |
 
-<p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 1rem;">
-  <strong>Other pathways:</strong> 
-  System Integrators (<a href="sdk/">SDK Reference</a> · <a href="downstream/">Production DDL</a> · <a href="tutorials/private-wiki/">Private Wikis</a>) · 
-  Engine Contributors (<a href="tutorials/custom-analyzer/">Custom Analyzer</a> · <a href="tutorials/custom-eval/">Custom Eval</a> · <a href="architecture-decisions/">Architecture Decisions</a>)
-</p>
-
-## Further uses
-
-Tutorials, and a longer list of use cases, built on the event stream:
-
-| Capability | Read |
-|---|---|
-| **Claim-level search** | [Frontier use cases](frontier-use-cases.md) — Search claim histories, not documents. "Claims removed as unsourced." "Claims that softened after events." |
-| **LLM summarization** | [Summarization tutorial](tutorials/summarization.md) — Pipe events through any model. Get human-readable change reports with audit trail. |
-| **Non-Wikipedia sources** | [Custom adapter tutorial](tutorials/custom-adapter.md) — Confluence, GitHub wikis, Notion. Same analyzers, different data. |
+All three live in [the Refract repository](https://github.com/refract-org/refract). Event contracts and reproducible examples are maintained with the engine. The public [review](review.md) and [history-range](usage.md) pages are built directly from those core guides.
 
 ## License
 
-AGPL-3.0. Built and maintained by [NextConsensus](https://nextconsensus.com).
+The engine is AGPL-3.0. This site's original documentation is CC-BY-4.0; included core guides retain their source license. Built and maintained by [NextConsensus](https://nextconsensus.com).

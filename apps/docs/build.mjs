@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { realpathSync } from "node:fs";
 import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
-import { basename, dirname, join, posix } from "node:path";
+import { basename, dirname, join, posix, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { marked } from "marked";
 import { CARD_HEIGHT, CARD_WIDTH, renderSocialCard } from "./social-card.mjs";
@@ -18,8 +18,16 @@ const SITE_URL = (
 ).replace(/\/?$/, "/");
 const SITE_NAME = "Refract";
 const SITE_DESCRIPTION =
-	"A deterministic observation engine for revision histories. It reads a page's edits and emits a typed event for each change.";
+	"Refract gives mutable knowledge a memory. Inspect changed wording and citations across available source revision histories.";
 const SOURCE_REPOSITORY = "https://github.com/refract-org/refract";
+const REPO_DIR = resolve(__dirname, "../..");
+const CANONICAL_PAGES = {
+	review: "docs/review.md",
+	usage: "docs/usage.md",
+};
+export const CORE_ASSETS = {
+	"core-onboarding.svg": "docs/examples/onboarding.svg",
+};
 // One Open Graph card for every page, rendered at build time from the name
 // and description above.
 const SOCIAL_CARD_FILE = "social-card.png";
@@ -297,7 +305,7 @@ function wrapHTML(title, description, content, currentSlug, headings = []) {
     <aside class="sidebar">
       <div class="sidebar-header">
         <a href="${BASE}" class="brand">Refract</a>
-        <p class="tagline">A deterministic observation engine<br>for revision histories.</p>
+        <p class="tagline">Memory for changing<br>source records.</p>
         <div class="sidebar-search">
           <button class="search-trigger" id="search-trigger" aria-label="Search documentation">
             <svg class="search-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -657,6 +665,27 @@ export function rewriteLink(href, sourceDir = "") {
 	return `${slugHref(slug || "index")}${suffix}`;
 }
 
+// Core guides retain repository-relative links. Only mapped pages become site
+// routes; source files and captured artifacts keep their repository addresses.
+export function rewriteCanonicalLink(href, sourcePath) {
+	if (
+		!href ||
+		/^[a-z][a-z\d+.-]*:/i.test(href) ||
+		href.startsWith("#") ||
+		href.startsWith("/")
+	)
+		return href;
+	const [, path = "", suffix = ""] = href.match(/^([^?#]*)([?#].*)?$/) ?? [];
+	if (!path) return href;
+	const target = posix.normalize(posix.join(posix.dirname(sourcePath), path));
+	const entry = Object.entries(CANONICAL_PAGES).find(
+		([, source]) => source === target,
+	);
+	return entry
+		? `${slugHref(entry[0])}${suffix}`
+		: `${SOURCE_REPOSITORY}/blob/main/${target}${suffix}`;
+}
+
 async function collectFiles(dir, base = "") {
 	const entries = await readdir(dir, { withFileTypes: true });
 	const files = [];
@@ -689,16 +718,24 @@ async function build() {
 	const fallbackPages = [];
 	const renderer = new marked.Renderer();
 	let currentSourceDir = "";
+	let currentCanonicalSource;
 	let currentHeadingCounts = new Map();
 	let currentHeadings = [];
 
 	renderer.link = ({ href, title, text }) => {
-		const h = rewriteLink(href, currentSourceDir);
+		const h = currentCanonicalSource
+			? rewriteCanonicalLink(href, currentCanonicalSource)
+			: rewriteLink(href, currentSourceDir);
 		const t = title ? ` title="${title}"` : "";
 		return `<a href="${h}"${t}>${text}</a>`;
 	};
 	renderer.image = ({ href, title, text }) => {
-		const h = rewriteLink(href, currentSourceDir);
+		const h = currentCanonicalSource
+			? rewriteCanonicalLink(href, currentCanonicalSource).replace(
+					`${SOURCE_REPOSITORY}/blob/`,
+					"https://raw.githubusercontent.com/refract-org/refract/",
+				)
+			: rewriteLink(href, currentSourceDir);
 		const t = title ? ` title="${title}"` : "";
 		return `<img src="${h}" alt="${text}"${t}>`;
 	};
@@ -723,12 +760,21 @@ async function build() {
 	marked.use({ gfm: true, breaks: false });
 
 	for (const file of files) {
-		const raw = await readFile(file.path, "utf-8");
+		currentCanonicalSource = CANONICAL_PAGES[file.slug];
+		const raw = await readFile(
+			currentCanonicalSource
+				? join(REPO_DIR, currentCanonicalSource)
+				: file.path,
+			"utf-8",
+		);
 		currentSourceDir = dirname(file.slug);
 		if (currentSourceDir === ".") currentSourceDir = "";
 		currentHeadingCounts = new Map();
 		currentHeadings = [];
-		const body = marked.parse(raw, { renderer });
+		const sourceNote = currentCanonicalSource
+			? `<p>Source guide: <a href="${SOURCE_REPOSITORY}/blob/main/${currentCanonicalSource}">${currentCanonicalSource}</a>. This guide retains the core repository's license.</p>`
+			: "";
+		const body = marked.parse(raw, { renderer }) + sourceNote;
 		const tokens = marked.lexer(raw);
 		const title = pageTitle(tokens, file.slug);
 		// The home page keeps the site-wide positioning line.
@@ -772,6 +818,9 @@ async function build() {
 		}),
 	);
 
+	for (const [name, source] of Object.entries(CORE_ASSETS)) {
+		await cp(join(REPO_DIR, source), join(DIST_DIR, name));
+	}
 	for (const asset of assets) {
 		const dest = join(DIST_DIR, asset.rel);
 		await mkdir(dirname(dest), { recursive: true });

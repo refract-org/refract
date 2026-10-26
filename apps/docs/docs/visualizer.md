@@ -1,6 +1,6 @@
 # Refract UI — Visualizer
 
-Standalone web app for exploring Refract observation data. Load any JSONL file of Refract events and see timelines, word-level diffs, citation graphs, and event-type breakdowns. No backend, no server, no data leaves your machine.
+Browser-only app for exploring exported Refract event lines. The file is read in your browser; the viewer does not fetch source histories or send uploaded data to a backend. Evidence bundles and saved review reports are separate formats.
 
 ![Refract UI: timeline, word-level diff, and citation panels](assets/refract-ui-screenshot.png)
 
@@ -19,10 +19,11 @@ Open `http://localhost:5173`. Sample data loads immediately. Drag your own `.jso
 ## Generate data to visualize
 
 ```bash
-refract analyze "Bitcoin" --depth forensic --format ndjson > bitcoin-events.jsonl
+refract export "Bitcoin" --from 369361755 --to 369393212 --format ndjson > bitcoin-events.ndjson
 ```
 
-Use `--depth forensic` for the full 26 event types.
+The bounds select a two-revision span. The event types depend on the analyzers
+and available inputs; choosing a depth does not ensure every type appears.
 
 ## Panels
 
@@ -48,7 +49,7 @@ Revert clusters, edit velocity per day, and talk page activity timeline.
 
 ### Language Changes
 
-Card grid of wording events — claims reworded, strengthened, softened, or removed.
+Card grid of sentence observations — first seen, modified, removed, or reintroduced.
 
 ### Schema Inspector
 

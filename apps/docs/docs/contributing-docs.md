@@ -13,6 +13,15 @@ and process for improving Refract docs.
 | Add a new page | New use case, integration guide, or reference |
 | Improve the build system | build.mjs, CSS, rendering |
 
+## Canonical guides
+
+The review and history-range pages are mapped to the repository root's
+`docs/review.md` and `docs/usage.md` in `build.mjs`. Their local Markdown files
+are pointers for contributors. The site renders, indexes, and links the core
+sources directly. Keep command behavior and coverage requirements in those
+canonical guides. The demo illustration is copied from `docs/examples/onboarding.svg`;
+regenerate it with the core capture script.
+
 ## Repository structure
 
 ```
@@ -78,18 +87,17 @@ The build script copies `assets/` into `dist/` so relative paths work.
 ## Adding a new page
 
 1. Create `docs/<slug>.md` with the page content
-2. Add the page to the `NAV` array in `build.mjs`:
-   ```javascript
+2. Add the page to `docs/nav.json`:
+   ```json
    {
-     title: 'Appendix',
-     slug: null,
-     children: [
-       // ... existing entries ...
-       { title: 'Your New Page', slug: 'your-new-page' },
-     ],
-   },
+     "title": "Appendix",
+     "slug": null,
+     "children": [
+       { "title": "Your New Page", "slug": "your-new-page" }
+     ]
+   }
    ```
-3. Run `npm run build` to verify
+3. Run `bun run build` to verify
 4. Open a PR
 
 ## Diagram style
@@ -114,7 +122,7 @@ A good tutorial:
 ## Build and preview
 
 ```bash
-npm run build        # Build static site to dist/
+bun run build        # Build static site to dist/
 ```
 
 The site is plain HTML — open `dist/index.html` in a browser, or serve with any static

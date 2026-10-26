@@ -18,6 +18,8 @@ Use `analyze` when you need those additional observations.
 The new command requires a source build until it ships in an npm release:
 
 ```bash
+git clone https://github.com/refract-org/refract.git
+cd refract
 bun install --frozen-lockfile
 bun run build
 refract() { node packages/cli/dist/src/cli.js "$@"; }

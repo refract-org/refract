@@ -130,4 +130,4 @@ should have been detected or a citation change should have been classified as
 "replaced." Synthetic data gives us controlled, hand-labeled ground truth for every
 event. It also avoids licensing and attribution issues when publishing benchmark data.
 
-The synthetic pages are available in [refract-demo-data](https://github.com/refract-org/refract-demo-data).
+The datasets are maintained in the core repository's [demo-data directory](https://github.com/refract-org/refract/tree/main/demo-data).

@@ -9,6 +9,9 @@ on:
     branches: [main]
     paths:
       - apps/docs/**
+      - docs/**
+      - package.json
+      - bun.lock
       - .github/workflows/docs-deploy.yml
   workflow_dispatch:
 

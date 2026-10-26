@@ -5,7 +5,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { marked } from "marked";
 import { beforeAll, describe, expect, it } from "vitest";
-import { rewriteLink } from "../build.mjs";
+import { CORE_ASSETS, rewriteLink } from "../build.mjs";
 
 const ROOT_DIR = resolve(__dirname, "..");
 const DOCS_DIR = join(ROOT_DIR, "docs");
@@ -137,6 +137,11 @@ function checkLink(
 	);
 	if (isAssetExtension) {
 		const assetName = basename(pathPart);
+		const coreAsset = CORE_ASSETS[assetName as keyof typeof CORE_ASSETS];
+		if (coreAsset) {
+			const assetPath = resolve(ROOT_DIR, "../..", coreAsset);
+			return { isValid: existsSync(assetPath), resolvedPath: assetPath };
+		}
 		const assetPath = join(ROOT_DIR, "assets", assetName);
 		if (existsSync(assetPath)) {
 			return { isValid: true, resolvedPath: assetPath };

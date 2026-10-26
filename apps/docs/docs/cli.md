@@ -2,6 +2,9 @@
 
 All commands work with `wikihistory` as a backward-compatible alias (e.g., `wikihistory analyze`).
 
+The tables describe published CLI 0.5.17. See the source-build guides for newer
+review, coverage, and explorer-range behavior.
+
 ## `refract init`
 
 Onboarding — runs a quick analysis and shows what Refract can do.
@@ -10,9 +13,16 @@ Onboarding — runs a quick analysis and shows what Refract can do.
 refract init
 ```
 
-Fetches recent revisions of "Earth," runs the section differ, and prints next steps:
-analyze, explore, claim, snapshot, monitor, mcp. No flags needed — a zero-config
-first experience.
+The published version runs a short live analysis. In the core source build,
+`init` uses a bundled fictional library history without fetching a source;
+`--json` prints its computed events as NDJSON.
+
+### Source-build review workflow
+
+`refract review` keeps fetched and acknowledged revisions separate. Its flags,
+saved-report format, and coverage requirements are maintained in
+[Review your sources](review.md), built directly from the core guide. This
+command is unreleased in npm version 0.5.17.
 
 ## `refract analyze`
 

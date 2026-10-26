@@ -1,91 +1,58 @@
 # Quick start
 
-## Prerequisites
+Compare two source revisions, inspect the observations, and save events for your tools. This walkthrough uses published CLI version 0.5.17. The unreleased [review workflow](review.md) has separate source-build instructions.
 
-- [Node.js](https://nodejs.org) 20+ or [Bun](https://bun.sh) v1.2+ runtime
-- Internet connection (for fetching revision data from Wikimedia)
+## Install
 
-See [installation](install.md) for all options (npx, npm, bun, Docker, from source).
-
-## Install the CLI
-
-**Zero install** (no download needed):
+Use Node.js 20+ and npm:
 
 ```bash
-npx @refract-org/cli analyze "Earth" --depth brief
+npm install -g @refract-org/cli@0.5.17
+refract --version
 ```
 
-**Or install locally:**
+Fetching Wikipedia histories requires an internet connection. You can also run a command with `npx @refract-org/cli@0.5.17` without a global installation; npx downloads the package when needed. See [installation](install.md) for other options.
+
+## Compare a known span
 
 ```bash
-bun add -g @refract-org/cli
-refract analyze "Earth" --depth brief
+refract analyze "Bitcoin" --from 369361755 --to 369393212 --depth detailed --json
 ```
 
-(`wikihistory` also works as an alias.)
+These two revisions are from 2010-06-21. Look for `citation_removed`: inspect `before`, `after`, `fromRevisionId`, and `toRevisionId`, then compare the [source revisions](https://en.wikipedia.org/w/index.php?title=Bitcoin&diff=369393212&oldid=369361755). The observation records a removed reference; it does not explain the editor's reason.
 
-See [installation](install.md) for all options (bun, npm, Docker, from source).
+`--json` prints one event per line as NDJSON. In an interactive terminal, analysis without it opens the local explorer when there are events. `--depth brief` fetches the latest 20 revisions by default; detailed and forensic analysis can fetch the full history unless you provide bounds. Depth selects analyzers, while `--from`, `--to`, and `--since` scope the history.
 
-## Your first analysis
+## Browse the observations
+
+The CLI includes a local explorer via `refract explore "Bitcoin"`. The published version fetches its own history window; the source build adds `--from`, `--to`, and `--depth` to reuse the bounds above. To inspect this exact export with the published version, use the file viewer in the next step.
+
+## Save events
 
 ```bash
-refract analyze "Earth"
+refract export "Bitcoin" --from 369361755 --to 369393212 --format ndjson > bitcoin-events.ndjson
 ```
 
-By default, this fetches up to 20 recent revisions of the Wikipedia page "Earth" and runs the standard detailed-depth analyzers (section changes, citation changes, revert detection, template changes). Use `--depth forensic` for all 26 event types. Use `--from` and `--to` to scope to a specific revision range.
+Open this file in your data tools or the [browser viewer](visualizer.md). The viewer accepts event lines, rather than evidence bundles or saved review reports.
 
-Output is printed to stdout as structured JSON. Use `--report` to get a structured `ObservationReport` that groups events by claim with a lifecycle ledger. Use `--similarity <n>` to adjust the sentence matching threshold (default 0.8).
-
-## View results in the web UI
+## Inspect an earlier record
 
 ```bash
-refract explore "Earth"
+refract snapshot "Bitcoin" --at "2010-06-21"
 ```
 
-Opens a local web server (default port 8899) with a timeline view, evidence table, and diff viewer — the most user-friendly way to browse results.
+The command finds a revision at or before the date and prints its metadata and a text preview. The preview is truncated at 2,000 characters; use the revision ID to inspect the complete source.
 
-## Saving output
+## Track a passage in a window
 
 ```bash
-refract export "Earth" --format ndjson > earth-events.jsonl
+refract claim "Bitcoin" --text "blockchain" --limit 50
 ```
 
-Use `refract export` to format output as json, csv, ndjson, html, parquet, an evidence bundle with a SHA-256 hash (`--bundle`), or a replay manifest (`--manifest`). Add `--flatten` to produce flat column-oriented CSV suitable for analytical tools.
+This searches the latest 50 fetched revisions. A first match is relative to that window. Matching rules and partial or unavailable text can limit what the result establishes. See [history selection and output](usage.md) for current source-build behavior.
 
-## Try it: trace a claim
+## Continue
 
-Now find when a specific word first appeared and track how it changed:
-
-```bash
-refract claim "Earth" --text "climate" -c
-```
-
-Refract scans every revision for "climate," reports when it was first added, modified, or removed, and summarizes its status (STABLE, REMOVED, CONTESTED). Try a term you expect to be disputed — any word or phrase works.
-
-## View the results visually
-
-The standalone [Refract UI](tutorials/refract-ui.md) loads JSONL output and renders timelines, diffs, citation graphs, and event breakdowns. Export your analysis and drop the file into the browser:
-
-```bash
-refract export "Earth" --format ndjson > earth-events.jsonl
-# then open http://localhost:5173 in Refract UI and drag the file in
-```
-
-See the [Refract UI tutorial](tutorials/refract-ui.md) for the full walkthrough.
-
-## Classify events with a model
-
-```bash
-# Default: mechanical heuristic
-refract classify revert --input '{"comment":"revert vandalism"}'
-
-# With API key: uses configured model
-refract classify revert --input '{"comment":"..."}' --model deepseek-chat
-```
-
-## Next steps
-
-- [Concepts](concepts.md)
-- [CLI reference](cli.md)
-- [Analysis depth levels](depth.md)
-- [Tutorial: Track Wikipedia changes](tutorials/wikipedia-history.md)
+- [Review sources you revisit](review.md) — from a source build
+- [CLI reference](cli.md) — flags and output formats
+- [Data integrations](integrations.md) — use observations in your own process
