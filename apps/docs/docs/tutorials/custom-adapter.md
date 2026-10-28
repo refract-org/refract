@@ -117,7 +117,7 @@ won't be detected. Adapt the preprocessing to match what your analyzers expect.
 ## Contribute an adapter
 
 If you've built an adapter for a common source, contribute it to
-[refract-labs](https://github.com/refract-org/refract-labs) as an experimental
+[the core examples directory](https://github.com/refract-org/refract/tree/main/examples) as an experimental
 probe. Follow the [custom analyzer tutorial](custom-analyzer.md) for the full
 pipeline: adapter → analyzer integration → tests → eval.
 

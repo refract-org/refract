@@ -1,50 +1,76 @@
 # refract-py
 
-Python SDK for [Refract](https://github.com/refract-org/refract) — the open claim-history layer for public knowledge.
-Its source is `clients/python` in the Refract repository.
+Python adapter for [Refract](https://github.com/refract-org/refract), maintained in `clients/python`. The core engine reconstructs observations from source revision histories; this package calls its CLI and parses NDJSON into Python dataclasses or DataFrames.
+
+## Install
 
 ```bash
-pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"  # not on PyPI yet
+pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"
+npm install -g @refract-org/cli@0.5.17
 ```
 
-`git+https://github.com/refract-org/refract-py.git`, the address before the move,
-still installs, but it stays at the last version published there.
+Python 3.10+ and Node.js 20+ are required. The adapter looks for `refract` on PATH, then falls back to `npx @refract-org/cli`, which may download the CLI. Install the CLI explicitly when you need a controlled version. Fetching source histories requires network access.
 
-Requires the [Refract CLI](https://github.com/refract-org/refract):
+For pandas, include the optional dependency:
+
 ```bash
-npm install -g @refract-org/cli
+pip install "refract-py[dataframe] @ git+https://github.com/refract-org/refract.git#subdirectory=clients/python"
 ```
 
-## Usage
+## Inspect a bounded history
 
 ```python
 from refract import Refract
 
 r = Refract()
-
-# Analyze a page, get typed dataclasses
-events = r.analyze("Bitcoin", depth="brief")
+# "from" is a Python keyword, so pass revision bounds through a dictionary.
+bounds = {"from": "369361755", "to": "369393212"}
+events = r.analyze("Bitcoin", depth="detailed", **bounds)
 for event in events:
-    print(event.eventType, event.timestamp)
-
-# Export as pandas DataFrame
-df = r.analyze("Bitcoin", depth="forensic", as_frame=True)
-print(df.groupby("event_type").size())
-
-# Export flattened CSV-compatible rows
-df = r.export("Bitcoin", format="ndjson", flatten=True, as_frame=True)
+    print(event.eventType, event.fromRevisionId, event.toRevisionId)
+    print(event.before, event.after)
 ```
 
-## Integrations
+The kwargs become CLI flags; values should be strings. This span compares two Wikipedia revisions from 2010-06-21. Inspect `citation_removed` and the corresponding source diff. A citation change alone does not establish whether a statement is supported.
 
-| Tool | How |
+Use `Refract(binary="/absolute/path/to/refract")` to select an installed CLI. A built core entry point also works: `Refract(binary="/absolute/path/to/refract/packages/cli/dist/src/cli.js")` runs it with Node.
+
+## Work with rows
+
+```python
+df = r.analyze("Bitcoin", depth="detailed", as_frame=True, **bounds)
+print(df.groupby("event_type").size())
+
+events = r.export("Bitcoin", format="ndjson", **bounds)
+```
+
+`as_frame=True` creates flattened rows with event type, revision IDs, section, timestamp, event ID, schema version, and the first fact's analyzer metadata. An empty result has no rows and may have no columns. The dataclasses expose selected event fields; they do not retain every enrichment field from the original NDJSON. Keep the original CLI export when you need the complete record.
+
+## Review workflow
+
+The unreleased core `review` command has a separate saved-report format and acknowledgment loop. This adapter currently wraps `analyze` and `export`; it does not provide a review method. Use the CLI and the [review guide](https://refract-org.github.io/refract/review/) for that workflow.
+
+`RefractError` is raised for nonzero CLI exits. An analysis event list alone does not describe complete source coverage. For coverage-sensitive review, retain and inspect the core review report instead.
+
+## Data integrations
+
+| Tool | Interface |
 |---|---|
-| **pandas** | `as_frame=True` returns DataFrames with flattened provenance fields |
-| **Jupyter** | Analyze pages, plot citation churn, export findings — all from a notebook |
-| **LangChain** | `refract_langchain.py` loads events as `Document` objects with stability metadata for provenance-aware RAG |
-| **DuckDB** | Export as NDJSON, query with SQL: `SELECT * FROM 'events.jsonl'` |
+| pandas / Jupyter | Dataclasses and flattened DataFrames from the methods above |
+| DuckDB | Read original CLI NDJSON with `SELECT * FROM read_json_auto('events.ndjson')` |
+| Browser viewer | Open original CLI NDJSON in [apps/ui](../../apps/ui/README.md) |
 
-See the [Python SDK tutorial](https://refract-org.github.io/refract/tutorials/python-sdk/) and [integrations docs](https://refract-org.github.io/refract/integrations/) for full workflows.
+Event contracts and captured examples live with the engine in this repository. The former `refract-py.git` installation URL stays at its archived version; use the subdirectory target above for current development.
+
+## Development
+
+```bash
+python -m pip install -e . pytest hatch
+python -m pytest tests/ -v
+hatch build
+```
+
+Build the core CLI at the repository root before running contract tests, or set `REFRACT_CLI` to a built `cli.js`. CI tests the installed wheel on Python 3.10 and 3.12 against the CLI built from the same commit.
 
 ## License
 

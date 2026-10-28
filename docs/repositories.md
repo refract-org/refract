@@ -21,16 +21,18 @@ into `apps/docs/`, `apps/ui/` and `clients/python/` with their history.
 refract-docs now publishes only a redirect site, which sends each
 `/refract-docs/` page to the same page under `/refract/`.
 
-This inventory was checked on 2026-10-12. The organization has no current
+This inventory was checked on 2026-10-26. All three former supporting repos are
+archived; active development is in this repository. The organization has no current
 `refract-labs` or `refract-demo-data` repository. Datasets live in `demo-data/`;
 runnable onboarding and review examples live in `docs/examples/`.
 
-## Fix drift before moving files
+## Keep shared contracts in one place
 
-Engine behavior and file formats belong in the core. The public site should link
-to the [review contract](./review.md) and explain how to use it, rather than maintain
-a second specification. Distinguish published CLI behavior from source-build
-features on every entry page.
+Engine behavior and file formats belong in the core. The public review and
+history-range pages render `docs/review.md` and `docs/usage.md` directly, with
+repository-relative links resolved to mapped site routes or source files. Edit
+those canonical guides to update the site. Distinguish published CLI behavior
+from source-build features on every entry page.
 
 Keep sample revisions and their computed output together in the core. Regenerate
 with the capture scripts; `bun run check:examples` checks that saved output still
@@ -71,8 +73,8 @@ opens a previously exported file without fetching that source.
 Keep the npm workspace list explicit. Moving a private application into the
 repository must not add it to the published package set. Python packaging stays
 under Hatch and retains the `refract` import and existing subprocess behavior.
-The site may retain its npm lockfile until a separate package-manager change is
-tested; repository consolidation does not require a simultaneous toolchain move.
+The docs site and viewer use the root Bun workspace and lockfile. Python retains
+its own package build outside that workspace.
 
 ## Migration sequence
 
@@ -84,7 +86,9 @@ tested; repository consolidation does not require a simultaneous toolchain move.
    *Status:* history imported (#37); lint, tests and build run in `docs-site.yml`;
    `docs-deploy.yml` publishes to `/refract/`, and refract-docs serves a page at
    every old path that redirects to the new one, plus copies of the old images
-   and a catch-all for anything else. Reference pages are not yet mapped to `docs/`.
+   and a catch-all for anything else. Review and history-range pages now read
+   their canonical `docs/` sources; the demo illustration comes from the core's
+   checked example output.
 2. **Move the viewer.** Import its history under `apps/ui/`, preserve its
    license, and keep its browser-only operation. Replace independently
    maintained event lists with a checked schema fixture or type-only adapter;
@@ -112,6 +116,8 @@ tested; repository consolidation does not require a simultaneous toolchain move.
    destinations, preserve tags and history, and transfer open issues. Archive
    only after installs, deployments, and links have been verified. Preserve any
    required redirect-only Pages deployment.
+   *Status:* all three old repositories are archived. The docs repository
+   retains its redirect site, and historical installation URLs remain available.
 
 Each move should be a separate PR with before/after build evidence.
 

@@ -8,6 +8,8 @@
 			{ "title": "Compare to alternatives", "slug": "compare" },
 			{ "title": "Demo", "slug": "demo" },
 			{ "title": "Quick start", "slug": "quickstart" },
+			{ "title": "Review your sources", "slug": "review" },
+			{ "title": "History ranges and output", "slug": "usage" },
 			{ "title": "Common events", "slug": "quickstart-events" },
 			{ "title": "Complete workflow", "slug": "complete-workflow" },
 			{ "title": "Install", "slug": "install" },

@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - apps/docs/**
+      - docs/**
       - package.json
       - bun.lock
       - .github/workflows/docs-site.yml
@@ -15,6 +16,7 @@ on:
     branches: [main]
     paths:
       - apps/docs/**
+      - docs/**
       - package.json
       - bun.lock
       - .github/workflows/docs-site.yml
