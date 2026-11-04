@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **`publish.yml` waits for each package to reach installers before publishing the next.** During the 0.6.0 publish, `ingestion` 0.3.4 appeared on the registry before the `evidence-graph` 0.5.3 it requires, and a clean `npm install @refract-org/cli` failed with ETARGET until the two matched. Each new version must now appear in both forms of its packument that installers read. One that does not appear within 10 minutes counts as a failure and holds back the packages that depend on it. The job's time limit rises from 30 to 75 minutes to fit these waits.
+
 ## 0.6.0 (2026-11-04)
 
 ### Fixed
