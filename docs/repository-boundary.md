@@ -1,6 +1,6 @@
 # Repository Boundary
 
-Refract gives mutable knowledge a memory through temporal observability for
+Refract provides temporal observability for
 MediaWiki and other available revision histories. It derives observations of
 changes across time, anchored to source revisions. Domain-specific interpretation
 belongs in downstream applications.

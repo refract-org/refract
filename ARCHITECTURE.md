@@ -1,7 +1,7 @@
 # Architecture: Two-Knowledge-Split Design
 
-Refract gives mutable knowledge a memory. It provides temporal observability
-for knowledge by deriving structured, provenance-tagged observations from
+Refract is a git log for Wikipedia and other MediaWiki wikis. It derives
+structured, provenance-tagged observations from
 available revision histories. The observation pipeline uses deterministic rules
 and makes no model calls; downstream applications interpret the observations.
 

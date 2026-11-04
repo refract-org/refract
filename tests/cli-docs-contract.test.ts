@@ -73,6 +73,14 @@ describe("the npm README covers the CLI", () => {
   });
 });
 
+describe("the MCP npm README covers the MCP server", () => {
+  it("lists each tool", () => {
+    const readme = read("packages/mcp/README.md");
+    const missing = TOOLS.map((tool) => tool.name).filter((name) => !readme.includes(`| \`${name}\``));
+    expect(missing).toEqual([]);
+  });
+});
+
 describe("the MCP documentation covers the MCP server", () => {
   const toolNames = TOOLS.map((tool) => tool.name).sort();
   const parameters = (tool: (typeof TOOLS)[number]) => Object.keys(tool.inputSchema.properties);

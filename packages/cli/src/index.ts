@@ -65,7 +65,7 @@ export const program = new Command();
 
 program
   .name("refract")
-  .description("Observe how MediaWiki pages change: deterministic events from revision histories")
+  .description("git log for Wikipedia: typed events for changes across MediaWiki revision histories")
   .version(REFRACT_VERSION)
   .addHelpCommand("help [command]", "show help for a specific command")
   .addHelpText(

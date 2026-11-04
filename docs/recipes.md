@@ -188,13 +188,13 @@ After `bun run build`, these commands regenerate the checked-in artifacts:
 
 ```bash
 bun scripts/capture-onboarding.ts
-bun scripts/capture-bitcoin-example.ts
+bun scripts/capture-wiki-examples.ts
 ```
 
 Both use local inputs. Add `--check` to compare the saved artifacts with current
-output without rewriting them. To fetch the two pinned Bitcoin revision pairs
-again, run `bun scripts/capture-bitcoin-example.ts --refresh`; that step requires
-network access.
+output without rewriting them. To fetch the pinned Pluto and Bitcoin revision
+pairs again, run `bun scripts/capture-wiki-examples.ts --refresh`; that step
+requires network access.
 
 ## Next steps
 

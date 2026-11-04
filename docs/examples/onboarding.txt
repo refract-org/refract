@@ -1,5 +1,5 @@
 
-  Refract gives mutable knowledge a memory.
+  Refract is a git log for Wikipedia.
   This offline example uses five fictional revisions of Rivergate Library.
   The text, dates, revision IDs, and reference URL are sample data.
 
@@ -31,8 +31,8 @@
   Changes stay pending until you acknowledge the report.
 
   Then try a real page (requires network access):
-    refract analyze "Bitcoin" --depth brief --json
-  This reads the latest 20 revisions and prints metadata as NDJSON.
+    refract analyze "Pluto" --from 71593165 --to 71593296 --depth detailed --json
+  This prints NDJSON events for one edit made the day Pluto was reclassified.
 
   Track a phrase across recent revisions:
     refract claim "Bitcoin" --text "decentralized" --limit 50

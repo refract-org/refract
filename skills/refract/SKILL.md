@@ -13,7 +13,7 @@ license: AGPL-3.0
 
 # Refract
 
-Deterministic observation engine for revision histories. Evidence, not truth.
+git log for Wikipedia and other MediaWiki wikis.
 It reports what changed; downstream applications decide what matters.
 
 ## Choose a command

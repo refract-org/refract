@@ -4,7 +4,7 @@
   "mcpName": "io.github.refract-org/refract",
   "type": "module",
   "private": false,
-  "description": "CLI for observing claim and evidence changes across public page histories: ingest, diff, timeline, export, visualize, and cache",
+  "description": "git log for Wikipedia: see how a page's sentences, citations, and structure changed, revision by revision",
   "license": "AGPL-3.0",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",

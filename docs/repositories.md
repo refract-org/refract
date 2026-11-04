@@ -144,3 +144,10 @@ At minimum, the contract checks should cover:
 Licenses remain attached to the imported subprojects. Relocation alone does not
 relicense their content. Release names, public import names, and event identifiers
 remain consumer contracts throughout the migration.
+
+## Position in the revisable-delegation loop
+
+Refract holds the **detect mismatch** step in the [STD-07 Revisable Delegation Record](https://ethotechnics.org/standards/std-07-revisable-delegation-record) loop, emitting structured `EvidenceEvent` records over source revisions. It identifies what changed without deciding whether a change matters: downstream consumers supply the predicate and the context. [`refract delegation`](https://refract-org.github.io/refract/cli/#refract-delegation) writes STD-07 discrepancy records for another system to read; you state the subject, the assumption at stake, and which events count.
+
+- **Wired to**: [NextConsensus](https://nextconsensus.com) and [Ambit](https://github.com/zz-plant/ambit) via [`refract-and-nextconsensus.md`](./refract-and-nextconsensus.md) and [`repository-boundary.md`](./repository-boundary.md).
+- **Siblings**: [Ambit](https://github.com/zz-plant/ambit) (capability and authorization), [Whether](https://github.com/zz-plant/whether) (act), [Ethotechnics](https://ethotechnics.org) (the record shape and vocabulary).

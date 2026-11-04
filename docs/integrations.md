@@ -43,7 +43,7 @@ fields. The CLI separately fetches talk-page and page-log metadata. Library
 consumers must supply or process that metadata when they need those observations.
 
 See the [saved Bitcoin revision pairs](./examples/bitcoin-revisions.json) for
-complete input objects and the [capture script](../scripts/capture-bitcoin-example.ts)
+complete input objects and the [capture script](../scripts/capture-wiki-examples.ts)
 for an executable example. Analyze its pairs separately so the gap between them
 does not become an invented transition.
 

@@ -16,7 +16,7 @@ export async function runInit(options: { json?: boolean } = {}): Promise<void> {
   }
 
   console.log();
-  console.log("  Refract gives mutable knowledge a memory.");
+  console.log("  Refract is a git log for Wikipedia.");
   console.log("  This offline example uses five fictional revisions of Rivergate Library.");
   console.log("  The text, dates, revision IDs, and reference URL are sample data.");
   console.log();
@@ -50,8 +50,8 @@ export async function runInit(options: { json?: boolean } = {}): Promise<void> {
   console.log("  Changes stay pending until you acknowledge the report.");
   console.log();
   console.log("  Then try a real page (requires network access):");
-  console.log('    refract analyze "Bitcoin" --depth brief --json');
-  console.log("  This reads the latest 20 revisions and prints metadata as NDJSON.");
+  console.log('    refract analyze "Pluto" --from 71593165 --to 71593296 --depth detailed --json');
+  console.log("  This prints NDJSON events for one edit made the day Pluto was reclassified.");
   console.log();
   console.log("  Track a phrase across recent revisions:");
   console.log('    refract claim "Bitcoin" --text "decentralized" --limit 50');

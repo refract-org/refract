@@ -17,7 +17,7 @@ const ROOT_DIR = resolve(__dirname, "..");
 const DIST_DIR = join(ROOT_DIR, "dist");
 const SITE_URL = "https://refract-org.github.io/refract/";
 const SITE_DESCRIPTION =
-	"Refract gives mutable knowledge a memory. Inspect changed wording and citations across available source revision histories.";
+	"A git log for Wikipedia: see how a page's sentences, citations, and structure changed, revision by revision, as data you can check.";
 // Pages that use the site description: the home page by design, and pages with
 // no prose paragraph to describe them (the build logs these).
 const SITE_DESCRIPTION_PAGES = ["glossary", "index"];
