@@ -49,7 +49,7 @@ jobs:
           node-version: 22
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       # Install the built wheel, not the checkout, so a module left out of the
