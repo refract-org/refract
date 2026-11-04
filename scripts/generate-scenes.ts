@@ -26,7 +26,6 @@ const SCENES: Record<string, SceneSpec> = {
   dark:     { width: 960,  height: 540,  minBytes: 10_000, bg: "#0a0a0a", gradient: true },
   demo:     { width: 720,  height: 405,  minBytes: 12_000, bg: "#1a1a2e", gradient: true },
   email:    { width: 600,  height: 200,  minBytes: 5_000, bg: "#16213e" },
-  favicon:  { width: 64,   height: 64,   minBytes: 600,    bg: "#e94560", scale: 0.95 },
   github:   { width: 1280, height: 640,  minBytes: 15_000, bg: "#1a1a2e", gradient: true },
   header:   { width: 1920, height: 400,  minBytes: 12_000, bg: "#1a1a2e", gradient: true },
   mastodon: { width: 1200, height: 600,  minBytes: 15_000, bg: "#16213e", gradient: true },

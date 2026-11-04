@@ -7,6 +7,7 @@ import type { AuthConfig, RevisionOptions } from "@refract-org/ingestion";
 import { MediaWikiClient } from "@refract-org/ingestion";
 import type { HistoryCoverage } from "../coverage.js";
 import { describeCoverage, formatCoverage } from "../coverage.js";
+import { spinner } from "../render.js";
 import { loadCachedRevisions, saveRevisions } from "./cache.js";
 
 export interface FetchResult {
@@ -39,7 +40,8 @@ export async function fetchRevisionsWithCache(
   if (briefRevisionLimit !== undefined && (!Number.isSafeInteger(briefRevisionLimit) || briefRevisionLimit < 1))
     throw new Error("--brief-limit must be a positive integer.");
   const client = new MediaWikiClient(apiUrl ? { apiUrl, auth } : auth ? { auth } : undefined);
-  console.error(`Analyzing "${pageTitle}" at depth: ${depth}...`);
+  const progress = spinner();
+  progress.start(`Analyzing "${pageTitle}" at depth: ${depth}...`);
 
   let revisions: Revision[] = [];
 
@@ -52,16 +54,22 @@ export async function fetchRevisionsWithCache(
     options.limit = briefRevisionLimit ?? 20;
   }
   const request = { fromRevisionId: fromRevId, toRevisionId: toRevId, since: fromTimestamp, limit: options.limit };
-  // A fixed, continuous range can be reused. Open ranges always check the source.
-  if (useCache && !apiUrl && fromRevId && toRevId && !fromTimestamp) {
-    const cached = (await loadCachedRevisions(pageTitle, 500, cacheDir))
-      .filter((r) => r.revId >= fromRevId && r.revId <= toRevId)
-      .sort((a, b) => a.revId - b.revId);
-    if (describeCoverage(cached, request).status === "complete") revisions = cached;
-  }
-  if (!revisions.length) {
-    revisions = await client.fetchRevisions(pageTitle, options);
-    if (useCache && !apiUrl && revisions.length) await saveRevisions(revisions, cacheDir);
+  try {
+    // A fixed, continuous range can be reused. Open ranges always check the source.
+    if (useCache && !apiUrl && fromRevId && toRevId && !fromTimestamp) {
+      const cached = (await loadCachedRevisions(pageTitle, 500, cacheDir))
+        .filter((r) => r.revId >= fromRevId && r.revId <= toRevId)
+        .sort((a, b) => a.revId - b.revId);
+      if (describeCoverage(cached, request).status === "complete") revisions = cached;
+    }
+    if (!revisions.length) {
+      revisions = await client.fetchRevisions(pageTitle, options);
+      if (useCache && !apiUrl && revisions.length) await saveRevisions(revisions, cacheDir);
+    }
+    progress.land();
+  } catch (err) {
+    progress.stop();
+    throw err;
   }
   const withTs = revisions.map((r) => ({ r, ts: new Date(r.timestamp).getTime() }));
   withTs.sort((a, b) => a.ts - b.ts);

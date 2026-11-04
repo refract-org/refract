@@ -21,7 +21,6 @@ const SPECS: Record<string, Spec> = {
 	dark: { width: 960, height: 540, minBytes: 10_000 },
 	demo: { width: 720, height: 405, minBytes: 12_000 },
 	email: { width: 600, height: 200, minBytes: 5_000 },
-	favicon: { width: 64, height: 64, minBytes: 400 },
 	github: { width: 1280, height: 640, minBytes: 15_000 },
 	header: { width: 1920, height: 400, minBytes: 12_000 },
 	mastodon: { width: 1200, height: 600, minBytes: 15_000 },

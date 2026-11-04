@@ -64,7 +64,6 @@ const SCENES: Record<string, SceneSpec> = {
 		gradient: true,
 	},
 	email: { width: 600, height: 200, minBytes: 5_000, bg: "#16213e" },
-	favicon: { width: 64, height: 64, minBytes: 600, bg: "#e94560", scale: 0.95 },
 	github: {
 		width: 1280,
 		height: 640,

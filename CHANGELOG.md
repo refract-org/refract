@@ -13,12 +13,16 @@
 - **Which monitoring command to use.** `docs/usage.md` compares `review`, `cron`, `watch`, and `stream`; the CLI reference, cron guide, and monitoring tutorial link to it.
 - **`refract --help` starts from questions** and links to the docs. `init` also points at `review`, `claim`, and `snapshot`. The README adds `claim` to its workflows and links the docs site from the top.
 - **Recipes for sharing and checking a result**, covering `export --format html`, `export --proof`, and `verify --html`. The cross-wiki tutorial and CLI reference document `diff --detect-borrowing`, the Python README documents `refract_langchain` and `refract_eval`, and the install guide documents building the Docker image.
+- **A logo, a favicon set, and a loading indicator, drawn from one diagram of a lens focusing rays onto a point.** `assets/brand/` holds the sources, `bun run assets:brand` renders the icons, and `tests/brand-assets.test.ts` fails when a copy falls behind. The viewer, docs site, and social card drop the solid triangle for them, and the README gains the logo.
+- **The viewer shows progress while it reads a file.** A throbber appears when a file or the sample data takes longer than 150 ms, holds still under reduced motion, and keeps moving through a long parse, which now yields every 2,000 lines.
 
 ### Changed
+- **`analyze` shows a throbber on a terminal while it fetches revisions.** The CLI's spinner existed, but nothing called it. Piped output and logs are unchanged.
 - **The docs site moved to https://refract-org.github.io/refract/.** It is built and published from `apps/docs` by `docs-deploy.yml`, so a change to the engine and to its documentation can land in one PR. Every page under the old address, https://refract-org.github.io/refract-docs/, redirects to the same page at the new one, and the old images stay where they were. Canonical URLs, Open Graph tags and the sitemap use the new address, as do the "Next steps" that `refract analyze` prints and the package READMEs.
 - **The apps use the monorepo's tooling.** Their own lockfiles (two `bun.lock`, one `package-lock.json`), `.husky` hooks, `mise.toml` and `prepare: husky` scripts are removed; the root lockfile, hook and toolchain cover them, and each app's `.lintstagedrc.json` still applies to its files. Their `package.json` repository and issue links point at this repository.
 
 ### Removed
+- **The `*-favicon.png` and `*-touch-icon.png` files and the `favicon` asset scene.** The favicons were nearly blank, the touch icons were bad crops of other scenes, and nothing referenced them.
 - **The root `SKILL.md`, `skills/refract/references/cli.md`, and `.github/actions/varia-action`.** `skills/refract/SKILL.md` is now the one agent skill: the two had diverged, and one listed event names renamed long ago and said `npx` was "coming". The action could not run: it points at a `dist/index.js` that was never committed and calls the CLI by its old name.
 
 ### Fixed

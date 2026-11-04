@@ -1,3 +1,4 @@
+import { Throbber } from "./brand/Throbber.js";
 import { CitationChurnChart } from "./citations/CitationChurnChart.js";
 import { SourceChangeTable } from "./citations/SourceChangeTable.js";
 import { EditVelocityChart } from "./disputes/EditVelocityChart.js";
@@ -75,6 +76,11 @@ new ImportUpload(document.getElementById("import-area")!, (events) => {
 });
 
 async function loadSampleData(): Promise<void> {
+	const throbber = new Throbber(
+		document.getElementById("import-status")!,
+		"Loading sample events",
+	);
+	throbber.start();
 	try {
 		const resp = await fetch("/sample-data.jsonl");
 		const text = await resp.text();
@@ -88,6 +94,8 @@ async function loadSampleData(): Promise<void> {
 		updateAll(events);
 	} catch (err) {
 		console.warn("Could not load sample data:", err);
+	} finally {
+		throbber.stop();
 	}
 }
 
