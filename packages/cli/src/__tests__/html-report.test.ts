@@ -26,7 +26,11 @@ const event = (after: string): EvidenceEvent =>
     timestamp: "2026-01-01T00:00:00Z",
   }) as EvidenceEvent;
 
-const inlineScripts = (html: string) => [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((match) => match[1]);
+const inlineScripts = (html: string) =>
+  html
+    .split("<script>")
+    .slice(1)
+    .map((part) => part.split("</script>")[0]);
 
 describe("renderHtmlReport", () => {
   it.each([true, false])("emits an inline script that parses (JSON download: %s)", (showJsonDownload) => {
