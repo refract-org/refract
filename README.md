@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/brand/refract-logo.svg" width="96" alt="">
+
 # Refract
 
 **`git log` for Wikipedia.**

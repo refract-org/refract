@@ -294,7 +294,11 @@ function wrapHTML(title, description, content, currentSlug, headings = []) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeMarkup(documentTitle(title))}</title>
   <link rel="stylesheet" href="${BASE}style.css?v=${ASSET_VERSION}">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><style>path{fill:%2307090f}@media (prefers-color-scheme:dark){path{fill:%23e2e4ed}}</style><path d='M8 2 15 14H1z'/></svg>">
+  <link rel="icon" href="${BASE}favicon.ico" sizes="32x32">
+  <link rel="icon" type="image/svg+xml" href="${BASE}favicon.svg">
+  <link rel="apple-touch-icon" href="${BASE}apple-touch-icon.png">
+  <link rel="manifest" href="${BASE}site.webmanifest">
+  <meta name="theme-color" content="#07090f">
   <meta name="description" content="${escapeMarkup(description)}">
   ${renderSeoHead(title, description, currentSlug)}
 </head>
@@ -304,7 +308,7 @@ function wrapHTML(title, description, content, currentSlug, headings = []) {
   <div class="layout">
     <aside class="sidebar">
       <div class="sidebar-header">
-        <a href="${BASE}" class="brand">Refract</a>
+        <a href="${BASE}" class="brand"><svg class="brand-mark" viewBox="0 0 16 16" aria-hidden="true"><path fill="#7c8aff" d="M3.8 1Q8 8 3.8 15Q-.4 8 3.8 1z"/><path fill="none" stroke="#fb923c" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" d="M7.6 3.8 13.8 8 7.6 12.2"/></svg>Refract</a>
         <p class="tagline">Memory for changing<br>source records.</p>
         <div class="sidebar-search">
           <button class="search-trigger" id="search-trigger" aria-label="Search documentation">

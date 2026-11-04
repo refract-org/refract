@@ -52,7 +52,8 @@
     "prepare": "husky",
     "setup": "mise trust && bun install",
     "assets:check": "bun run scripts/check-assets.ts",
-    "assets:generate": "bun run scripts/generate-scenes.ts"
+    "assets:generate": "bun run scripts/generate-scenes.ts",
+    "assets:brand": "bun run scripts/generate-brand-icons.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.8",
