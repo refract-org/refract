@@ -7,13 +7,13 @@
     "url": "https://github.com/refract-org/refract",
     "source": "github"
   },
-  "version": "0.5.17",
+  "version": "0.6.0",
   "websiteUrl": "https://refract-org.github.io/refract/",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@refract-org/cli",
-      "version": "0.5.17",
+      "version": "0.6.0",
       "transport": {
         "type": "stdio"
       },

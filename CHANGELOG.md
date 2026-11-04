@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.0 (2026-11-04)
 
 ### Fixed
 - **Sentence text no longer includes category tags.** `[[Category:X]]` was left in the stripped text, so its name joined the next sentence, as in `Category:IAU planet debate Pluto is…`. Events for affected sentences differ from earlier versions, and some rewrites near a category tag are now reported as `sentence_first_seen` rather than `sentence_modified`.
