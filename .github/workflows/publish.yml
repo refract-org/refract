@@ -67,10 +67,25 @@ jobs:
           # hand-written and left out @refract-org/mcp, which the CLI imports at
           # startup, so the next CLI would not have installed at all.
           FAILED=""
+          FAILED_NAMES=""
           for pkg in $(bun scripts/check-release.ts --order); do
             echo "::group::Publishing $pkg"
             NAME=$(node -p "require('./$pkg/package.json').name")
             VERSION=$(node -p "require('./$pkg/package.json').version")
+            # A package whose internal dependency just failed would install for
+            # nobody, and once it is `latest` that breaks every new install. Hold
+            # it back, so a partial release leaves the previous version working.
+            BLOCKED=""
+            for dep in $(node -p "Object.keys(require('./$pkg/package.json').dependencies ?? {}).join(' ')"); do
+              case " $FAILED_NAMES " in *" $dep "*) BLOCKED="$dep" ;; esac
+            done
+            if [ -n "$BLOCKED" ]; then
+              echo "::error::Not publishing $NAME@$VERSION: its dependency $BLOCKED failed"
+              FAILED="$FAILED $NAME@$VERSION"
+              FAILED_NAMES="$FAILED_NAMES $NAME"
+              echo "::endgroup::"
+              continue
+            fi
             # Skip versions already on the registry: packages version
             # independently, so most tags republish only some of them, and npm
             # rejects a duplicate PUT — which failed the whole run. Skipping is
@@ -82,15 +97,16 @@ jobs:
               # A failed publish still fails the run — v0.5.12 reported success
               # while every package 404'd on PUT (npm's response to an
               # unauthorized write), so the tag looked released and was not.
-              # But it must not stop the packages after it: v0.5.16 died at
+              # But it must not stop unrelated packages after it: v0.5.16 died at
               # @refract-org/mcp (a new package, which cannot use trusted
-              # publishing until it exists on npm) and left eval and cli
-              # unpublished behind it. Attempt every package, then fail once.
+              # publishing until it exists on npm) and left eval behind it.
+              # Attempt each package whose dependencies made it, then fail once.
               if ( cd "$pkg" && "$NPM" publish --access public --provenance ); then
                 echo "$NAME@$VERSION published"
               else
                 echo "::error::Publish failed for $NAME@$VERSION"
                 FAILED="$FAILED $NAME@$VERSION"
+                FAILED_NAMES="$FAILED_NAMES $NAME"
               fi
             fi
             echo "::endgroup::"
