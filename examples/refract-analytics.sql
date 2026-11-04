@@ -1,6 +1,6 @@
 -- refract-analytics.sql
 -- Pre-built DuckDB views for Refract event streams.
--- Load with: duckdb -c ".read refract-analytics.sql"
+-- Load with: duckdb -c ".read examples/refract-analytics.sql"
 -- Then query: SELECT * FROM contested_claims;
 
 -- Claims that have been reverted, lost citations, or generated disputes.
