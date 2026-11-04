@@ -49,6 +49,17 @@ node packages/cli/dist/src/cli.js --version
 Run the CLI as `node packages/cli/dist/src/cli.js <command>`, or put it on your
 `PATH` with `bun link` inside `packages/cli`.
 
+## Docker
+
+Build the image from a checkout. Its entry point is the CLI:
+
+```bash
+git clone https://github.com/refract-org/refract.git
+cd refract
+docker build -t refract .
+docker run --rm refract analyze "Bitcoin" --depth brief --json
+```
+
 ## Verify installation
 
 ```bash

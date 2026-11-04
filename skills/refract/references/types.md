@@ -8,9 +8,8 @@ The central output unit — describes what changed at a revision boundary.
 type EvidenceLayer = "observed" | "policy_coded" | "model_interpretation" | "speculative" | "unknown";
 
 type EventType =
-  // Claim lifecycle
-  | "claim_first_seen" | "claim_removed" | "claim_softened" | "claim_strengthened"
-  | "claim_reworded" | "claim_moved" | "claim_reintroduced"
+  // Sentence lifecycle
+  | "sentence_first_seen" | "sentence_removed" | "sentence_modified" | "sentence_reintroduced"
   // Citation changes
   | "citation_added" | "citation_removed" | "citation_replaced"
   // Template changes

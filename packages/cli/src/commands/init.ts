@@ -45,14 +45,25 @@ export async function runInit(options: { json?: boolean } = {}): Promise<void> {
   console.log("  Try the data workflow offline:");
   console.log("    refract init --json > sample-events.ndjson");
   console.log();
+  console.log("  Try the review workflow offline:");
+  console.log("    refract review --sample --from 1 --state-dir ./review-state");
+  console.log("  Changes stay pending until you acknowledge the report.");
+  console.log();
   console.log("  Then try a real page (requires network access):");
   console.log('    refract analyze "Bitcoin" --depth brief --json');
   console.log("  This reads the latest 20 revisions and prints metadata as NDJSON.");
+  console.log();
+  console.log("  Track a phrase across recent revisions:");
+  console.log('    refract claim "Bitcoin" --text "decentralized" --limit 50');
+  console.log();
+  console.log("  See what a page said on a date:");
+  console.log('    refract snapshot "Bitcoin" --at 2024-01-15');
   console.log();
   console.log("  View a timeline in your browser:");
   console.log('    refract explore "Bitcoin"');
   console.log("  This starts a local server; Ctrl+C stops it.");
   console.log();
   console.log("  Walkthrough and recipes: https://github.com/refract-org/refract/blob/main/docs/recipes.md");
+  console.log("  Full docs: https://refract-org.github.io/refract/");
   console.log();
 }

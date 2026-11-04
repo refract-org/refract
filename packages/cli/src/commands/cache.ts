@@ -36,9 +36,8 @@ async function getPersistence(): Promise<{
       _instance = new Persistence({ dbPath: join(dir, "refract.db") }) as unknown as typeof _instance;
     } catch (_err) {
       throw new Error(
-        "Caching requires the optional @refract-org/persistence package.\n" +
-          "Install it: bun add @refract-org/persistence\n" +
-          "Or run without --cache to skip caching.",
+        "Caching needs Bun and a source checkout: @refract-org/persistence uses bun:sqlite and is not on npm.\n" +
+          "Run without --cache to skip caching.",
       );
     }
   }

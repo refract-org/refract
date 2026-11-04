@@ -6,6 +6,8 @@
 
 See what changed in the sources you rely on since your last review, with text and revision links you can inspect.
 
+[Documentation](https://refract-org.github.io/refract/) · [CLI reference](https://refract-org.github.io/refract/cli/)
+
 [![CI](https://github.com/refract-org/refract/actions/workflows/ci.yml/badge.svg)](https://github.com/refract-org/refract/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/release/refract-org/refract)](https://github.com/refract-org/refract/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-0f172a.svg)](./LICENSE)
@@ -98,13 +100,14 @@ Use a **page title**, such as `Bitcoin`, rather than a page URL. For another Med
 
 [Choose a history range and output mode](./docs/usage.md) · [Install compatibility](./COMPATIBILITY.md)
 
-## Three workflows
+## Four workflows
 
-| Your question | What you receive | Start here |
-|---------------|------------------|------------|
-| “What changed in my sources since my last review?” | Pending changes with full text, source links, coverage, and explicit acknowledgment | [Review a watchlist](./docs/review.md) |
-| “What did the record say at an earlier date?” | A text preview and revision ID at or before the requested date | [Inspect an earlier record](./docs/recipes.md#inspect-an-earlier-record) |
-| “My application needs changes as data.” | NDJSON events to filter, store, or pass to your review process | [Build a review feed](./docs/recipes.md#build-a-review-feed) |
+| Your question | Command | What you receive | Start here |
+|---------------|---------|------------------|------------|
+| “What changed in my sources since my last review?” | `refract review` | Pending changes with full text, source links, coverage, and explicit acknowledgment | [Review a watchlist](./docs/review.md) |
+| “When did this text appear, change, or disappear?” | `refract claim` | Candidate text, match kind, latest revision, and status within the fetched revisions | [Inspect changes to a passage](./docs/recipes.md#inspect-changes-to-a-passage) |
+| “What did the record say at an earlier date?” | `refract snapshot` | A text preview and revision ID at or before the requested date | [Inspect an earlier record](./docs/recipes.md#inspect-an-earlier-record) |
+| “My application needs changes as data.” | `refract export` | NDJSON events to filter, store, or pass to your review process | [Build a review feed](./docs/recipes.md#build-a-review-feed) |
 
 Start with a small set of sources you already revisit. The [review guide](./docs/review.md#check-fit-with-a-real-review-process) provides a way to assess the workflow with your own review criteria. For a data integration, export events or consume the saved review report, select `citation_removed`, and inspect its source context.
 
@@ -117,6 +120,8 @@ The central primitive is an **observed transition, anchored to source revisions*
 The same captured inputs, analyzer versions, and configuration produce the same event observations. Coverage is bounded by the analyzed history and matching rules; export timestamps can differ between runs.
 
 Claim IDs describe text in page and section context. Matching rules associate wording across revisions. State labels and hashes have specific limits: see [claim-state timelines](./docs/concepts/claim-state-timelines.md) and [replay and verification](./ARCHITECTURE.md#replay-and-verification).
+
+To hand someone a result, [write a standalone report or a verification bundle](./docs/recipes.md#share-or-check-what-you-found).
 
 ## What Refract captures
 
@@ -150,9 +155,10 @@ Choose the interface that matches your existing workflow:
 | CLI | You want to inspect or export a page's history | `refract export "Bitcoin" --from 369361755 --to 369393212 --format ndjson` |
 | Libraries | You already fetch revisions or own versioned text inputs | `buildRevisionEvents(revisions, { depth: "detailed" })` |
 | MCP | An agent needs to request histories and receive structured observations | `refract mcp` |
-| Python | You work in Python and want events as dataclasses or DataFrames | `pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"` |
+| Python | You work in Python and want events as dataclasses, DataFrames, or LangChain documents | `pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"` |
+| Agent skill | Your coding agent should know which command answers which question | `cp -R skills/refract ~/.claude/skills/` |
 
-[Library adapter and data integrations](./docs/integrations.md) · [MCP setup](./docs/mcp.md) · [Private wiki access](./docs/usage.md#other-mediawiki-instances)
+[Library adapter and data integrations](./docs/integrations.md) · [MCP setup](./docs/mcp.md) · [Agent skill](./skills/refract/SKILL.md) · [Private wiki access](./docs/usage.md#other-mediawiki-instances)
 
 ## Monorepo architecture
 
@@ -229,7 +235,7 @@ These build on the core engine:
 
 | Project | Purpose |
 |---------|---------|
-| [Docs site](./apps/docs) | Public documentation site — [integrations](https://refract-org.github.io/refract/integrations/), quickstart, CLI, SDK, tutorials |
+| [Docs site](https://refract-org.github.io/refract/) | Public documentation site ([source](./apps/docs)) — [integrations](https://refract-org.github.io/refract/integrations/), quickstart, CLI, SDK, tutorials |
 | [Viewer](./apps/ui) | Browser-only file viewer — load JSONL, render timelines, diffs, citations |
 | [Demo data](./demo-data) | Local datasets; the [offline walkthrough](./docs/recipes.md#try-the-offline-walkthrough) uses a fictional library history |
 | [Python adapter](./clients/python) | Calls the CLI and returns dataclasses or DataFrames |
@@ -241,7 +247,7 @@ See the [repository map](./docs/repositories.md) for ownership.
 
 ### Position in the revisable-delegation loop
 
-Refract holds the **detect mismatch** step in the [STD-07 Revisable Delegation Record](https://ethotechnics.org/standards/std-07-revisable-delegation-record) loop, emitting structured `EvidenceEvent` records over source revisions. It identifies what changed without deciding whether a change matters: downstream consumers supply the predicate and the context.
+Refract holds the **detect mismatch** step in the [STD-07 Revisable Delegation Record](https://ethotechnics.org/standards/std-07-revisable-delegation-record) loop, emitting structured `EvidenceEvent` records over source revisions. It identifies what changed without deciding whether a change matters: downstream consumers supply the predicate and the context. [`refract delegation`](https://refract-org.github.io/refract/cli/#refract-delegation) writes STD-07 discrepancy records for another system to read; you state the subject, the assumption at stake, and which events count.
 
 - **Wired to**: [NextConsensus](https://nextconsensus.com) and [Ambit](https://github.com/zz-plant/ambit) via [`docs/refract-and-nextconsensus.md`](./docs/refract-and-nextconsensus.md) and [`docs/repository-boundary.md`](./docs/repository-boundary.md).
 - **Siblings**: [Ambit](https://github.com/zz-plant/ambit) (capability and authorization), [Whether](https://github.com/zz-plant/whether) (act), [Ethotechnics](https://ethotechnics.org) (the record shape and vocabulary).

@@ -6,6 +6,14 @@ export interface InferenceProvider {
   infer(boundary: InferenceBoundary, input: Record<string, unknown>): Promise<InferenceResult>;
 }
 
+export const INFERENCE_BOUNDARIES = [
+  "revert",
+  "sentence_similarity",
+  "heuristic",
+  "template_signal",
+  "activity_spike",
+] as const satisfies readonly InferenceBoundary[];
+
 function asString(value: unknown): string {
   return typeof value === "string" ? value : "";
 }

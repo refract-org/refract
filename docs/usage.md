@@ -65,6 +65,18 @@ When stdout is redirected, `analyze` without `--json` can print a human-readable
 summary. Use `--json` for data pipelines. `explore --no-open` starts the server
 without opening a browser automatically.
 
+## Which command keeps checking a source?
+
+| You want | Command | How it runs | What it keeps |
+|----------|---------|-------------|---------------|
+| To inspect every change since your last acknowledged review | `review` | You run it; changes stay pending until you acknowledge the report | Fetched and reviewed revisions and saved reports, under `--state-dir` |
+| A scheduler to act when pages in a list change | `cron` | One run per schedule; exits 1 on new events and can notify Slack, email, or a webhook | Each page's previous observation, under `--cache-dir` |
+| To see one page's new revisions while a terminal stays open | `watch` | Polls the latest five revisions every 60 seconds until stopped | Nothing between runs |
+| A live feed of edits on a Wikimedia wiki | `stream` | Stays connected to EventStreams until stopped; prints revision metadata without analysis | Nothing |
+
+`cron` reports that events are new; it does not record what anyone inspected. Use
+`review` when a person's acknowledgment is part of the process.
+
 ## What does an empty result mean?
 
 Coverage reports the requested and observed range, revision count, missing

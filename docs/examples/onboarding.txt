@@ -26,13 +26,24 @@
   Try the data workflow offline:
     refract init --json > sample-events.ndjson
 
+  Try the review workflow offline:
+    refract review --sample --from 1 --state-dir ./review-state
+  Changes stay pending until you acknowledge the report.
+
   Then try a real page (requires network access):
     refract analyze "Bitcoin" --depth brief --json
   This reads the latest 20 revisions and prints metadata as NDJSON.
+
+  Track a phrase across recent revisions:
+    refract claim "Bitcoin" --text "decentralized" --limit 50
+
+  See what a page said on a date:
+    refract snapshot "Bitcoin" --at 2024-01-15
 
   View a timeline in your browser:
     refract explore "Bitcoin"
   This starts a local server; Ctrl+C stops it.
 
   Walkthrough and recipes: https://github.com/refract-org/refract/blob/main/docs/recipes.md
+  Full docs: https://refract-org.github.io/refract/
 

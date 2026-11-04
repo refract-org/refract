@@ -10,6 +10,9 @@ provenance events.
 # Analyze any Wikipedia page
 refract analyze "PageTitle" --depth brief
 
+# Review sources since the last acknowledged report
+refract review --pages-file pages.txt
+
 # Track a specific claim across revisions
 refract claim "PageTitle" --text "exact claim text"
 
@@ -36,6 +39,10 @@ bun run test       # vitest run (all packages)
 REFRACT_TEST_LIVE=1 bun run test   # also run the MediaWiki API contract tests
 bun run lint       # biome lint packages/
 ```
+
+`tests/cli-docs-contract.test.ts` fails when a command, flag, or MCP tool changes
+without `apps/docs/docs/cli.md`, `packages/cli/README.md`, both MCP pages, or
+`server.json` and `.well-known/mcp/server-card.json` changing with it.
 
 ## Architecture
 

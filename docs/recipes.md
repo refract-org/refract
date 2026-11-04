@@ -120,6 +120,32 @@ The links above assume English Wikipedia. For another MediaWiki instance, use
 that wiki's revision URL. Events are bounded by the captured range; they do not
 establish why a reference was removed or whether it supported the passage.
 
+## Share or check what you found
+
+**“Someone else needs to read this without running Refract.”**
+
+```bash
+refract export "Bitcoin" --from 369361755 --to 369393212 --format html > bitcoin-report.html
+```
+
+The result is one standalone page with the same timeline as the explorer and a
+JSON download. It needs no server.
+
+**“I want to check that a saved result is internally consistent.”**
+
+```bash
+refract export "Bitcoin" --from 369361755 --to 369393212 --proof > bitcoin-proof.json
+refract verify bitcoin-proof.json --html bitcoin-receipt.html
+```
+
+`verify` works offline and exits 1 when a check fails. A pass shows that the
+bundle agrees with itself. Nothing in it is signed, and anyone who edits it can
+recompute every hash, so compare its Merkle root with one you received separately
+or re-run the same Refract version over the same range. Use a source build until
+the next release: `verify` in 0.5.17 does not rehash the events.
+[What `verify` checks](https://refract-org.github.io/refract/bundle-manifest/#checking-a-bundle)
+lists the fields a pass does not cover.
+
 ## Compare two wikis
 
 ```bash
@@ -129,6 +155,9 @@ refract diff "Star Wars" --wiki-a https://en.wikipedia.org/w/api.php --wiki-b ht
 This produces a cross-wiki comparison. Live results depend on both histories;
 counts are not fixed example output. Compare detected differences in text and
 structure before assigning meaning to divergence.
+
+Add `--detect-borrowing` to measure the text each pair of wikis shares. A shared
+passage does not establish which wiki copied which.
 
 ## Let an agent request history
 

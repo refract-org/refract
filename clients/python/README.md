@@ -46,6 +46,26 @@ events = r.export("Bitcoin", format="ndjson", **bounds)
 
 `as_frame=True` creates flattened rows with event type, revision IDs, section, timestamp, event ID, schema version, and the first fact's analyzer metadata. An empty result has no rows and may have no columns. The dataclasses expose selected event fields; they do not retain every enrichment field from the original NDJSON. Keep the original CLI export when you need the complete record.
 
+## LangChain and evaluation modules
+
+The wheel ships two more modules. `refract_langchain` loads events as LangChain documents:
+
+```bash
+pip install "refract-py[langchain] @ git+https://github.com/refract-org/refract.git#subdirectory=clients/python"
+```
+
+```python
+from refract_langchain import RefractLoader
+
+loader = RefractLoader(page="Bitcoin", depth="detailed", min_stability=0.5)
+for doc in loader.load():
+    print(doc.metadata["event_type"], doc.metadata["stability_score"])
+```
+
+The loader reads the page's available history, so try a short page first. Events with high revert counts, citation churn, or edit clusters score lower, and `min_stability` drops those below the value you pass.
+
+`refract_eval` maps exported events to model-evaluation records, with `build_leakage_benchmark("events.jsonl", cutoff="2024-06-01")` and `check_provenance("events.jsonl", "example.org")`. See the [Python SDK guide](https://refract-org.github.io/refract/python-sdk/) for more.
+
 ## Review workflow
 
 The unreleased core `review` command has a separate saved-report format and acknowledgment loop. This adapter currently wraps `analyze` and `export`; it does not provide a review method. Use the CLI and the [review guide](https://refract-org.github.io/refract/review/) for that workflow.

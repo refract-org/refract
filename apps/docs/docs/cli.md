@@ -2,8 +2,9 @@
 
 All commands work with `wikihistory` as a backward-compatible alias (e.g., `wikihistory analyze`).
 
-The tables describe published CLI 0.5.17. See the source-build guides for newer
-review, coverage, and explorer-range behavior.
+The tables describe published CLI 0.5.17. Entries marked *source build* are newer and
+need a build from source until the next release. To keep checking a source, see
+[which command to use](usage.md#which-command-keeps-checking-a-source).
 
 ## `refract init`
 
@@ -16,13 +17,6 @@ refract init
 The published version runs a short live analysis. In the core source build,
 `init` uses a bundled fictional library history without fetching a source;
 `--json` prints its computed events as NDJSON.
-
-### Source-build review workflow
-
-`refract review` keeps fetched and acknowledged revisions separate. Its flags,
-saved-report format, and coverage requirements are maintained in
-[Review your sources](review.md), built directly from the core guide. This
-command is unreleased in npm version 0.5.17.
 
 ## `refract analyze`
 
@@ -47,13 +41,35 @@ refract analyze [page] [options]
 | `--api <url>` | `en.wikipedia.org` | MediaWiki API base URL |
 | `--cache-dir <path>` | `~/.wikihistory` | Cache directory path |
 | `-r, --report` | off | Output `ObservationReport` instead of raw events |
-| `--config <path>` | — | JSON file with analyzer config overrides |
-| `--similarity <n>` | `0.8` | Sentence matching threshold (0–1) |
-| `--revert-patterns <path>` | — | File of revert regex patterns |
-| `--cluster-window <min>` | `60` | Edit cluster window in minutes |
-| `--spike-factor <n>` | `3` | Talk activity spike multiplier |
-| `--talk-window <days>` | `7/3` | Talk correlation window as "before/after" in days |
-| `--section-rename <mode>` | `similarity` | Section rename detection: `exact`\|`similarity`\|`none` |
+
+Also accepts the [analyzer options](#analyzer-options).
+
+## `refract review`
+
+*Source build.* Inspect source changes since the last acknowledged review. Fetched and
+acknowledged revisions are kept separately. [Review your sources](review.md) covers the
+workflow, saved-report format, and coverage requirements.
+
+```bash
+refract review [page] [options]
+```
+
+| Flag | Default | Description |
+|---|---|---|
+| `page` | optional (positional) | Page title; can be combined with `--pages-file` |
+| `--sample` | off | Review the bundled fictional history offline |
+| `--pages-file <path>` | — | Watchlist: one page title per line |
+| `--state-dir <path>` | `~/.refract/review` | Review state and saved reports |
+| `--from <id>` | — | Initial comparison baseline; does not mark it reviewed |
+| `--limit <n>` | `200` | New revisions per page per run; repeat the command to resume |
+| `--ack <report-id>` | — | Acknowledge an inspected saved report without fetching |
+| `--format <format>` | `markdown` | `markdown` or `json` |
+| `--event-type <types>` | — | Show only these comma-separated event types |
+| `--section <name>` | — | Show only events in this section |
+| `--text <text>` | — | Show only events containing this text |
+| `--api <url>` | `en.wikipedia.org` | MediaWiki API base URL |
+
+Exits 2 when a page's status is `error` or `incomplete`.
 
 ## `refract claim`
 
@@ -83,6 +99,7 @@ refract snapshot <page> [options]
 |---|---|---|
 | `page` | required (positional) | Page title |
 | `--at <date>` | today | Target date (ISO 8601, e.g. `2024-01-15`). Finds the closest revision at or before this date. |
+| `--revision-limit <n>` | `500` | Revisions fetched while looking for the date |
 | `-c, --cache` | off | Cache revisions in SQLite |
 | `--api <url>` | `en.wikipedia.org` | MediaWiki API base URL |
 
@@ -124,7 +141,11 @@ refract diff <topic> [options]
 | `--wiki-a <url>` | required | First wiki API URL |
 | `--wiki-b <url>` | required | Second wiki API URL |
 | `--wiki-c <url>` | optional | Third wiki API URL |
+| `--wiki-d <url>` | optional | Fourth wiki API URL |
+| `--wiki-e <url>` | optional | Fifth wiki API URL |
+| `--wiki-f <url>` | optional | Sixth wiki API URL |
 | `-d, --depth <d>` | `detailed` | Analysis depth. See [depth levels](depth.md) |
+| `--detect-borrowing` | off | *Source build.* Measure the text each pair of wikis shares. See the [cross-wiki tutorial](tutorials/cross-wiki-diff.md#4-measure-shared-text). |
 
 ## `refract eval`
 
@@ -196,9 +217,13 @@ refract export <page> [options]
 | `--bundle` | off | Export as evidence bundle with a SHA-256 hash of its contents (not signed). See [bundle format](bundle-manifest.md). |
 | `--manifest` | off | Export as replay manifest with all hashes. See [manifest format](bundle-manifest.md). |
 | `--proof` | off | Export as self-contained verification bundle with Merkle inclusion proofs. |
+| `--from <revId>` | — | Start revision ID |
+| `--to <revId>` | — | End revision ID |
+| `--since <ts>` | — | Analyze revisions from this ISO timestamp |
 | `--flatten` | off | Flatten nested fields into columns (`csv`) |
-| `--similarity <n>` | `0.8` | Sentence matching threshold (0–1) |
 | `--api <url>` | `en.wikipedia.org` | MediaWiki API base URL |
+
+Also accepts the [analyzer options](#analyzer-options).
 
 `export` analyzes at `detailed` depth: the page's full history, or the range that `--from`, `--to` or `--since` selects. With no events it
 writes nothing to stdout (the notice goes to stderr), so an empty NDJSON file stays
@@ -258,10 +283,14 @@ refract explore <page> [options]
 | `page` | required (positional) | Page title |
 | `-p, --port <n>` | `8899` | Server port |
 | `--no-open` | off | Don't open browser automatically |
-| `-r, --report` | off | Output `ObservationReport` instead of raw events |
-| `--similarity <n>` | `0.8` | Sentence matching threshold (0–1) |
-| `--config <path>` | — | JSON file with analyzer config overrides |
+| `--from <revId>` | — | *Source build.* Start revision ID |
+| `--to <revId>` | — | *Source build.* End revision ID |
+| `--since <ts>` | — | *Source build.* Start timestamp |
+| `--depth <d>` | `detailed` | *Source build.* Analysis depth: `brief`, `detailed`, `forensic` |
+| `-c, --cache` | off | *Source build.* Reuse a continuous fixed range from the local cache. Needs Bun and `@refract-org/persistence`. |
 | `--api <url>` | `en.wikipedia.org` | MediaWiki API base URL |
+
+Also accepts the [analyzer options](#analyzer-options).
 
 ## `refract visualize`
 
@@ -349,3 +378,17 @@ Client-credential headers (`X-OAuth-Client-Id`, `X-OAuth-Client-Secret`) come fr
 (0.5.17+). Up to 0.5.7 they were read from `OAUTH_CLIENT_ID` and
 `OAUTH_CLIENT_SECRET` and sent to whatever wiki was queried, Wikipedia included; do
 not set those names for Refract.
+
+## Analyzer options
+
+`analyze`, `export`, `delegation`, and `explore` accept these overrides:
+
+| Flag | Default | Description |
+|---|---|---|
+| `--config <path>` | — | JSON file with analyzer config overrides |
+| `--similarity <n>` | `0.8` | Sentence matching threshold (0–1) |
+| `--revert-patterns <path>` | — | File of revert regex patterns, one per line |
+| `--cluster-window <min>` | `60` | Edit cluster window in minutes |
+| `--spike-factor <n>` | `3` | Talk activity spike multiplier |
+| `--talk-window <days>` | `7/3` | Talk correlation window as "before/after" in days |
+| `--section-rename <mode>` | `similarity` | Section rename detection: `exact`\|`similarity`\|`none` |

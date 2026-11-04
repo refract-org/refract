@@ -4,6 +4,8 @@
 events are new since the previous run. It is built to be started by a scheduler —
 system cron, a CI workflow, a job runner — and to exit. It keeps its own state between
 runs, so the scheduler has to keep that state too (see [where state lives](#where-state-lives)).
+To record what a person has inspected instead, use [`refract review`](review.md);
+[compare the monitoring commands](usage.md#which-command-keeps-checking-a-source).
 
 ## Basic usage
 

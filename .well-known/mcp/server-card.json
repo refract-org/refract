@@ -19,18 +19,29 @@
     },
     {
       "name": "export",
-      "description": "Export analysis results as structured data. Supports JSON, NDJSON, CSV, Parquet, and HTML formats.",
-      "input": { "page": "string", "format": "json | ndjson | csv | parquet | html" }
+      "description": "Export page analysis as structured JSON, with revision, section, and timestamp provenance on each event.",
+      "input": { "page": "string", "depth": "brief | detailed | forensic (optional)", "api": "string optional (MediaWiki API base URL)", "since": "string optional (ISO timestamp)" }
     },
     {
       "name": "cron",
-      "description": "One-shot re-observation for scheduled monitoring. Compares against prior analysis and optionally notifies on new events.",
-      "input": { "pages-file": "string (path to file with page titles, one per line)" }
+      "description": "One-shot re-observation: reads a pages file, analyzes each page, and reports its event count.",
+      "input": { "pagesFile": "string (path to file with page titles, one per line)" }
     },
     {
       "name": "classify",
       "description": "Model-assisted classification of an inference boundary. Replaces default heuristic with an LLM-based decision for one boundary.",
-      "input": { "boundary": "string (classification boundary name)" }
+      "input": { "boundary": "revert | sentence_similarity | heuristic | template_signal | activity_spike", "input": "object (fields vary by boundary)" }
+    },
+    {
+      "name": "get_statement_history",
+      "description": "Track the history of a specific statement across revisions. Returns when the statement (or a semantic neighbor) appeared, disappeared, or changed, with revision IDs, timestamps, an overall status, and a short change summary.",
+      "input": {
+        "statement": "string (raw text statement to track)",
+        "page": "string (MediaWiki page title)",
+        "context": "string optional (use-context slug)",
+        "depth": "brief | detailed | forensic (optional, default detailed)",
+        "api": "string optional (MediaWiki API base URL)"
+      }
     }
   ],
   "capabilities": ["tools"],

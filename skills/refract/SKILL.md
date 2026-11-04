@@ -1,160 +1,125 @@
 ---
 name: refract
-description: Use when integrating MediaWiki edit history analysis, building claim-provenance tools, or working with @refract-org/* packages — deterministic observation engine for public revision histories
+description: >-
+  Analyze Wikipedia and MediaWiki revision histories: review source changes,
+  track text and citations across revisions, and emit deterministic provenance
+  events. Use when a task involves edit history, claim or citation tracking,
+  knowledge-change observation, the refract CLI or MCP server, or
+  @refract-org/* packages. Do NOT use for healthcare-specific interpretation,
+  clinical judgment, or domain-specific source weighting; those belong in
+  downstream applications.
 license: AGPL-3.0
 ---
 
 # Refract
 
-Deterministic claim-provenance engine for MediaWiki knowledge systems. Evidence, not truth.
+Deterministic observation engine for revision histories. Evidence, not truth.
+It reports what changed; downstream applications decide what matters.
 
-## When to Use
+## Choose a command
 
-- Integrating MediaWiki edit history analysis into a tool
-- Building claim-provenance tracking across revisions
-- Using `@refract-org/*` packages (evidence-graph, analyzers, ingestion)
-- Running the `refract` CLI for page analysis (`wikihistory` also works)
-- Extending the engine with new analyzers or model adapters
-- Setting up L2 model-assisted interpretation on top of L1 deterministic evidence
+Run `npx @refract-org/cli <command>`, or `refract <command>` after
+`npm install -g @refract-org/cli`. `refract <command> --help` lists every option,
+and the [CLI reference](https://refract-org.github.io/refract/cli/) explains them.
 
-## Quick Start
+| Question | Command |
+|----------|---------|
+| What does Refract do? (offline) | `refract init` |
+| What changed since my last review? | `refract review --pages-file pages.txt` |
+| When did this text appear or change? | `refract claim "Page" --text "exact text"` |
+| What did the page say on a date? | `refract snapshot "Page" --at 2024-01-15` |
+| What changed between two revisions? | `refract analyze "Page" --from ID --to ID --depth detailed --json` |
+| I need the events as data | `refract export "Page" --format ndjson > events.ndjson` |
+| How do two wikis differ? | `refract diff "Topic" --wiki-a URL --wiki-b URL` |
+| Does this saved bundle agree with itself? | `refract export "Page" --proof > bundle.json`, then `refract verify bundle.json` |
 
-```bash
-# CLI via npx (coming) or clone the repo
-git clone https://github.com/refract-org/refract
-cd refract && bun install && bun run build
+Use a page title, not a URL. `--api URL` selects another MediaWiki instance.
+Always pass `--json` to `analyze` from a terminal session: without it, `analyze`
+opens the browser explorer and keeps its server running. `review` needs a source
+build until the release after 0.5.17:
+[review guide](https://refract-org.github.io/refract/review/).
 
-# Analyze a Wikipedia page
-bun packages/cli/src/index.ts analyze "Earth" --depth detailed
+## MCP tools
 
-# Track a specific claim across revisions
-bun packages/cli/src/index.ts claim "Earth" --text "Earth is the third planet from the Sun"
+Configure the client with `@refract-org/cli` (`npx -y @refract-org/cli mcp`), never
+the unscoped `refract` package, which is an unrelated project.
 
-# Watch a page section
-bun packages/cli/src/index.ts watch "Climate_change" --section "Scientific consensus"
-```
+| Tool | Purpose |
+|------|---------|
+| `analyze` | Full page edit history with structured events |
+| `claim` | Track a specific sentence's provenance across revisions |
+| `export` | Export analysis as JSON |
+| `cron` | One-shot re-observation of a list of pages |
+| `classify` | Classify one observation boundary with a model |
+| `get_statement_history` | When a statement or a close variant appeared, changed, or disappeared |
 
-### Using Packages
+`review`, `snapshot`, `diff`, and `verify` are CLI-only.
 
-```ts
-import type { EvidenceEvent, ClaimIdentity } from "@refract-org/evidence-graph";
-import { createClaimIdentity } from "@refract-org/evidence-graph";
+## Event types
+
+26 types across 8 categories. Every event can carry six deterministic enrichment
+fields: `editMagnitude`, `contentChange`, `keyTerms`, `certaintyProfile`,
+`directionSignal`, and `quantitativeFindings`.
+
+| Category | Events |
+|----------|--------|
+| Sentences | `sentence_first_seen`, `sentence_removed`, `sentence_modified`, `sentence_reintroduced` |
+| Citations | `citation_added`, `citation_removed`, `citation_replaced` |
+| Templates | `template_added`, `template_removed`, `template_parameter_changed` |
+| Sections | `section_reorganized`, `lead_promotion`, `lead_demotion` |
+| Reverts | `revert_detected`, `edit_cluster_detected` |
+| Links and categories | `wikilink_added`, `wikilink_removed`, `category_added`, `category_removed` |
+| Metadata | `page_moved`, `protection_changed` |
+| Talk | `talk_page_correlated`, `talk_thread_opened`, `talk_thread_archived`, `talk_reply_added`, `talk_activity_spike` |
+
+## Using the packages
+
+| Package | Purpose |
+|---------|---------|
+| `@refract-org/evidence-graph` | Core types and schemas (no dependencies) |
+| `@refract-org/ingestion` | MediaWiki API adapters and rate limiting |
+| `@refract-org/analyzers` | Section diffing, citation tracking, revert detection, template tracking, enrichment |
+| `@refract-org/cli` | The `refract` command (alias: `wikihistory`) |
+| `@refract-org/mcp` | MCP library; the executable is `refract mcp` |
+| `@refract-org/eval` | Evaluation harness with benchmark pages |
+| `persistence` | SQLite caching through `bun:sqlite`; not published |
+
+Use a **single adapter file** as the import boundary. Re-export only what you need;
+no other file imports from `@refract-org/*` directly.
+
+```typescript
+// adapter.ts
 import { MediaWikiClient } from "@refract-org/ingestion";
-import { sectionDiffer, citationTracker } from "@refract-org/analyzers";
+import type { EvidenceEvent } from "@refract-org/evidence-graph";
+import { citationTracker, computeCertaintyProfile, sectionDiffer } from "@refract-org/analyzers";
 
-// L1: Fetch revisions (deterministic, no model)
-const client = new MediaWikiClient();
-const revisions = await client.fetchRevisions("Earth", { limit: 50 });
-
-// L1: Extract evidence (deterministic, no model)
-const sections = sectionDiffer.extractSections(revisions[0].content);
-const citations = citationTracker.extractCitations(revisions[0].content);
+export type { EvidenceEvent };
+export { MediaWikiClient, citationTracker, computeCertaintyProfile, sectionDiffer };
 ```
 
-## Architecture (Critical)
+## Invariants
 
-Every integration MUST respect these invariants:
+Every integration must respect these:
 
-| Scope | Sees raw text? | Output |
-|-------|----------------|--------|
-| **Deterministic** (L1) | Yes (wikitext) | `deterministicFacts` arrays |
-| **Ground truth** (L3) | N/A | Outcome labels (talk page consensus, RFCs, ArbCom) |
+1. The deterministic pipeline never calls a model.
+2. The same captured inputs, analyzer versions, and configuration produce the same event observations.
+3. Every event is tagged with its revision, section, and timestamp.
 
-**Invariants (do not violate):**
-1. Deterministic pipeline never calls a model
-2. Output is byte-for-byte reproducible on the same revision range
-3. Every event is provenance-tagged (revision, section, timestamp)
+## Forbidden features
 
-## Packages
-
-| Package | npm | Purpose |
-|---------|-----|---------|
-| `evidence-graph` | `@refract-org/evidence-graph` | Core types/schemas (no deps) |
-| `ingestion` | `@refract-org/ingestion` | Wikipedia API adapters, rate limiting |
-| `analyzers` | `@refract-org/analyzers` | Section diffing, citation tracking, revert detection, template tracking |
-| `cli` | `@refract-org/cli` | `refract` CLI tool (alias: `wikihistory`) |
-| `persistence` | (internal) | SQLite caching (bun:sqlite) |
-| `eval` | (internal) | Evaluation harness with benchmark pages |
-
-### Import Conventions
-
-```ts
-// Cross-package types
-import type { EvidenceEvent, ClaimIdentity } from "@refract-org/evidence-graph";
-
-// Cross-package runtime
-import { MediaWikiClient } from "@refract-org/ingestion";
-import { sectionDiffer } from "@refract-org/analyzers";
-
-// Intra-package (relative with .js extension)
-import { createAdapter } from "./adapter.js";
-```
-
-Always use `import type` for type-only imports. Never import from `dist/`.
-
-## Core Types
-
-### EvidenceEvent
-The central unit — what happened at a revision boundary.
-
-```ts
-interface EvidenceEvent {
-  eventType: EventType;         // "claim_first_seen" | "citation_added" | "revert_detected" | ...
-  claimId?: string;
-  fromRevisionId: number;
-  toRevisionId: number;
-  section: string;
-  before: string;
-  after: string;
-  deterministicFacts: DeterministicFact[];
-  layer: EvidenceLayer;         // "observed" | "policy_coded"
-  timestamp: string;            // ISO 8601
-}
-```
-
-### ClaimObject
-Tracks a proposition across revision history.
-
-```ts
-interface ClaimObject {
-  identity: ClaimIdentity;
-  lineage: ClaimLineage;
-  currentState: ClaimState;     // "absent" → "emerging" → "contested" → ... → "deleted"
-  propositionType: PropositionType;
-  phase: string;                // Phase 0 | Phase 1b | Phase 2a | Phase 2b
-}
-```
-
-### CLI Commands
-
-```
-refract analyze <page>  [--depth brief|detailed|forensic] [--from <rev>] [--to <rev>] [--cache]
-refract claim <page>    --text "<claim>"
-refract export <page>   --format json|csv
-refract watch <page>    [--section <name>]
-```
-
-## Reference Files
-
-| Task | File |
-|------|------|
-| Architecture invariants, data flow | [references/architecture.md](references/architecture.md) |
-| Core types (EvidenceEvent, ClaimObject, Report) | [references/types.md](references/types.md) |
-| CLI commands and options | [references/cli.md](references/cli.md) |
-| Eval harness and benchmark pages | [references/eval.md](references/eval.md) |
-
-## Forbidden Features
-
-When building on top of refract, do NOT create features that:
+When building on Refract, do NOT create features that:
 
 - Target or identify individual editors
 - Do sentiment analysis or toxicity scoring
 - Predict or forecast future edits
 - Automate Wikipedia editing
-- Make truth/accuracy claims about content
+- Make truth or accuracy claims about content
 - Use healthcare-specific vocabulary (drug names, FDA, clinical trials)
 
-## Cross-Skill References
+## Reference files
 
-- **SQLite persistence** → `persistence` package uses bun:sqlite
-- **Testing** → Use `vitest` skill (vitest with `globals: true`, tests in `src/__tests__/*.test.ts`)
+| Task | File |
+|------|------|
+| Architecture invariants and data flow | [references/architecture.md](references/architecture.md) |
+| Core types | [references/types.md](references/types.md) |
+| Eval harness and benchmark pages | [references/eval.md](references/eval.md) |

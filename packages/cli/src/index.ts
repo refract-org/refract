@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
+import type { InferenceBoundary } from "@refract-org/evidence-graph";
 import type { AuthConfig } from "@refract-org/ingestion";
-import { Command } from "commander";
+import { Argument, Command } from "commander";
 import { buildConfig, buildObservationReport, runAnalyze } from "./commands/analyze.js";
 import { runClaim } from "./commands/claim.js";
 import { runCron } from "./commands/cron.js";
@@ -18,6 +19,7 @@ import { runStream } from "./commands/stream.js";
 import { runVerify } from "./commands/verify.js";
 import { runVisualize } from "./commands/visualize.js";
 import { runWatch } from "./commands/watch.js";
+import { INFERENCE_BOUNDARIES, OpenAICompatibleProvider } from "./inference-provider.js";
 import { bold, cyan, dim, formatEvent, gray, green, heading, red, success } from "./render.js";
 import { REFRACT_VERSION } from "./version.js";
 
@@ -57,13 +59,51 @@ export function extractAuth(opts: Record<string, unknown>): AuthConfig | undefin
   return { apiKey, apiUser, apiPassword, oauthClientId, oauthClientSecret };
 }
 
-const program = new Command();
+const DOCS_URL = "https://refract-org.github.io/refract/";
+
+export const program = new Command();
 
 program
   .name("refract")
-  .description("Wikipedia edit history analysis — deterministic L1 observation engine")
+  .description("Observe how MediaWiki pages change: deterministic events from revision histories")
   .version(REFRACT_VERSION)
-  .addHelpCommand("help [command]", "show help for a specific command");
+  .addHelpCommand("help [command]", "show help for a specific command")
+  .addHelpText(
+    "after",
+    `
+Start from your question:
+  Changes since my last review?  refract review --pages-file pages.txt
+  When did this text change?     refract claim <page> --text "<text>"
+  What did the page say then?    refract snapshot <page> --at 2024-01-15
+  Changes as data?               refract export <page> --format ndjson
+  Connect an agent?              refract mcp
+
+Try it offline: refract init
+Docs: ${DOCS_URL}`,
+  );
+
+/**
+ * Printed after the explorer starts as well as after the text summary: in a
+ * terminal, `analyze` opens the explorer, and this block used to print only on
+ * the path that does not, so a person at a terminal never saw it.
+ */
+function printNextSteps(page: string, inExplorer: boolean): void {
+  const file = `${page.toLowerCase().replace(/\s+/g, "-")}-events.jsonl`;
+  const steps: [string, string][] = [
+    ...(inExplorer ? [] : ([["View in browser", `refract explore "${page}"`]] as [string, string][])),
+    ["Track text", `refract claim "${page}" --text "exact phrase"`],
+    ["See an earlier date", `refract snapshot "${page}" --at 2024-01-15`],
+    ["Export as data", `refract export "${page}" --format ndjson > ${file}`],
+    ["Review changes later", `refract review "${page}"`],
+    ["Connect an agent", "refract mcp"],
+    ["Full docs", DOCS_URL],
+  ];
+  console.log();
+  console.log(dim("Next steps:"));
+  for (const [label, command] of steps) {
+    console.log(dim(`  ${label.padEnd(20)} → ${command}`));
+  }
+}
 
 // ── init ──
 program
@@ -82,7 +122,7 @@ const analyzeCmd = program
   .option("--from <revId>", "start revision ID")
   .option("--to <revId>", "end revision ID")
   .option("--since <timestamp>", "re-observe from ISO timestamp")
-  .option("-c, --cache", "cache revisions in SQLite (~/.wikihistory/refract.db)")
+  .option("-c, --cache", "cache revisions in SQLite (~/.wikihistory/refract.db); needs Bun and a source checkout")
   .option("--pages-file <path>", "batch file of page titles (one per line)")
   .option("--brief-limit <n>", "max revisions in brief mode (default: 20)", parseInt)
   .option("--batch-concurrency <n>", "max pages to analyze in parallel (default: 4)", parseInt)
@@ -153,7 +193,6 @@ analyzeCmd.action(async (page, opts) => {
   // Interactive mode: auto-launch web UI when stdout is a TTY and no --json flag
   const isInteractive = process.stdout.isTTY && !opts.json;
   if (isInteractive && events.length > 0) {
-    const { runExplore } = await import("./commands/explore.js");
     await runExplore(
       page,
       8899,
@@ -166,6 +205,7 @@ analyzeCmd.action(async (page, opts) => {
       opts.since as string | undefined,
       { analysis },
     );
+    printNextSteps(page, true);
     return;
   }
 
@@ -189,21 +229,7 @@ analyzeCmd.action(async (page, opts) => {
     );
   }
 
-  if (events.length > 0) {
-    console.log();
-    console.log(dim("Next steps:"));
-    console.log(dim(`  View in browser  → refract explore "${page}"`));
-    console.log(dim(`  Track a claim    → refract claim "${page}" --text "claim text"`));
-    console.log(dim(`  Snapshot in time  → refract snapshot "${page}" --at 2024-01-15`));
-    console.log(
-      dim(
-        `  Export data      → refract export "${page}" --format ndjson > ${page.toLowerCase().replace(/\s+/g, "-")}-events.jsonl`,
-      ),
-    );
-    console.log(dim(`  Monitor for changes → refract cron pages.txt --interval 24 --notify-slack`));
-    console.log(dim(`  Connect an AI    → refract mcp`));
-    console.log(dim(`  Full docs        → https://refract-org.github.io/refract/`));
-  }
+  if (events.length > 0) printNextSteps(page, false);
 });
 
 // ── review ──
@@ -281,7 +307,7 @@ const claimCmd = program
   .description("track a specific claim across revisions")
   .option("-t, --text <text>", "claim text to track (required)")
   .option("--limit <n>", "max revisions to fetch (default: 50)", parseInt)
-  .option("-c, --cache", "cache revisions in SQLite");
+  .option("-c, --cache", "cache revisions in SQLite; needs Bun and a source checkout");
 withGlobal(claimCmd);
 claimCmd.action(async (page, opts) => {
   const claimText = opts.text as string | undefined;
@@ -306,7 +332,7 @@ const snapshotCmd = program
   .description("reconstruct page state at a point in time")
   .option("--at <date>", "target date (ISO 8601, e.g. 2024-01-15)", new Date().toISOString().slice(0, 10))
   .option("--revision-limit <n>", "max revisions to fetch (default: 500)", parseInt)
-  .option("-c, --cache", "cache revisions in SQLite");
+  .option("-c, --cache", "cache revisions in SQLite; needs Bun and a source checkout");
 withGlobal(snapshotCmd);
 snapshotCmd.action(async (page, opts) => {
   await runSnapshot(
@@ -324,7 +350,7 @@ snapshotCmd.action(async (page, opts) => {
 const exportCmd = program
   .command("export <page>")
   .description("export analysis as structured data")
-  .option("-f, --format <format>", "output format: json, csv, ndjson, parquet", "json")
+  .option("-f, --format <format>", "output format: json, csv, ndjson, html, parquet", "json")
   .option("--bundle", "export as evidence bundle with a SHA-256 hash of its contents")
   .option("--manifest", "export as replay manifest listing all hashes")
   .option("--proof", "export as self-contained verification bundle with Merkle proofs")
@@ -474,7 +500,7 @@ const exploreCmd = program
   .option("--to <revId>", "end revision ID", Number)
   .option("--since <timestamp>", "start timestamp")
   .option("--depth <depth>", "brief, detailed, forensic", "detailed")
-  .option("-c, --cache", "reuse a continuous fixed range from the local cache");
+  .option("-c, --cache", "reuse a continuous fixed range from the local cache; needs Bun and a source checkout");
 withGlobal(exploreCmd);
 withAnalyzerConfig(exploreCmd);
 exploreCmd.action(async (page, opts) => {
@@ -601,22 +627,21 @@ evalCmd.action(async (opts) => {
 
 // ── classify ──
 program
-  .command("classify <boundary>")
-  .description("classify a single observation boundary using an inference provider")
+  .command("classify")
+  .addArgument(new Argument("<boundary>", "observation boundary to classify").choices(INFERENCE_BOUNDARIES))
+  .description("classify a single observation boundary using its default rule or an inference provider")
   .option("--input <json>", 'input data as JSON string (e.g. \'{"comment": "revert vandalism"}\')')
   .option("--api-key <key>", "API key for inference provider")
   .option("--endpoint <url>", "inference provider endpoint URL (OpenAI-compatible)")
   .option("--model <name>", "model name (default: gpt-4o-mini)")
   .action(async (boundary, opts) => {
     const input = opts.input ? JSON.parse(opts.input as string) : {};
-    const { OpenAICompatibleProvider } = await import("./inference-provider.js");
     const provider = new OpenAICompatibleProvider({
       apiKey: (opts.apiKey as string) || process.env.REFRACT_INFERENCE_API_KEY,
       endpoint: (opts.endpoint as string) || process.env.REFRACT_INFERENCE_ENDPOINT,
       model: (opts.model as string) || process.env.REFRACT_INFERENCE_MODEL,
     });
-    // biome-ignore lint/suspicious/noExplicitAny: dynamic boundary name from CLI
-    const result = await provider.infer(boundary as any, input);
+    const result = await provider.infer(boundary as InferenceBoundary, input);
     console.log(JSON.stringify(result, null, 2));
   });
 
