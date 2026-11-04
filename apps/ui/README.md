@@ -11,7 +11,7 @@ The viewer lives in `apps/ui` of the Refract repository:
 ```bash
 git clone https://github.com/refract-org/refract.git
 cd refract
-bun install
+bun install --frozen-lockfile
 cd apps/ui
 bun run dev
 ```
@@ -23,10 +23,13 @@ Event types come from `@refract-org/evidence-graph` as types only, so `bun run b
 ### Using your own Refract data
 
 ```bash
-refract export "Bitcoin" --format ndjson > bitcoin-events.jsonl
+refract export "Bitcoin" --from 369361755 --to 369393212 --format ndjson > bitcoin-events.ndjson
 ```
 
-Then drag `bitcoin-events.jsonl` onto the Refract UI upload zone.
+Then select or drag `bitcoin-events.ndjson` onto the upload zone. Both `.jsonl`
+and `.ndjson` are accepted. The CLI explorer fetches histories; this viewer opens
+previously exported event lines. Evidence bundles and saved `refract-review/v1`
+reports have different structures. Use the CLI to review and acknowledge a report.
 
 ## What you'll see
 

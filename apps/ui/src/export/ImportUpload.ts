@@ -32,7 +32,7 @@ export class ImportUpload {
 
 		const fileInput = document.createElement("input");
 		fileInput.type = "file";
-		fileInput.accept = ".jsonl,.json";
+		fileInput.accept = ".jsonl,.ndjson,.json";
 		fileInput.style.display = "none";
 
 		uploadZone.addEventListener("click", () => fileInput.click());
@@ -150,6 +150,16 @@ export class ImportUpload {
 
 		if (typeof e.before !== "string" || typeof e.after !== "string") {
 			return { valid: false, error: "Missing before or after text" };
+		}
+
+		if (
+			!Array.isArray(e.deterministicFacts) ||
+			e.deterministicFacts.some(
+				(fact) =>
+					!fact || typeof fact !== "object" || typeof fact.fact !== "string",
+			)
+		) {
+			return { valid: false, error: "Invalid or missing deterministicFacts" };
 		}
 
 		if (e.layer && typeof e.layer === "string" && !VALID_LAYERS.has(e.layer)) {
