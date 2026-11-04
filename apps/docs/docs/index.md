@@ -1,8 +1,8 @@
-# Refract gives mutable knowledge a memory
+# A git log for Wikipedia
 
-Refract records how public knowledge changes across available revision histories. Inspect changed wording, removed citations, and returned text with the source revisions behind each observation.
+Refract shows how a page's sentences, citations, and structure changed, revision by revision, with the source revisions behind each observation. It works on Wikipedia and any other MediaWiki wiki.
 
-It is a temporal observability layer for knowledge. Its deterministic engine reconstructs events from revision traces; your review process decides what those changes mean.
+It runs locally under deterministic rules, with no API key or model. Your review process decides what the changes mean.
 
 <div class="hero-links">
   <a href="demo/" class="button primary">See a captured example</a>
@@ -12,15 +12,15 @@ It is a temporal observability layer for knowledge. Its deterministic engine rec
 
 ## Start with one change
 
-This bounded Wikipedia example compares two Bitcoin revisions from 2010 using the published CLI. It prints one event per line as NDJSON:
+On 24 August 2006, the International Astronomical Union reclassified Pluto as a dwarf planet. Wikipedia's Pluto article went through 43 revisions in under an hour that afternoon. This prints its first sentence from each of them:
 
 ```bash
-npx @refract-org/cli@0.5.17 analyze "Bitcoin" --from 369361755 --to 369393212 --depth detailed --json
+npx @refract-org/cli@0.6.0 claim "Pluto" --text "ninth and smallest" --from 71593043 --to 71601937
 ```
 
-Look for `citation_removed`, then inspect its `before`, `after`, and revision IDs. A removed reference is an observation; whether it changes your use of the source is a separate decision.
+The sentence starts at "Pluto is the ninth…" and passes through "Pluto was until recently considered the ninth…". The [captured walkthrough](https://github.com/refract-org/refract/blob/main/docs/example-output.md) links each change to its revisions.
 
-For repeated review, [review a watchlist](review.md) from a source build. Refract remembers the last revision you explicitly acknowledged. That command is unreleased in the npm version used above.
+For repeated review, [review a watchlist](review.md). Refract remembers the last revision you explicitly acknowledged.
 
 ## What you receive
 

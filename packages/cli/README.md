@@ -1,6 +1,12 @@
 # @refract-org/cli
 
-CLI tool — provides the `refract` command (alias: `wikihistory`).
+`git log` for Wikipedia. Provides the `refract` command (alias: `wikihistory`).
+
+```bash
+npx @refract-org/cli claim Pluto --text "ninth and smallest" --from 71593043 --to 71601937
+```
+
+This prints one sentence of Wikipedia's Pluto article from each of 43 revisions made on the day Pluto was reclassified. To install it and try an offline sample:
 
 ```bash
 npm install -g @refract-org/cli

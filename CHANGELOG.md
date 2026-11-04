@@ -1,8 +1,18 @@
 # Changelog
 
-## Unreleased
+## 0.6.0 (2026-11-04)
+
+### Fixed
+- **Sentence text no longer includes category tags.** `[[Category:X]]` was left in the stripped text, so its name joined the next sentence, as in `Category:IAU planet debate Pluto is…`. Events for affected sentences differ from earlier versions, and some rewrites near a category tag are now reported as `sentence_first_seen` rather than `sentence_modified`.
+- **The browser explorer and `export --format html` work again.** An unescaped newline in the page's inline script stopped it parsing, so the event list stayed empty and the tabs and buttons did nothing. Published 0.5.17 has this bug. A new test parses the script.
+- **Wiki text can no longer break out of those pages.** Event text is escaped where it is embedded in the inline script and in HTML attributes.
 
 ### Added
+- **`refract claim` takes `--from` and `--to`.** With both, it reads the whole range; with one, the `--limit` default still applies.
+- **Piped `analyze` output shows the changed wording** of sentence and citation events, not only `sentence_length=`.
+- **`publish.yml` lists the server in the official MCP registry.** `server.json` now follows the registry's current schema. The tool list stays in the MCP server card.
+- **A real example leads the README.** `docs/examples/pluto-events.ndjson` follows the first sentence of Wikipedia's Pluto article through 24 August 2006, from saved lead-only inputs. `scripts/capture-wiki-examples.ts`, which replaces `capture-bitcoin-example.ts`, checks the events and the README's quotes.
+- **`packages/mcp/README.md`**, and a test that it lists each tool.
 - `refract review`: source watchlists, saved fetched/reviewed revision cursors, resumable history fetching, and explicit acknowledgment of an inspected report.
 - Markdown and JSON review reports with source identity, changed text, revision links, mechanical filters, saved inputs, and coverage. `review --sample` demonstrates the complete workflow offline.
 - Optional revision parent and source-text availability metadata. Coverage reports missing inputs and avoids text comparisons across known gaps.
@@ -17,6 +27,11 @@
 - **The viewer shows progress while it reads a file.** A throbber appears when a file or the sample data takes longer than 150 ms, holds still under reduced motion, and keeps moving through a long parse, which now yields every 2,000 lines.
 
 ### Changed
+- **One description everywhere: "git log for Wikipedia".** The README, docs site, CLI help, `init`, package metadata, MCP server metadata and agent skill now lead with it. The MCP description now fits the registry's 100-character limit.
+- **The README is shorter and starts from the result.** It names who Refract is for and what it does not read. The architecture tree and project list left the README, and the STD-07 context moved to `docs/repositories.md`.
+- **The roadmap covers current work only.** Completed-phase lists and the agent workstream table are gone.
+- **Files moved:** `refract-analytics.sql` to `examples/`, and `benchmark/ground-truth/` to `benchmarks/ground-truth/`.
+- **Removed:** `tmp-gen.ts`, a backup `opencode.json`, `.agent/`, `.opencode/`, the unused demo GIF and PNG, and the archived v0.3.x Bitcoin transcript.
 - **`analyze` shows a throbber on a terminal while it fetches revisions.** The CLI's spinner existed, but nothing called it. Piped output and logs are unchanged.
 - **The docs site moved to https://refract-org.github.io/refract/.** It is built and published from `apps/docs` by `docs-deploy.yml`, so a change to the engine and to its documentation can land in one PR. Every page under the old address, https://refract-org.github.io/refract-docs/, redirects to the same page at the new one, and the old images stay where they were. Canonical URLs, Open Graph tags and the sitemap use the new address, as do the "Next steps" that `refract analyze` prints and the package READMEs.
 - **The apps use the monorepo's tooling.** Their own lockfiles (two `bun.lock`, one `package-lock.json`), `.husky` hooks, `mise.toml` and `prepare: husky` scripts are removed; the root lockfile, hook and toolchain cover them, and each app's `.lintstagedrc.json` still applies to its files. Their `package.json` repository and issue links point at this repository.

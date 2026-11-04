@@ -59,7 +59,7 @@ refract diff "Bitcoin" \
   --detect-borrowing
 ```
 
-`--detect-borrowing` needs a source build until the next release. It compares the latest
+`--detect-borrowing` compares the latest
 wikitext of each pair of wikis using five-token shingles, and reports Jaccard similarity,
 shared tokens, and contiguous shared spans of at least eight tokens. A pair is flagged
 `[SIGNIFICANT BORROWING]` at 15% similarity or at 16 shared tokens. That second bar is low:

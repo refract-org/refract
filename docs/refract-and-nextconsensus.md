@@ -1,6 +1,6 @@
 # How Refract Relates to NextConsensus
 
-Refract gives mutable knowledge a memory by deriving observations from available revision histories. [NextConsensus](https://nextconsensus.com), which builds and maintains Refract, is the first system downstream of it. This page says what crosses the boundary between the two and what does not. What NextConsensus does with the record is described by NextConsensus, on its own site, not here.
+Refract derives observations from available revision histories. [NextConsensus](https://nextconsensus.com), which builds and maintains Refract, is the first system downstream of it. This page says what crosses the boundary between the two and what does not. What NextConsensus does with the record is described by NextConsensus, on its own site, not here.
 
 ## The Split
 

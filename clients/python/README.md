@@ -6,7 +6,7 @@ Python adapter for [Refract](https://github.com/refract-org/refract), maintained
 
 ```bash
 pip install "git+https://github.com/refract-org/refract.git#subdirectory=clients/python"
-npm install -g @refract-org/cli@0.5.17
+npm install -g @refract-org/cli@0.6.0
 ```
 
 Python 3.10+ and Node.js 20+ are required. The adapter looks for `refract` on PATH, then falls back to `npx @refract-org/cli`, which may download the CLI. Install the CLI explicitly when you need a controlled version. Fetching source histories requires network access.
@@ -68,7 +68,7 @@ The loader reads the page's available history, so try a short page first. Events
 
 ## Review workflow
 
-The unreleased core `review` command has a separate saved-report format and acknowledgment loop. This adapter currently wraps `analyze` and `export`; it does not provide a review method. Use the CLI and the [review guide](https://refract-org.github.io/refract/review/) for that workflow.
+The core `review` command has a separate saved-report format and acknowledgment loop. This adapter currently wraps `analyze` and `export`; it does not provide a review method. Use the CLI and the [review guide](https://refract-org.github.io/refract/review/) for that workflow.
 
 `RefractError` is raised for nonzero CLI exits. An analysis event list alone does not describe complete source coverage. For coverage-sensitive review, retain and inspect the core review report instead.
 

@@ -66,6 +66,13 @@ export function eventLabel(eventType: string): string {
   return labels[eventType] ?? eventType.replace(/_/g, " ");
 }
 
+const EXCERPT_LENGTH = 240;
+
+function excerpt(text: string): string {
+  const flat = text.replace(/\s+/g, " ").trim();
+  return flat.length > EXCERPT_LENGTH ? `${flat.slice(0, EXCERPT_LENGTH)}\u2026` : flat;
+}
+
 export function formatEvent(event: EvidenceEvent): string {
   const icon = eventIcon(event.eventType);
   const label = eventLabel(event.eventType);
@@ -82,6 +89,12 @@ export function formatEvent(event: EvidenceEvent): string {
     .join(", ");
   if (detail) {
     line += `\n    ${dim(detail)}`;
+  }
+
+  // Sentence and citation events hold one passage. Other events can hold a whole section.
+  if (/^(sentence|citation)_/.test(event.eventType)) {
+    if (event.before) line += `\n    ${dim("Before:")} ${excerpt(event.before)}`;
+    if (event.after) line += `\n    ${dim("After:")}  ${excerpt(event.after)}`;
   }
 
   if (event.modelInterpretation) {

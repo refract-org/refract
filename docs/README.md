@@ -1,6 +1,6 @@
 # Refract Documentation
 
-Refract gives mutable knowledge a memory. See how Wikipedia text and citations
+Refract is a git log for Wikipedia. See how Wikipedia text and citations
 changed since your last review, with text and revision links to inspect.
 
 The [documentation site](https://refract-org.github.io/refract/) has the CLI reference,

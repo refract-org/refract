@@ -275,7 +275,7 @@ const allEvents = ${JSON.stringify(
       deterministicFacts: e.deterministicFacts?.map((f) => `${f.fact}${f.detail ? `: ${f.detail}` : ""}`),
       confidence: e.modelInterpretation?.confidence,
     })),
-  )};
+  ).replace(/</g, "\\u003c")};
 
 let currentPage = 1;
 let pageSize = 50;
@@ -326,7 +326,7 @@ function renderPage() {
   if (pageEvents.length === 0) {
     list.innerHTML = '<div class="empty">No events match the current filters</div>';
   } else {
-    list.innerHTML = pageEvents.map(renderEventHTML).join('\n');
+    list.innerHTML = pageEvents.map(renderEventHTML).join('');
   }
   const displayPage = pageSize === 0 ? 1 : currentPage;
   const displayTotal = pageSize === 0 ? 1 : totalPages;
@@ -382,7 +382,7 @@ function showDiff(from, to, eventType) {
 }
 
 function closeModal() { document.getElementById('diff-modal').classList.remove('open'); }
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML.replace(/"/g, '&quot;'); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 ${inlineDownloadScript}
 renderPage();

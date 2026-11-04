@@ -17,7 +17,7 @@ cd "$(dirname "$0")/.."
 
 WINDOW_START="2026-05-29T00:00:00Z"
 WINDOW_END_NOTE="pinned by lastRevisionId per page in the manifest"
-OUT="benchmark/ground-truth"
+OUT="benchmarks/ground-truth"
 export NODE_OPTIONS="--max-old-space-size=6144"
 
 PAGES=(

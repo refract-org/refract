@@ -18,7 +18,7 @@ const SITE_URL = (
 ).replace(/\/?$/, "/");
 const SITE_NAME = "Refract";
 const SITE_DESCRIPTION =
-	"Refract gives mutable knowledge a memory. Inspect changed wording and citations across available source revision histories.";
+	"A git log for Wikipedia: see how a page's sentences, citations, and structure changed, revision by revision, as data you can check.";
 const SOURCE_REPOSITORY = "https://github.com/refract-org/refract";
 const REPO_DIR = resolve(__dirname, "../..");
 const CANONICAL_PAGES = {

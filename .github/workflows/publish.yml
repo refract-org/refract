@@ -67,10 +67,25 @@ jobs:
           # hand-written and left out @refract-org/mcp, which the CLI imports at
           # startup, so the next CLI would not have installed at all.
           FAILED=""
+          FAILED_NAMES=""
           for pkg in $(bun scripts/check-release.ts --order); do
             echo "::group::Publishing $pkg"
             NAME=$(node -p "require('./$pkg/package.json').name")
             VERSION=$(node -p "require('./$pkg/package.json').version")
+            # A package whose internal dependency just failed would install for
+            # nobody, and once it is `latest` that breaks every new install. Hold
+            # it back, so a partial release leaves the previous version working.
+            BLOCKED=""
+            for dep in $(node -p "Object.keys(require('./$pkg/package.json').dependencies ?? {}).join(' ')"); do
+              case " $FAILED_NAMES " in *" $dep "*) BLOCKED="$dep" ;; esac
+            done
+            if [ -n "$BLOCKED" ]; then
+              echo "::error::Not publishing $NAME@$VERSION: its dependency $BLOCKED failed"
+              FAILED="$FAILED $NAME@$VERSION"
+              FAILED_NAMES="$FAILED_NAMES $NAME"
+              echo "::endgroup::"
+              continue
+            fi
             # Skip versions already on the registry: packages version
             # independently, so most tags republish only some of them, and npm
             # rejects a duplicate PUT — which failed the whole run. Skipping is
@@ -82,15 +97,16 @@ jobs:
               # A failed publish still fails the run — v0.5.12 reported success
               # while every package 404'd on PUT (npm's response to an
               # unauthorized write), so the tag looked released and was not.
-              # But it must not stop the packages after it: v0.5.16 died at
+              # But it must not stop unrelated packages after it: v0.5.16 died at
               # @refract-org/mcp (a new package, which cannot use trusted
-              # publishing until it exists on npm) and left eval and cli
-              # unpublished behind it. Attempt every package, then fail once.
+              # publishing until it exists on npm) and left eval behind it.
+              # Attempt each package whose dependencies made it, then fail once.
               if ( cd "$pkg" && "$NPM" publish --access public --provenance ); then
                 echo "$NAME@$VERSION published"
               else
                 echo "::error::Publish failed for $NAME@$VERSION"
                 FAILED="$FAILED $NAME@$VERSION"
+                FAILED_NAMES="$FAILED_NAMES $NAME"
               fi
             fi
             echo "::endgroup::"
@@ -100,3 +116,36 @@ jobs:
             echo "Publish failed for:$FAILED"
             exit 1
           fi
+
+      # The registry reads mcpName from the npm package to confirm ownership of
+      # the name in server.json, so this has to follow the npm publish above.
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Download and verify mcp-publisher
+        env:
+          MCP_PUBLISHER_VERSION: v1.8.7
+        run: |
+          set -euo pipefail
+          archive="mcp-publisher_linux_amd64.tar.gz"
+          base_url="https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}"
+          curl --fail --location --silent --show-error --output "$archive" "$base_url/$archive"
+          curl --fail --location --silent --show-error --output "$archive.sigstore.json" "$base_url/$archive.sigstore.json"
+          cosign verify-blob \
+            --bundle "$archive.sigstore.json" \
+            --certificate-identity "https://github.com/modelcontextprotocol/registry/.github/workflows/release.yml@refs/tags/${MCP_PUBLISHER_VERSION}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "$archive"
+          tar xzf "$archive" mcp-publisher
+          rm -f "$archive" "$archive.sigstore.json"
+
+      - name: Publish to the MCP registry
+        run: |
+          ./mcp-publisher login github-oidc
+          # npm can take a moment to serve a version it has just accepted.
+          for attempt in 1 2 3 4 5; do
+            ./mcp-publisher publish && exit 0
+            echo "Attempt $attempt failed; retrying in 30 seconds."
+            sleep 30
+          done
+          exit 1

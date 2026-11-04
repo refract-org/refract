@@ -1,6 +1,6 @@
 # Claim-State Timelines
 
-Refract gives mutable knowledge a memory by deriving observations from available
+Refract derives observations from available
 revision histories. A claim-state timeline organizes those observations around
 matched text, within the captured history and the rules used to match it.
 

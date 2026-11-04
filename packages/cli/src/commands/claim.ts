@@ -25,6 +25,11 @@ export interface ClaimHistoryResult {
   caveats?: string[];
 }
 
+export interface ClaimRange {
+  from?: number;
+  to?: number;
+}
+
 export async function runClaimHistory(
   pageTitle: string,
   claimText: string,
@@ -32,13 +37,29 @@ export async function runClaimHistory(
   apiUrl?: string,
   cacheDir?: string,
   auth?: AuthConfig,
-  revisionLimit = 50,
+  revisionLimit?: number,
+  range: ClaimRange = {},
 ): Promise<ClaimHistoryResult> {
   if (!claimText.trim()) throw new Error("Supply nonempty passage text.");
-  if (!Number.isSafeInteger(revisionLimit) || revisionLimit < 1) throw new Error("--limit must be a positive integer.");
+  const { from, to } = range;
+  for (const id of [from, to]) {
+    if (id !== undefined && (!Number.isSafeInteger(id) || id < 1))
+      throw new Error("Revision bounds must be positive integer IDs.");
+  }
+  if (from !== undefined && to !== undefined && from > to)
+    throw new Error("The start revision must be before the end revision.");
+  // Only a closed range says how much to read; anything else keeps the default cap.
+  const limit = revisionLimit ?? (from !== undefined && to !== undefined ? undefined : 50);
+  if (limit !== undefined && (!Number.isSafeInteger(limit) || limit < 1))
+    throw new Error("--limit must be a positive integer.");
   const client = new MediaWikiClient(apiUrl ? { apiUrl, auth } : auth ? { auth } : undefined);
 
-  const revisions = await client.fetchRevisions(pageTitle, { limit: revisionLimit, direction: "older" });
+  const revisions = await client.fetchRevisions(
+    pageTitle,
+    from !== undefined
+      ? { direction: "newer", startRevId: from, endRevId: to, limit }
+      : { direction: "older", startRevId: to, limit },
+  );
   if (useCache && !apiUrl && revisions.length > 0) await saveRevisions(revisions, cacheDir);
 
   if (revisions.length === 0) {
@@ -183,9 +204,10 @@ export async function runClaim(
   apiUrl?: string,
   cacheDir?: string,
   auth?: AuthConfig,
-  revisionLimit = 50,
+  revisionLimit?: number,
+  range?: ClaimRange,
 ): Promise<void> {
-  const result = await runClaimHistory(pageTitle, claimText, useCache, apiUrl, cacheDir, auth, revisionLimit);
+  const result = await runClaimHistory(pageTitle, claimText, useCache, apiUrl, cacheDir, auth, revisionLimit, range);
   console.log(`Tracking passage in "${pageTitle}"...`);
   console.log(`Claim text: "${claimText}"\n`);
   for (const variant of result.revisions) {

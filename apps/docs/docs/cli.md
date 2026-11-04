@@ -2,19 +2,17 @@
 
 All commands work with `wikihistory` as a backward-compatible alias (e.g., `wikihistory analyze`).
 
-The tables describe published CLI 0.5.17. Entries marked *source build* are newer and
-need a build from source until the next release. To keep checking a source, see
+The tables describe published CLI 0.6.0. To keep checking a source, see
 [which command to use](usage.md#which-command-keeps-checking-a-source).
 
 ## `refract init`
 
-Onboarding — runs a quick analysis and shows what Refract can do.
+Onboarding — shows what Refract reports on a bundled fictional history, offline.
 
 ```bash
 refract init
 ```
 
-The published version runs a short live analysis. In the core source build,
 `init` uses a bundled fictional library history without fetching a source;
 `--json` prints its computed events as NDJSON.
 
@@ -46,7 +44,7 @@ Also accepts the [analyzer options](#analyzer-options).
 
 ## `refract review`
 
-*Source build.* Inspect source changes since the last acknowledged review. Fetched and
+Inspect source changes since the last acknowledged review. Fetched and
 acknowledged revisions are kept separately. [Review your sources](review.md) covers the
 workflow, saved-report format, and coverage requirements.
 
@@ -83,7 +81,9 @@ refract claim <page> [options]
 |---|---|---|
 | `page` | required (positional) | Page title |
 | `-t, --text <text>` | required | Claim text to track |
-| `--limit <n>` | `50` | Revisions read: the latest N |
+| `--limit <n>` | `50` | Revisions read: the latest N. With both `--from` and `--to`, the whole range unless set |
+| `--from <revId>` | — | Start revision ID; reads forward from it |
+| `--to <revId>` | — | End revision ID; without `--from`, reads backward from it |
 | `-c, --cache` | off | Cache revisions in SQLite |
 | `--api <url>` | `en.wikipedia.org` | MediaWiki API base URL |
 
@@ -145,7 +145,7 @@ refract diff <topic> [options]
 | `--wiki-e <url>` | optional | Fifth wiki API URL |
 | `--wiki-f <url>` | optional | Sixth wiki API URL |
 | `-d, --depth <d>` | `detailed` | Analysis depth. See [depth levels](depth.md) |
-| `--detect-borrowing` | off | *Source build.* Measure the text each pair of wikis shares. See the [cross-wiki tutorial](tutorials/cross-wiki-diff.md#4-measure-shared-text). |
+| `--detect-borrowing` | off | Measure the text each pair of wikis shares. See the [cross-wiki tutorial](tutorials/cross-wiki-diff.md#4-measure-shared-text). |
 
 ## `refract eval`
 
@@ -283,11 +283,11 @@ refract explore <page> [options]
 | `page` | required (positional) | Page title |
 | `-p, --port <n>` | `8899` | Server port |
 | `--no-open` | off | Don't open browser automatically |
-| `--from <revId>` | — | *Source build.* Start revision ID |
-| `--to <revId>` | — | *Source build.* End revision ID |
-| `--since <ts>` | — | *Source build.* Start timestamp |
-| `--depth <d>` | `detailed` | *Source build.* Analysis depth: `brief`, `detailed`, `forensic` |
-| `-c, --cache` | off | *Source build.* Reuse a continuous fixed range from the local cache. Needs Bun and `@refract-org/persistence`. |
+| `--from <revId>` | — | Start revision ID |
+| `--to <revId>` | — | End revision ID |
+| `--since <ts>` | — | Start timestamp |
+| `--depth <d>` | `detailed` | Analysis depth: `brief`, `detailed`, `forensic` |
+| `-c, --cache` | off | Reuse a continuous fixed range from the local cache. Needs Bun and `@refract-org/persistence`. |
 | `--api <url>` | `en.wikipedia.org` | MediaWiki API base URL |
 
 Also accepts the [analyzer options](#analyzer-options).

@@ -1,6 +1,6 @@
 {
   "name": "@refract-org/ingestion",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "type": "module",
   "private": false,
   "description": "Multi-source ingestion adapters for fetching revisions, diffs, and entity histories from Wikipedia, and other knowledge repositories",

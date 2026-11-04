@@ -62,7 +62,7 @@ docs/
 - Reference packages as `@refract-org/<name>`.
 - Reference the CLI as `refract` (`wikihistory` works as a backward-compat alias).
 - Use `refract` as the command name in all code examples.
-- Describe Refract as a deterministic observation engine.
+- Lead with "git log for Wikipedia". "Deterministic observation engine" is the technical description, for pages about how it works.
 - L1/L2/L3 references are legacy — prefer "deterministic" / "observation layer".
 
 ## Build

@@ -6,21 +6,16 @@ pairs. Commands below use `refract` as the CLI command.
 
 ## Try the offline walkthrough
 
-The offline `init` behavior is available in this checkout. Until it ships in an
-npm release, build from source and define a shell function while working in the
-repository root:
+With the CLI installed, or through `npx @refract-org/cli`:
 
 ```bash
-bun install --frozen-lockfile
-bun run build
-refract() { node packages/cli/dist/src/cli.js "$@"; }
 refract init
 ```
 
 The fictional Rivergate Library sample shows a sentence changing from closing at
 six to closing at eight, a reference being removed, and wording about free
 printing disappearing and returning. The reference URL, dates, and revision IDs
-are fictional too. No network access is needed after dependencies are installed.
+are fictional too. It makes no wiki requests.
 
 ![Computed observations from the fictional sample](./examples/onboarding.svg)
 
@@ -141,8 +136,8 @@ refract verify bitcoin-proof.json --html bitcoin-receipt.html
 `verify` works offline and exits 1 when a check fails. A pass shows that the
 bundle agrees with itself. Nothing in it is signed, and anyone who edits it can
 recompute every hash, so compare its Merkle root with one you received separately
-or re-run the same Refract version over the same range. Use a source build until
-the next release: `verify` in 0.5.17 does not rehash the events.
+or re-run the same Refract version over the same range. Use 0.6.0 or later:
+`verify` in 0.5.17 and earlier does not rehash the events.
 [What `verify` checks](https://refract-org.github.io/refract/bundle-manifest/#checking-a-bundle)
 lists the fields a pass does not cover.
 
@@ -188,13 +183,13 @@ After `bun run build`, these commands regenerate the checked-in artifacts:
 
 ```bash
 bun scripts/capture-onboarding.ts
-bun scripts/capture-bitcoin-example.ts
+bun scripts/capture-wiki-examples.ts
 ```
 
 Both use local inputs. Add `--check` to compare the saved artifacts with current
-output without rewriting them. To fetch the two pinned Bitcoin revision pairs
-again, run `bun scripts/capture-bitcoin-example.ts --refresh`; that step requires
-network access.
+output without rewriting them. To fetch the pinned Pluto and Bitcoin revision
+pairs again, run `bun scripts/capture-wiki-examples.ts --refresh`; that step
+requires network access.
 
 ## Next steps
 

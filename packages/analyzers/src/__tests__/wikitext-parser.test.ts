@@ -8,7 +8,19 @@ import {
   extractHeadingMap,
   findSectionForText,
   sanitizeWikitext,
+  stripWikitext,
 } from "../wikitext-parser.js";
+
+describe("stripWikitext", () => {
+  it("drops category tags so they cannot join the next sentence", () => {
+    expect(stripWikitext("[[Category:IAU planet debate]]\n\nPluto is small.")).toBe("Pluto is small.");
+    expect(stripWikitext("Pluto is small.\n[[category:Dwarf planets|Pluto]]")).toBe("Pluto is small.");
+  });
+
+  it("keeps a visible link to a category", () => {
+    expect(stripWikitext("See [[:Category:Dwarf planets]].")).toBe("See :Category:Dwarf planets.");
+  });
+});
 
 const SAMPLE = `'''Bold text''' and ''italic''.
 == History ==

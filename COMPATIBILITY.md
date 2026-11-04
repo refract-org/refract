@@ -25,16 +25,16 @@ as this tree. `publish.yml` publishes in the order the script prints.
 
 | Package | In this tree | On npm (2026-09-29) | Downstream consumers |
 |---|---|---|---|
-| `@refract-org/evidence-graph` | 0.5.3 | 0.5.2 | every package; NextConsensus; `apps/ui` (types only, from this tree) |
-| `@refract-org/ingestion` | 0.3.3 | 0.3.3 | mcp, cli; NextConsensus |
-| `@refract-org/analyzers` | 0.5.2 | 0.5.2 | mcp, cli; NextConsensus |
-| `@refract-org/mcp` | 0.1.0 | 0.1.0 | cli |
+| `@refract-org/evidence-graph` | 0.5.3 | 0.5.3 | every package; NextConsensus; `apps/ui` (types only, from this tree) |
+| `@refract-org/ingestion` | 0.3.4 | 0.3.4 | mcp, cli; NextConsensus |
+| `@refract-org/analyzers` | 0.5.3 | 0.5.3 | mcp, cli; NextConsensus |
+| `@refract-org/mcp` | 0.1.1 | 0.1.1 | cli |
 | `@refract-org/eval` | 0.2.2 | 0.2.2 | cli (optional) |
-| `@refract-org/cli` | 0.5.17 | 0.5.17 | `clients/python`, Docker image, operators |
+| `@refract-org/cli` | 0.6.0 | 0.6.0 | `clients/python`, Docker image, operators |
 | `@refract-org/persistence` | 0.1.1 | private | cli `--cache` from a source checkout |
 
-`npm install @refract-org/cli@0.5.17` into an empty directory resolves the npm column
-above, and `refract --version` prints 0.5.17. It is the first CLI on npm since 0.5.7,
+`npm install @refract-org/cli@0.6.0` into an empty directory resolves the npm column
+above, and `refract --version` prints 0.6.0. The CLI on npm before 0.5.17 was 0.5.7,
 which does not start: it declares `@refract-org/analyzers@^0.3.0` and imports code
 that only analyzers 0.5.0 has.
 
@@ -82,6 +82,7 @@ As documented in `schema.md`:
 
 | refract CLI | `@refract-org/evidence-graph` | `EVENT_SCHEMA_VERSION` |
 |---|---|---|
+| 0.6.0 | 0.5.3 | `"0.5.0"` |
 | 0.5.17 | 0.5.2 | `"0.5.0"` |
 | 0.5.15–0.5.16 | 0.5.1 | `"0.5.0"` |
 | 0.5.0–0.5.7 | 0.4.x–0.5.0 | `"0.4.0"` |

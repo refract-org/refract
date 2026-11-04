@@ -98,7 +98,7 @@ function setVersion(path: string, pattern: RegExp) {
 }
 setVersion("packages/cli/package.json", /("version":\s*")[^"]+(")/);
 setVersion("packages/cli/src/version.ts", /(REFRACT_VERSION = ")[^"]+(")/);
-setVersion("server.json", /("version":\s*")[^"]+(",\s*"website")/);
+setVersion("server.json", /("version":\s*")[^"]+(",\s*"websiteUrl")/);
 setVersion("server.json", /("identifier":\s*"@refract-org\/cli",\s*"version":\s*")[^"]+(")/);
 setVersion(".well-known/mcp/server-card.json", /("version":\s*")[^"]+(")/);
 
@@ -106,8 +106,13 @@ setVersion(".well-known/mcp/server-card.json", /("version":\s*")[^"]+(")/);
 // where npm's state is what matters.
 await $`bun scripts/check-release.ts`;
 
+// The saved review report records the CLI version, so a bump makes it stale and
+// `bun run check:examples` would fail on the release commit.
+await $`bun run build`;
+await $`bun scripts/capture-review.ts`;
+
 const tag = `v${next}`;
-await $`git add package.json CHANGELOG.md packages/cli/package.json packages/cli/src/version.ts server.json .well-known/mcp/server-card.json`;
+await $`git add package.json CHANGELOG.md packages/cli/package.json packages/cli/src/version.ts server.json .well-known/mcp/server-card.json docs/examples/review.md docs/examples/review.json docs/examples/review-citations.md`;
 await $`git commit -m "chore: release ${tag}"`;
 await $`git tag ${tag}`;
 
