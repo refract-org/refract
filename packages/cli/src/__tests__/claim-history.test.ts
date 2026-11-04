@@ -69,6 +69,24 @@ describe("claim history reads the latest revisions", () => {
     expect(log.mock.calls.flat().join("\n")).toContain("Status:      absent");
   });
 
+  it.each([
+    [{ from: 3, to: 4 }, undefined, { rvdir: "newer", rvstartid: "3", rvendid: "4" }],
+    [{ from: 3 }, undefined, { rvdir: "newer", rvstartid: "3", rvendid: null }],
+    [{ to: 4 }, undefined, { rvdir: "older", rvstartid: "4", rvendid: null }],
+  ])("reads the requested revision range %j", async (range, limit, expected) => {
+    const fetchMock = vi.fn(async (input: string | URL) => pageHistory(new URL(input)));
+    vi.stubGlobal("fetch", fetchMock);
+    await runClaimHistory("Bridge", CLAIM, false, API, undefined, undefined, limit, range);
+    const url = new URL(fetchMock.mock.calls[0][0]);
+    for (const [name, value] of Object.entries(expected)) expect(url.searchParams.get(name)).toBe(value);
+  });
+
+  it("rejects a range that runs backward", async () => {
+    await expect(
+      runClaimHistory("Bridge", CLAIM, false, API, undefined, undefined, undefined, { from: 4, to: 3 }),
+    ).rejects.toThrow("start revision must be before");
+  });
+
   it("marks word overlap as uncertain and retains inspectable candidate text", async () => {
     const candidate = "The bridge opened to traffic in 2032.";
     vi.stubGlobal(
