@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <title>Refract</title>
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .lens { fill: #7c8aff }
+      .ray { stroke: #fb923c }
+    }
+  </style>
+  <path class="lens" fill="#5b68e0" d="M3.8 1Q8 8 3.8 15Q-.4 8 3.8 1z"/>
+  <path class="ray" stroke="#ea580c" fill="none" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round" d="M7.6 3.8 13.8 8 7.6 12.2"/>
+</svg>

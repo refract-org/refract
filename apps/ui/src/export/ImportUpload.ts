@@ -1,3 +1,4 @@
+import { Throbber } from "../brand/Throbber.js";
 import type { EvidenceEvent, EvidenceLayer } from "../types.js";
 import { isEventType } from "../types.js";
 
@@ -9,6 +10,10 @@ const LAYER_RECORD: Record<EvidenceLayer, true> = {
 	unknown: true,
 };
 const VALID_LAYERS = new Set<string>(Object.keys(LAYER_RECORD));
+
+// The throbber animates on the main thread, so a long parse has to give it
+// turns or it freezes on the frame it reached.
+const LINES_BETWEEN_YIELDS = 2000;
 
 export class ImportUpload {
 	private container: HTMLElement;
@@ -72,6 +77,10 @@ export class ImportUpload {
 		const status = document.getElementById("import-status");
 		if (!status) return;
 
+		status.textContent = "";
+		const throbber = new Throbber(status, `Reading ${file.name}`);
+		throbber.start();
+
 		try {
 			const text = await file.text();
 			const lines = text.split("\n").filter((l) => l.trim().length > 0);
@@ -79,6 +88,9 @@ export class ImportUpload {
 			const errors: string[] = [];
 
 			for (let i = 0; i < lines.length; i++) {
+				if (i > 0 && i % LINES_BETWEEN_YIELDS === 0) {
+					await new Promise((resolve) => setTimeout(resolve));
+				}
 				try {
 					const parsed = JSON.parse(lines[i]);
 					const validation = this.validateEvent(parsed);
@@ -91,6 +103,8 @@ export class ImportUpload {
 					errors.push(`Line ${i + 1}: Invalid JSON`);
 				}
 			}
+
+			throbber.stop();
 
 			if (events.length > 0) {
 				status.textContent = `Imported ${events.length} events${errors.length > 0 ? ` (${errors.length} errors)` : ""}`;
@@ -111,6 +125,7 @@ export class ImportUpload {
 				status.appendChild(errorList);
 			}
 		} catch (err) {
+			throbber.stop();
 			status.textContent = `Error reading file: ${err}`;
 			status.style.color = "var(--red)";
 		}

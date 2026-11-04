@@ -127,40 +127,72 @@ export function table(headers: string[], rows: string[][], align: ("left" | "rig
   return [headerRow, sep, ...dataRows].join("\n");
 }
 
-export function spinner(): { start(msg: string): void; update(msg: string): void; stop(msg?: string): void } {
-  const frames = ["\u280b", "\u2819", "\u2839", "\u2838", "\u283c", "\u2834", "\u2826", "\u2827", "\u2807", "\u280f"];
-  let frameIdx = 0;
+// The logo's rays in one line of text: focus falls behind the retina, in front of
+// it, splits onto it, then lands on it.
+const FOCUSED_FRAME = ")>   \u2022 ";
+const FOCUS_FRAMES = [")>   |\u00b7", ")> \u00b7 | ", ")>   : ", FOCUSED_FRAME];
+const FRAME_MS = 350;
+
+function paintFrame(frame: string): string {
+  return frame
+    .split(/([\u00b7:\u2022])/)
+    .map((part, i) => (i % 2 === 1 ? yellow(part) : gray(part)))
+    .join("");
+}
+
+type SpinnerStream = { write(text: string): unknown; isTTY?: boolean; columns?: number };
+
+/**
+ * Draws on stderr, so `--json` on stdout stays clean. Off a terminal it prints
+ * the message once. It can only tick while the event loop is free, so wrap
+ * waiting on I/O, not synchronous work.
+ */
+export function spinner(stream: SpinnerStream = process.stderr): {
+  start(msg: string): void;
+  /** Finish: keep the message, beside the focused frame. */
+  land(): void;
+  /** Abandon: clear the line, because whatever it was waiting for failed. */
+  stop(): void;
+} {
   let interval: ReturnType<typeof setInterval> | null = null;
   let currentMsg = "";
 
-  function render() {
-    process.stderr.write(`\r${gray(frames[frameIdx])} ${currentMsg}`);
-    frameIdx = (frameIdx + 1) % frames.length;
+  // Parks the cursor at column 0, so a retry warning printed mid-fetch replaces
+  // the frame instead of trailing it. Clipping keeps the line from wrapping,
+  // since only the last row of a wrapped line could be cleared.
+  function draw(frame: string) {
+    const room = stream.columns ? stream.columns - frame.length - 1 : undefined;
+    stream.write(`\r\x1b[2K${paintFrame(frame)} ${currentMsg.slice(0, room)}\r`);
+  }
+
+  function halt() {
+    if (interval) clearInterval(interval);
+    interval = null;
   }
 
   return {
     start(msg: string) {
       currentMsg = msg;
-      if (isTTY) {
-        interval = setInterval(render, 80);
-      } else {
-        process.stderr.write(`${msg}\n`);
+      if (!stream.isTTY) {
+        stream.write(`${msg}\n`);
+        return;
       }
+      let frameIdx = 0;
+      const tick = () => {
+        draw(FOCUS_FRAMES[frameIdx] ?? FOCUSED_FRAME);
+        frameIdx = (frameIdx + 1) % FOCUS_FRAMES.length;
+      };
+      tick();
+      interval = setInterval(tick, FRAME_MS);
+      interval.unref();
     },
-    update(msg: string) {
-      currentMsg = msg;
+    land() {
+      halt();
+      if (stream.isTTY) stream.write(`\r\x1b[2K${paintFrame(FOCUSED_FRAME)} ${currentMsg}\n`);
     },
-    stop(msg?: string) {
-      if (interval) {
-        clearInterval(interval);
-        interval = null;
-      }
-      if (isTTY) {
-        process.stderr.write(`\r${" ".repeat(currentMsg.length + 2)}\r`);
-      }
-      if (msg) {
-        process.stderr.write(`${msg}\n`);
-      }
+    stop() {
+      halt();
+      if (stream.isTTY) stream.write("\r\x1b[2K");
     },
   };
 }

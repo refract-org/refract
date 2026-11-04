@@ -65,10 +65,66 @@ body {
 }
 
 #app-header h1 {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 	font-size: 1.4rem;
 	font-weight: 600;
 	color: var(--accent);
 	letter-spacing: -0.02em;
+}
+
+.brand-mark {
+	width: 1.25em;
+	height: 1.25em;
+	flex: none;
+}
+
+.brand-lens {
+	fill: var(--accent);
+}
+
+.brand-ray {
+	fill: none;
+	stroke: var(--orange);
+	stroke-width: 2.1;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+/* ── Throbber ── */
+.throbber {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--text);
+}
+
+.throbber svg {
+	width: 27px;
+	height: 24px;
+	flex: none;
+}
+
+.throbber-lens {
+	fill: var(--accent);
+}
+
+.throbber-retina {
+	fill: none;
+	stroke: var(--accent);
+	stroke-width: 3;
+	stroke-linecap: round;
+}
+
+.throbber-ray {
+	stroke: var(--orange);
+	stroke-width: 3.2;
+	stroke-linecap: round;
+}
+
+.throbber-point {
+	fill: var(--orange);
 }
 
 .subtitle {

@@ -29,8 +29,13 @@ const COLORS = {
 	brand: "#ffffff", // .brand
 	text: "#e2e4ed", // --text
 	muted: "#7c82a0", // --text-muted
-	accent: "#2dd4bf", // --accent
 	rule: "rgba(255, 255, 255, 0.12)", // --border-strong
+};
+
+// assets/brand/refract-logo.svg in its dark palette, with the box its ink fills.
+const LOGO = {
+	box: { x: 1, y: 4, width: 58, height: 40 },
+	markup: `<path d="M2 12H16M2 24H16M2 36H16" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round"/><path d="M20 5Q28 24 20 43Q12 24 20 5z" fill="#7c8aff"/><path d="M51 5Q61 24 51 43" fill="none" stroke="#7c8aff" stroke-width="2" stroke-linecap="round"/><path d="M24 12 56 24M25 24H56M24 36 56 24" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round"/><circle cx="56" cy="24" r="2.6" fill="#fb923c"/>`,
 };
 
 const MARGIN = 80;
@@ -88,12 +93,12 @@ export function socialCardSvg({ name, description, address }) {
 			`The social card fits ${MAX_LINES} lines of description; this one wraps to ${lines.length}: ${description}`,
 		);
 	}
-	// The site icon (the favicon triangle, drawn on a 16-unit grid), sized to
-	// the cap height of the name.
+	// The logo, sized to the cap height of the name.
 	const capHeight = NAME.size * 0.711;
-	const scale = capHeight / 12;
-	const iconWidth = 14 * scale;
-	const icon = `<path d="M8 2 15 14H1z" fill="${COLORS.accent}" transform="translate(${MARGIN - scale} ${NAME.baseline - 14 * scale}) scale(${scale})"/>`;
+	const { box, markup } = LOGO;
+	const scale = capHeight / box.height;
+	const iconWidth = box.width * scale;
+	const icon = `<g transform="translate(${MARGIN - box.x * scale} ${NAME.baseline - (box.y + box.height) * scale}) scale(${scale})">${markup}</g>`;
 	const body = lines
 		.map((line, i) =>
 			text(line, {

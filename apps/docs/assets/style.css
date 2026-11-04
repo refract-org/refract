@@ -76,6 +76,9 @@ body {
 }
 
 .brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
 	font-family: var(--font-heading);
 	font-size: 1.35rem;
 	font-weight: 700;
@@ -86,6 +89,12 @@ body {
 
 .brand:hover {
 	color: var(--accent);
+}
+
+.brand-mark {
+	width: 1.15em;
+	height: 1.15em;
+	flex: none;
 }
 
 .tagline {
