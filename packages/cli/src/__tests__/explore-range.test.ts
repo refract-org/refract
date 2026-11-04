@@ -1,4 +1,4 @@
-import type { Server } from "node:http";
+import { get, type Server } from "node:http";
 import type { Revision } from "@refract-org/evidence-graph";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -66,5 +66,76 @@ describe("explorer range", () => {
       undefined,
       undefined,
     );
+  });
+});
+
+describe("explorer origin boundary", () => {
+  const privateText = "Text from a private wiki";
+  const routes = ["/", "/api/events", "/api/revisions", "/api/coverage"];
+
+  async function startExplorer(): Promise<number> {
+    const revisions: Revision[] = [
+      {
+        revId: 7,
+        pageId: 1,
+        pageTitle: "Page",
+        content: privateText,
+        timestamp: "2025-01-01T00:00:00Z",
+        comment: "",
+        size: privateText.length,
+        minor: false,
+      },
+    ];
+    server = await runExplore("Page", 0, true, undefined, undefined, undefined, false, "brief", undefined, {
+      analysis: { events: [], revisions },
+    });
+    const address = server.address();
+    if (!address || typeof address === "string") throw new Error("missing port");
+    return address.port;
+  }
+
+  // Host is a forbidden header in the fetch spec, so this goes through node:http.
+  function getWithHost(port: number, path: string, host: string): Promise<{ status?: number; body: string }> {
+    return new Promise((resolve, reject) => {
+      get({ host: "127.0.0.1", port, path, headers: { Host: host } }, (res) => {
+        let body = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => {
+          body += chunk;
+        });
+        res.on("end", () => resolve({ status: res.statusCode, body }));
+      }).on("error", reject);
+    });
+  }
+
+  it("gives a cross-origin page no CORS grant on any route", async () => {
+    const port = await startExplorer();
+    for (const route of routes) {
+      const res = await fetch(`http://127.0.0.1:${port}${route}`, { headers: { Origin: "https://example.com" } });
+      expect(res.status, route).toBe(200);
+      expect(res.headers.get("access-control-allow-origin"), route).toBeNull();
+      await res.text();
+    }
+  });
+
+  it("refuses a Host that is not the loopback, as a rebound DNS name would send", async () => {
+    const port = await startExplorer();
+    const hosts = ["evil.example", `evil.example:${port}`, "localhost.evil.example", "127.0.0.1.evil.example"];
+    for (const host of hosts) {
+      for (const route of routes) {
+        const res = await getWithHost(port, route, host);
+        expect(res.status, `${host} ${route}`).toBe(403);
+        expect(res.body, `${host} ${route}`).not.toContain(privateText);
+      }
+    }
+  });
+
+  it("serves the addresses the explorer can be opened at", async () => {
+    const port = await startExplorer();
+    for (const host of [`localhost:${port}`, `127.0.0.1:${port}`]) {
+      const res = await getWithHost(port, "/api/revisions", host);
+      expect(res.status, host).toBe(200);
+      expect(res.body, host).toContain(privateText);
+    }
   });
 });
