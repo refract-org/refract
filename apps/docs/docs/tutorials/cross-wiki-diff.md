@@ -23,8 +23,9 @@ refract diff "Douglas_Adams" \
   --depth detailed
 ```
 
-Refract fetches both pages, runs the full deterministic pipeline on each, and produces
-a side-by-side diff of section structure, citations, categories, and sentence changes.
+Refract fetches both pages, runs the full deterministic pipeline on each, and prints
+side-by-side counts of sections, citations, templates, reverts, categories, wikilinks,
+and event types.
 
 ### 2. Compare competing Fandom wikis
 
@@ -48,47 +49,65 @@ refract diff "climate_change" \
   --depth detailed
 ```
 
-### 4. Export the comparison
+### 4. Measure shared text
 
 ```bash
 refract diff "Bitcoin" \
   --wiki-a https://en.wikipedia.org/w/api.php \
   --wiki-b https://simple.wikipedia.org/w/api.php \
-  --depth detailed > diff-output.jsonl
+  --depth brief \
+  --detect-borrowing
 ```
+
+`--detect-borrowing` needs a source build until the next release. It compares the latest
+wikitext of each pair of wikis using five-token shingles, and reports Jaccard similarity,
+shared tokens, and contiguous shared spans of at least eight tokens. A pair is flagged
+`[SIGNIFICANT BORROWING]` at 15% similarity or at 16 shared tokens. That second bar is low:
+citation templates and markup can reach it. The flag reports the rule, and shared text does
+not establish which wiki copied which, or whether either did.
 
 ## Reading the output
 
-`refract diff` produces events with a `wiki` property tagging which wiki the event
-came from:
+`refract diff` prints a summary for people; it has no JSON mode. An excerpt from a live run
+on 2026-11-04, whose counts will differ from yours:
 
-```json
-{
-  "eventType": "citation_added",
-  "wiki": "b",
-  "wikiUrl": "https://simple.wikipedia.org/w/api.php",
-  "fromRevisionId": 100,
-  "toRevisionId": 101,
-  "section": "History",
-  "before": "",
-  "after": "<ref>{{cite web |title=Bitcoin.org...}}</ref>",
-  "timestamp": "2024-01-15T10:00:00Z",
-  "deterministicFacts": [
-    {
-      "fact": "Citation added only on wiki B, absent on wiki A",
-      "provenance": { "analyzer": "cross-wiki-differ", "version": "0.5.1" }
-    }
-  ]
-}
+```text
+  Wiki A: https://en.wikipedia.org/w/api.php (HHI: 0.036)
+  Wiki B: https://simple.wikipedia.org/w/api.php (HHI: 0.056)
+
+── Overview ──
+  Total events      413     54
+  Sections           30     10
+  Citations         228     17
+  Templates          11      4
+  Reverts             2      1
+  Categories          3      2
+  Wikilinks         283     57
+
+── Cross-Wiki Text Propagation & Borrowing ──
+  Wikis A ↔ B: 3.6% Jaccard similarity (2784 shared tokens, 190 spans) [SIGNIFICANT BORROWING]
 ```
 
-Key signals:
+HHI is the source concentration of each wiki's citations; `[concentrated]` marks a high
+value. An event-type breakdown follows, then any counts more than two standard deviations
+from the mean across wikis.
+
+The summary holds counts. To compare individual events, export each wiki and compare the files:
+
+```bash
+refract export "Bitcoin" --api https://en.wikipedia.org/w/api.php --format ndjson > a.ndjson
+refract export "Bitcoin" --api https://simple.wikipedia.org/w/api.php --format ndjson > b.ndjson
+```
+
+Differences to look for in those events:
 - **Event present on one wiki but not the other** → content divergence
 - **Same section, different content** → framing divergence
 - **Different categories** → classification divergence (canon vs. non-canon, different rating systems)
 - **Different citation sources** → evidence base divergence (English-language sources vs. local sources)
 
 ## Use cases
+
+These examples show kinds of difference to find in the exported events; `refract diff` itself prints counts.
 
 ### Detecting canon divergence (Fandom)
 

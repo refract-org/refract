@@ -62,6 +62,7 @@ range; the default brief run reads a recent window. See [range and depth rules](
 | `from` | string | | Start revision ID |
 | `to` | string | | End revision ID |
 | `since` | string | | Re-observe from ISO timestamp |
+| `config` | object | | Analyzer overrides: `similarityThreshold`, `spikeFactor`, `clusterWindowMinutes`, `talkWindowBeforeDays`, `talkWindowAfterDays`, `renameDetection` |
 
 ### `claim`
 
@@ -81,17 +82,32 @@ Export page analysis as structured JSON.
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `page` | string | ✅ | Page title |
+| `depth` | enum | | `brief`, `detailed`, or `forensic` |
 | `api` | string | | MediaWiki API base URL |
+| `since` | string | | Re-observe from ISO timestamp |
 
 ### `cron`
 
-Re-observe pages — for scheduled monitoring.
+Re-observe pages — for scheduled monitoring. Reports each page's event count from a
+`brief` analysis of English Wikipedia; it keeps no state between calls and sends no
+notifications. `refract cron` on the command line does both.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `pagesFile` | string | ✅ | File path with one page title per line |
-| `interval` | string | | Lookback window in hours |
-| `api` | string | | MediaWiki API base URL |
+
+### `classify`
+
+Classify one observation boundary. Uses the configured inference provider when an API
+key is available, and otherwise asks the connected client through MCP sampling.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `boundary` | enum | ✅ | `revert`, `sentence_similarity`, `heuristic`, `template_signal`, or `activity_spike` |
+| `input` | object | ✅ | Input data; fields vary by boundary |
+| `apiKey` | string | | Inference provider API key (env: `REFRACT_INFERENCE_API_KEY`) |
+| `endpoint` | string | | OpenAI-compatible endpoint URL |
+| `model` | string | | Model name (default: `gpt-4o-mini`) |
 
 ### `get_statement_history`
 
@@ -118,21 +134,11 @@ Response fields: `statement`, `page`, `context`, `revisions` (array of `revision
 
 ## Authentication
 
-For private wikis, pass `apiKey`, `apiUser`, and `apiPassword` as parameters on any tool call.
+MCP tools do not accept wiki credentials, so they reach only wikis that allow anonymous
+reads. For a private wiki, use the CLI with [`--api-key` or `--api-user`](./usage.md#other-mediawiki-instances).
+The `apiKey` parameter on `classify` is for the inference provider.
 
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/call",
-  "params": {
-    "name": "analyze",
-    "arguments": { "page": "Internal Knowledge Base", "api": "https://wiki.internal.example.com/api.php", "apiKey": "sk-..." }
-  }
-}
-```
-
-### Passage matching and latest state
+## Passage matching and latest state
 
 `get_statement_history` now includes `latest_revision_id`, `latest_match`, and
 `caveats`. Detailed results retain candidate text and each variant's match kind.

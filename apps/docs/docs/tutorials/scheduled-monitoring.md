@@ -13,6 +13,10 @@ and section reorganization as they happen — not when someone notices.
 | `refract cron` | One-shot re-observation for cron scheduling | Batch monitoring of many pages on a fixed schedule |
 | `refract watch` | Polls one page and prints its new revisions until stopped | Following a specific page as it changes |
 
+These modes alert you to changes; they do not record what anyone inspected. For that, use
+[`refract review`](../review.md), and see
+[how all the monitoring commands compare](../usage.md#which-command-keeps-checking-a-source).
+
 ## Step 1: Create your pages file
 
 List the pages you want to monitor, one per line:

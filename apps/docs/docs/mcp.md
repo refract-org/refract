@@ -104,6 +104,7 @@ Analyze a MediaWiki page's full edit history. Returns structured events with `sc
 | `from` | string | | Start revision ID |
 | `to` | string | | End revision ID |
 | `since` | string | | Re-observe from ISO timestamp |
+| `config` | object | | Analyzer overrides: `similarityThreshold`, `spikeFactor`, `clusterWindowMinutes`, `talkWindowBeforeDays`, `talkWindowAfterDays`, `renameDetection` |
 
 ### `claim`
 
@@ -113,6 +114,7 @@ Track a specific sentence across revisions. Shows first seen, modifications, rem
 |---|---|---|---|
 | `page` | string | required | Page title |
 | `text` | string | required | Sentence text to track (partial match) |
+| `api` | string | | MediaWiki API base URL |
 
 ### `export`
 
@@ -144,6 +146,18 @@ Ask a model to classify a single observation boundary. See [CLI reference](cli) 
 | `apiKey` | string | | Inference provider API key (env: `REFRACT_INFERENCE_API_KEY`) |
 | `endpoint` | string | | OpenAI-compatible endpoint (DeepSeek, Ollama, etc.) |
 | `model` | string | | Model name |
+
+### `get_statement_history`
+
+Track normalized text or partial word matches across revisions. Returns matched revision IDs, timestamps, an overall status, the latest match, and a short change summary. A partial match does not establish equivalent meaning.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `statement` | string | required | Raw text statement to track |
+| `page` | string | required | MediaWiki page title |
+| `context` | string | | Optional use-context slug |
+| `depth` | enum | | `brief`, `detailed` (default), `forensic` |
+| `api` | string | | MediaWiki API base URL |
 
 ## Protocol
 

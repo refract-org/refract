@@ -25,6 +25,17 @@ describe("offline onboarding", () => {
     expect(fetchRevisions).not.toHaveBeenCalled();
   });
 
+  it("points at the review, claim, and snapshot workflows", async () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    await runInit();
+
+    const output = log.mock.calls.map((args) => args.join(" ")).join("\n");
+    expect(output).toContain("refract review --sample");
+    expect(output).toContain('refract claim "Bitcoin"');
+    expect(output).toContain('refract snapshot "Bitcoin"');
+  });
+
   it("exports reproducible NDJSON that a review workflow can filter offline", async () => {
     const fetchRevisions = vi
       .spyOn(MediaWikiClient.prototype, "fetchRevisions")
