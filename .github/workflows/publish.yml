@@ -10,7 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     # v0.5.13 and v0.5.14 died at GitHub's 6-hour default: `bun test` (Bun's
     # own runner, not the project suite) hung in CI. Fail a hang in minutes.
-    timeout-minutes: 30
+    # The limit has to outlast the registry readback in `Publish packages`, up
+    # to 10 minutes for each of six packages: cancelled at 30, the job would stop
+    # before it could report what failed or list the server in the MCP registry.
+    timeout-minutes: 75
     permissions:
       contents: read
       id-token: write
@@ -63,6 +66,47 @@ jobs:
           "$NPM" install -g npm@^11.5.1
           "$NPM" --version
 
+          # npm accepting a publish does not mean an install can see the version.
+          # v0.6.0 (run 41903225637) published evidence-graph, ingestion and analyzers
+          # at 20:05:59, 20:06:04 and 20:06:08 on this job's clock, and the registry
+          # dated them 20:08:05, 20:07:19 and 20:08:45: minutes later, out of order.
+          # ingestion 0.3.4 was visible while the evidence-graph 0.5.3 it needs was
+          # not, and the published CLI's range picks up the newest ingestion, so a
+          # clean `npm install @refract-org/cli` failed with ETARGET until the
+          # registry caught up. Dependency order only protects an install if each
+          # package is readable before the next one goes out.
+          #
+          # Read the packument, because ranges resolve against it and `npm view` of
+          # an exact version can answer first. The registry caches two forms of it
+          # separately, and both have to show the version: npm's resolver asks for
+          # the full document, and bun for the abbreviated one. Do not bust that
+          # cache, because installs go through it. It keeps a packument for up to 5
+          # minutes (max-age=300), which is why the limit is twice that.
+          REGISTRY_WAIT_SECONDS=600
+          REGISTRY_POLL_SECONDS=10
+          registry_serves() {
+            local accept
+            for accept in \
+              "application/json" \
+              "application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*"; do
+              curl --fail --silent --show-error --max-time 30 --header "Accept: $accept" \
+                "https://registry.npmjs.org/${1/\//%2F}" \
+                | node -e 'try { process.exit(JSON.parse(require("fs").readFileSync(0)).versions[process.argv[1]] ? 0 : 1) } catch { process.exit(1) }' "$2" \
+                || return 1
+            done
+          }
+          wait_for_registry() {
+            local started=$SECONDS
+            until registry_serves "$1" "$2"; do
+              if [ $((SECONDS - started)) -ge "$REGISTRY_WAIT_SECONDS" ]; then
+                return 1
+              fi
+              echo "$1@$2 not readable after $((SECONDS - started))s"
+              sleep "$REGISTRY_POLL_SECONDS"
+            done
+            echo "$1@$2 readable after $((SECONDS - started))s"
+          }
+
           # Dependency order, from the same script that checked it. The list was
           # hand-written and left out @refract-org/mcp, which the CLI imports at
           # startup, so the next CLI would not have installed at all.
@@ -103,6 +147,14 @@ jobs:
               # Attempt each package whose dependencies made it, then fail once.
               if ( cd "$pkg" && "$NPM" publish --access public --provenance ); then
                 echo "$NAME@$VERSION published"
+                # The version exists now and cannot be taken back, but its dependents
+                # would install for nobody yet. Failing here holds them back, and a
+                # re-run finds this version already published and carries on.
+                if ! wait_for_registry "$NAME" "$VERSION"; then
+                  echo "::error::$NAME@$VERSION was published, but the registry did not serve it within $REGISTRY_WAIT_SECONDS seconds"
+                  FAILED="$FAILED $NAME@$VERSION"
+                  FAILED_NAMES="$FAILED_NAMES $NAME"
+                fi
               else
                 echo "::error::Publish failed for $NAME@$VERSION"
                 FAILED="$FAILED $NAME@$VERSION"
