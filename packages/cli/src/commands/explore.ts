@@ -6,6 +6,10 @@ import { formatCoverage } from "../coverage.js";
 import { renderHtmlReport } from "../html-renderer.js";
 import { runAnalyze } from "./analyze.js";
 
+// The server binds to 127.0.0.1, but a page can rebind its own DNS name to that
+// address and become same-origin with it. Only the Host header gives that away.
+const LOOPBACK_HOST = /^(localhost|127\.0\.0\.1)(:\d+)?$/i;
+
 function openBrowser(url: string): void {
   const cmd = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
   import("node:child_process")
@@ -49,6 +53,11 @@ export async function runExplore(
     ));
 
   const server = createServer((req, res) => {
+    if (!LOOPBACK_HOST.test(req.headers.host ?? "")) {
+      res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+      res.end("The Refract explorer only answers at localhost or 127.0.0.1.\n");
+      return;
+    }
     const url = new URL(req.url ?? "/", `http://localhost:${port}`);
     if (url.pathname === "/api/coverage") {
       res.writeHead(200, { "Content-Type": "application/json" });
@@ -56,12 +65,12 @@ export async function runExplore(
       return;
     }
     if (url.pathname === "/api/events") {
-      res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+      res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(events));
       return;
     }
     if (url.pathname === "/api/revisions") {
-      res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+      res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(revisions));
       return;
     }
