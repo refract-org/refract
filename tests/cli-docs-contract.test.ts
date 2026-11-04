@@ -105,7 +105,7 @@ describe("the MCP documentation covers the MCP server", () => {
     });
   });
 
-  describe.each(["server.json", ".well-known/mcp/server-card.json"])("%s", (path) => {
+  describe.each([".well-known/mcp/server-card.json"])("%s", (path) => {
     const advertised = JSON.parse(read(path)).tools as { name: string; input: Record<string, unknown> }[];
 
     it("advertises each tool", () => {

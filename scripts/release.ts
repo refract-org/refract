@@ -98,7 +98,7 @@ function setVersion(path: string, pattern: RegExp) {
 }
 setVersion("packages/cli/package.json", /("version":\s*")[^"]+(")/);
 setVersion("packages/cli/src/version.ts", /(REFRACT_VERSION = ")[^"]+(")/);
-setVersion("server.json", /("version":\s*")[^"]+(",\s*"website")/);
+setVersion("server.json", /("version":\s*")[^"]+(",\s*"websiteUrl")/);
 setVersion("server.json", /("identifier":\s*"@refract-org\/cli",\s*"version":\s*")[^"]+(")/);
 setVersion(".well-known/mcp/server-card.json", /("version":\s*")[^"]+(")/);
 
