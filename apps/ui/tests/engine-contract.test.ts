@@ -16,13 +16,17 @@ import { EVENT_TYPES } from "../src/types.js";
 const EXAMPLES = join(import.meta.dirname, "../../../docs/examples");
 const captured = readdirSync(EXAMPLES).filter((f) => f.endsWith(".ndjson"));
 
-async function importText(container: HTMLElement, text: string) {
+async function importText(
+	container: HTMLElement,
+	text: string,
+	filename = "events.jsonl",
+) {
 	const onData = vi.fn<(events: EvidenceEvent[]) => void>();
 	new ImportUpload(container, onData);
 	const input = container.querySelector(
 		'input[type="file"]',
 	) as HTMLInputElement;
-	const file = new File([text], "events.jsonl", {
+	const file = new File([text], filename, {
 		type: "application/jsonl",
 	});
 	Object.defineProperty(input, "files", { value: [file] });
@@ -78,6 +82,56 @@ describe("engine output through the viewer", () => {
 		expect(captured.length).toBeGreaterThan(0);
 	});
 
+	it("offers the engine's NDJSON extension in the file chooser", () => {
+		new ImportUpload(container, () => {});
+		expect(container.querySelector("input")?.accept.split(",")).toContain(
+			".ndjson",
+		);
+	});
+
+	it.each([
+		undefined,
+		null,
+		{},
+		"facts",
+		[null],
+		["fact"],
+		[{}],
+		[{ fact: 42 }],
+		[{ fact: "valid" }, { fact: null }],
+	])("rejects malformed facts (%j) before rendering", async (facts) => {
+		const event = JSON.parse(
+			readFileSync(join(EXAMPLES, "sample-events.ndjson"), "utf8").split(
+				"\n",
+			)[0],
+		);
+		event.deterministicFacts = facts;
+		const result = await importText(container, JSON.stringify(event));
+		expect(result.events).toEqual([]);
+		expect(result.status).toContain("deterministicFacts");
+	});
+
+	it("imports valid lines alongside malformed facts with a line diagnostic", async () => {
+		const event = JSON.parse(
+			readFileSync(join(EXAMPLES, "sample-events.ndjson"), "utf8").split(
+				"\n",
+			)[0],
+		);
+		const result = await importText(
+			container,
+			[
+				JSON.stringify({ ...event, deterministicFacts: [null] }),
+				JSON.stringify(event),
+			].join("\n"),
+			"events.ndjson",
+		);
+		expect(result.events).toEqual([event]);
+		expect(result.status).toContain("Imported 1 events (1 errors)");
+		expect(result.status).toContain(
+			"Line 1: Invalid or missing deterministicFacts",
+		);
+	});
+
 	it.each(captured)(
 		"imports, lists and re-exports %s unchanged",
 		async (name) => {
@@ -87,7 +141,7 @@ describe("engine output through the viewer", () => {
 				.filter((l) => l.trim())
 				.map((l) => JSON.parse(l));
 
-			const imported = await importText(container, text);
+			const imported = await importText(container, text, name);
 			expect(imported.status).toBe(`Imported ${original.length} events`);
 			expect(imported.events).toEqual(original);
 
