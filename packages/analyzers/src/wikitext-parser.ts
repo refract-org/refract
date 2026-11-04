@@ -22,6 +22,9 @@ export function stripWikitext(wikitext: string): string {
   text = text.replace(/\{\{[^{}]*?\}\}/g, "");
   text = text.replace(/'''(.+?)'''/g, "$1");
   text = text.replace(/''(.+?)''/g, "$1");
+  // A category tag is page metadata, not prose. Left in, its name joined the next
+  // sentence. A visible link to a category, [[:Category:X]], has its own syntax.
+  text = text.replace(/\[\[\s*Category\s*:[^\]]*\]\]/gi, "");
   text = text.replace(/\[\[([^\]|]+?)\]\]/g, "$1");
   text = text.replace(/\[\[[^\]]+?\|([^\]]+?)\]\]/g, "$1");
   text = text.replace(/\n{3,}/g, "\n\n");
