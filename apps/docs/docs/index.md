@@ -12,15 +12,15 @@ It runs locally under deterministic rules, with no API key or model. Your review
 
 ## Start with one change
 
-On 24 August 2006, the International Astronomical Union reclassified Pluto as a dwarf planet. This compares two revisions of Wikipedia's Pluto article from that afternoon using the published CLI. It prints one event per line as NDJSON:
+On 24 August 2006, the International Astronomical Union reclassified Pluto as a dwarf planet. Wikipedia's Pluto article went through 43 revisions in under an hour that afternoon. This prints its first sentence from each of them:
 
 ```bash
-npx @refract-org/cli@0.5.17 analyze "Pluto" --from 71593165 --to 71593296 --depth detailed --json
+npx @refract-org/cli@0.6.0 claim "Pluto" --text "ninth and smallest" --from 71593043 --to 71601937
 ```
 
-Look for `sentence_modified`, then inspect its `before`, `after`, and revision IDs. The first sentence changes from "Pluto is the ninth…" to "Pluto was until recently considered the ninth…". The [captured walkthrough](https://github.com/refract-org/refract/blob/main/docs/example-output.md) follows that sentence through the hour.
+The sentence starts at "Pluto is the ninth…" and passes through "Pluto was until recently considered the ninth…". The [captured walkthrough](https://github.com/refract-org/refract/blob/main/docs/example-output.md) links each change to its revisions.
 
-For repeated review, [review a watchlist](review.md) from a source build. Refract remembers the last revision you explicitly acknowledged. That command is unreleased in the npm version used above.
+For repeated review, [review a watchlist](review.md). Refract remembers the last revision you explicitly acknowledged.
 
 ## What you receive
 

@@ -21,7 +21,7 @@ follow its first sentence across seven of those edits:
   Pluto is considered the ninth and smallest of the traditional planets of the Solar system, except by the IAU…
 14:09:06Z  sentence_first_seen  71597389 → 71597482
   Pluto is widely considered the ninth and smallest of the traditional planets of the Solar system
-14:10:27Z  sentence_modified    71597482 → 71597671
+14:10:27Z  sentence_first_seen  71597482 → 71597671
   Pluto was considered the ninth and smallest of the traditional planets of the Solar system
 14:20:36Z  sentence_modified    71599033 → 71599252
   Pluto at one time was considered the ninth and smallest…
@@ -29,9 +29,8 @@ follow its first sentence across seven of those edits:
   Pluto was considered the ninth and smallest of the planets of the Solar system…
 ```
 
-Excerpts drop the rest of each sentence. In the captured events, the wording is
-preceded by `Category:IAU planet debate`, the category link that sits above that
-sentence in the wikitext.
+Excerpts drop the rest of each sentence. A rewrite too different from the previous
+wording is reported as `sentence_first_seen`, usually beside a `sentence_removed`.
 
 The [saved inputs](./examples/pluto-revisions.json) stop at each revision's first
 section heading and omit edit summaries, because some from that day name an
@@ -42,7 +41,13 @@ revisions. Article text is by Wikipedia's Pluto contributors, available under
 These timestamps show when the text changed. They do not establish why an editor
 changed it.
 
-To fetch one of these transitions from Wikipedia and list its sentence events:
+To follow the sentence through the whole range on Wikipedia:
+
+```bash
+refract claim "Pluto" --text "ninth and smallest" --from 71593043 --to 71601937
+```
+
+To fetch one of these transitions as events:
 
 ```bash
 refract analyze "Pluto" --from 71593165 --to 71593296 --depth detailed --json > pluto-events.ndjson

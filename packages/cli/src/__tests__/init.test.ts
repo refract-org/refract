@@ -32,7 +32,7 @@ describe("offline onboarding", () => {
 
     const output = log.mock.calls.map((args) => args.join(" ")).join("\n");
     expect(output).toContain("refract review --sample");
-    expect(output).toContain('refract claim "Bitcoin"');
+    expect(output).toContain('refract claim "Pluto"');
     expect(output).toContain('refract snapshot "Bitcoin"');
   });
 

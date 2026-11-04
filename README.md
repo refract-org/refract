@@ -33,13 +33,17 @@ On 24 August 2006, the International Astronomical Union reclassified Pluto as a 
 
 Rows are excerpts and skip the edits between them. [Captured events](./docs/examples/pluto-events.ndjson) · [Walkthrough](./docs/example-output.md). Article text by Wikipedia contributors, [CC BY-SA](https://creativecommons.org/licenses/by-sa/4.0/).
 
-Run one of these transitions yourself (Node.js 20+ and network access):
+Follow that sentence yourself (Node.js 20+ and network access). This prints it from each of the 43 revisions:
 
 ```bash
-npx @refract-org/cli analyze Pluto --from 71593165 --to 71593296 --depth detailed --json
+npx @refract-org/cli claim Pluto --text "ninth and smallest" --from 71593043 --to 71601937
 ```
 
-Each line is one event. The `sentence_modified` line holds the full `before` and `after` wording.
+Browse every change from that hour as a timeline. Fetching takes about a minute, then your browser opens:
+
+```bash
+npx @refract-org/cli explore Pluto --from 71593043 --to 71601937
+```
 
 Refract reports what changed. Why it changed, and whether that matters, is for you to judge.
 
@@ -55,10 +59,10 @@ Refract reads Wikipedia and any other MediaWiki wiki. It does not fetch arbitrar
 
 | Your question | Command | What you receive | Start here |
 |---------------|---------|------------------|------------|
+| “What changed in my pages since my last review?” | `refract review` | Pending changes with full text, source links, coverage, and explicit acknowledgment | [Review a watchlist](./docs/review.md) |
 | “When did this text appear, change, or disappear?” | `refract claim` | Candidate text, match kind, latest revision, and status within the fetched revisions | [Inspect changes to a passage](./docs/recipes.md#inspect-changes-to-a-passage) |
 | “What did the page say at an earlier date?” | `refract snapshot` | A text preview and revision ID at or before the requested date | [Inspect an earlier record](./docs/recipes.md#inspect-an-earlier-record) |
 | “My application needs changes as data.” | `refract export` | NDJSON events to filter, store, or pass to your review process | [Build a review feed](./docs/recipes.md#build-a-review-feed) |
-| “What changed in my pages since my last review?” | `refract review` (source build) | Pending changes with full text, source links, coverage, and explicit acknowledgment | [Review a watchlist](./docs/review.md) |
 
 ## Install
 
@@ -73,24 +77,18 @@ This reads the page's latest 20 revisions. Use a **page title**, not a URL. For 
 
 ## Try it offline
 
-The offline walkthrough and `refract review` are in this repository and will reach npm with the next release. Until then, run them from a source build:
+`init` runs the analyzers on a bundled **fictional** library history and makes no wiki requests:
 
 ```bash
-git clone https://github.com/refract-org/refract.git
-cd refract
-bun install --frozen-lockfile
-bun run build
-node packages/cli/dist/src/cli.js init
+npx @refract-org/cli init
 ```
-
-`init` runs the analyzers on a bundled **fictional** library history and makes no network requests.
 
 ![Three observations from the fictional Rivergate Library sample: changed wording, removed reference, and returned text](./docs/examples/onboarding.svg)
 
 `review` keeps changes pending until you acknowledge an inspected report, then compares later runs against that point:
 
 ```bash
-node packages/cli/dist/src/cli.js review --sample --from 1 --state-dir ./review-state
+npx @refract-org/cli review --sample --from 1 --state-dir ./review-state
 ```
 
 [Complete review workflow](./docs/review.md) · [Captured review](./docs/examples/review.md) · [Offline recipe](./docs/recipes.md#try-the-offline-walkthrough)

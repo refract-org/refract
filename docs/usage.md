@@ -58,9 +58,6 @@ The flags select extraction detail, not the importance of a change.
 | `review PAGE` | Markdown review report with saved inputs and explicit acknowledgment |
 | `review PAGE --format json` | Complete saved report plus filtered view; coverage is structured |
 
-The new offline `init` behavior requires a source build until it ships in an npm
-release. [The recipe](./recipes.md#try-the-offline-walkthrough) shows how to run it.
-
 When stdout is redirected, `analyze` without `--json` can print a human-readable
 summary. Use `--json` for data pipelines. `explore --no-open` starts the server
 without opening a browser automatically.

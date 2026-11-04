@@ -1,5 +1,6 @@
 {
   "name": "@refract-org/cli",
+  "mcpName": "io.github.refract-org/refract",
   "version": "0.5.17",
   "mcpName": "io.github.refract-org/refract",
   "type": "module",
@@ -30,9 +31,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@refract-org/mcp": "^0.1.0",
-    "@refract-org/ingestion": "^0.3.3",
-    "@refract-org/analyzers": "^0.5.2",
+    "@refract-org/mcp": "^0.1.1",
+    "@refract-org/ingestion": "^0.3.4",
+    "@refract-org/analyzers": "^0.5.3",
     "@refract-org/evidence-graph": "^0.5.3",
     "commander": "^12.0.0"
   },

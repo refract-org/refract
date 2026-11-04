@@ -1,17 +1,17 @@
 # Quick start
 
-Compare two source revisions, inspect the observations, and save events for your tools. This walkthrough uses published CLI version 0.5.17. The unreleased [review workflow](review.md) has separate source-build instructions.
+Compare two source revisions, inspect the observations, and save events for your tools. This walkthrough uses published CLI version 0.6.0.
 
 ## Install
 
 Use Node.js 20+ and npm:
 
 ```bash
-npm install -g @refract-org/cli@0.5.17
+npm install -g @refract-org/cli@0.6.0
 refract --version
 ```
 
-Fetching Wikipedia histories requires an internet connection. You can also run a command with `npx @refract-org/cli@0.5.17` without a global installation; npx downloads the package when needed. See [installation](install.md) for other options.
+Fetching Wikipedia histories requires an internet connection. You can also run a command with `npx @refract-org/cli@0.6.0` without a global installation; npx downloads the package when needed. See [installation](install.md) for other options.
 
 ## Compare a known span
 
@@ -25,7 +25,7 @@ These two revisions are from 2010-06-21. Look for `citation_removed`: inspect `b
 
 ## Browse the observations
 
-The CLI includes a local explorer via `refract explore "Bitcoin"`. The published version fetches its own history window; the source build adds `--from`, `--to`, and `--depth` to reuse the bounds above. To inspect this exact export with the published version, use the file viewer in the next step.
+The CLI includes a local explorer via `refract explore "Bitcoin"`. Add `--from`, `--to`, and `--depth` to reuse the bounds above. To inspect this exact export with the published version, use the file viewer in the next step.
 
 ## Save events
 
@@ -53,6 +53,6 @@ This searches the latest 50 fetched revisions. A first match is relative to that
 
 ## Continue
 
-- [Review sources you revisit](review.md) — from a source build
+- [Review sources you revisit](review.md)
 - [CLI reference](cli.md) — flags and output formats
 - [Data integrations](integrations.md) — use observations in your own process

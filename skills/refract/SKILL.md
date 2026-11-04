@@ -35,9 +35,8 @@ and the [CLI reference](https://refract-org.github.io/refract/cli/) explains the
 
 Use a page title, not a URL. `--api URL` selects another MediaWiki instance.
 Always pass `--json` to `analyze` from a terminal session: without it, `analyze`
-opens the browser explorer and keeps its server running. `review` needs a source
-build until the release after 0.5.17:
-[review guide](https://refract-org.github.io/refract/review/).
+opens the browser explorer and keeps its server running. `review` needs 0.6.0 or
+later: [review guide](https://refract-org.github.io/refract/review/).
 
 ## MCP tools
 

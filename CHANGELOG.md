@@ -3,10 +3,14 @@
 ## Unreleased
 
 ### Fixed
+- **Sentence text no longer includes category tags.** `[[Category:X]]` was left in the stripped text, so its name joined the next sentence, as in `Category:IAU planet debate Pluto is…`. Events for affected sentences differ from earlier versions, and some rewrites near a category tag are now reported as `sentence_first_seen` rather than `sentence_modified`.
 - **The browser explorer and `export --format html` work again.** An unescaped newline in the page's inline script stopped it parsing, so the event list stayed empty and the tabs and buttons did nothing. Published 0.5.17 has this bug. A new test parses the script.
 - **Wiki text can no longer break out of those pages.** Event text is escaped where it is embedded in the inline script and in HTML attributes.
 
 ### Added
+- **`refract claim` takes `--from` and `--to`.** With both, it reads the whole range; with one, the `--limit` default still applies.
+- **Piped `analyze` output shows the changed wording** of sentence and citation events, not only `sentence_length=`.
+- **`publish.yml` lists the server in the official MCP registry.** `server.json` now follows the registry's current schema and the CLI package declares `mcpName`. The tool list stays in the MCP server card.
 - **A real example leads the README.** `docs/examples/pluto-events.ndjson` follows the first sentence of Wikipedia's Pluto article through 24 August 2006, from saved lead-only inputs. `scripts/capture-wiki-examples.ts`, which replaces `capture-bitcoin-example.ts`, checks the events and the README's quotes.
 - **`packages/mcp/README.md`**, and a test that it lists each tool.
 - `refract review`: source watchlists, saved fetched/reviewed revision cursors, resumable history fetching, and explicit acknowledgment of an inspected report.

@@ -31,11 +31,11 @@
   Changes stay pending until you acknowledge the report.
 
   Then try a real page (requires network access):
-    refract analyze "Pluto" --from 71593165 --to 71593296 --depth detailed --json
-  This prints NDJSON events for one edit made the day Pluto was reclassified.
+    refract claim "Pluto" --text "ninth and smallest" --from 71593043 --to 71601937
+  This follows one sentence through an hour on the day Pluto was reclassified.
 
-  Track a phrase across recent revisions:
-    refract claim "Bitcoin" --text "decentralized" --limit 50
+  Get one of those changes as NDJSON events:
+    refract analyze "Pluto" --from 71593165 --to 71593296 --depth detailed --json
 
   See what a page said on a date:
     refract snapshot "Bitcoin" --at 2024-01-15

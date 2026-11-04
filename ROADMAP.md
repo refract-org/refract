@@ -4,7 +4,7 @@ Core revision analyzers are available. Current product work focuses on repeatabl
 
 ## Source review workflow
 
-Implemented in the source checkout; awaiting release:
+Shipped in 0.6.0:
 
 - `review`: watchlists, separate fetched/reviewed cursors, resumable inputs, and acknowledgment of saved reports.
 - Markdown and JSON reports with full changed text, source links, filters, and coverage.
