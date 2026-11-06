@@ -45,7 +45,7 @@
     },
     "packages/cli": {
       "name": "@refract-org/cli",
-      "version": "0.5.17",
+      "version": "0.6.0",
       "bin": {
         "refract": "dist/src/cli.js",
         "wikihistory": "dist/src/cli.js",
